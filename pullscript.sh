@@ -9,4 +9,4 @@ UNITYDIR="/c/Users/Adrian/Documents/Unity/IceGame/Assets/source"
 
 `cd $GITDIR`
 `git pull`
-`cp -rf $GITDIR/ $UNITYDIR/`
+`cp -rf $GITDIR/client/ $UNITYDIR/`

@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # Carpeta del codigo en el Git
-GITDIR="/c/Users/Adrian/Documents/ice-game"
+GITDIR="tu-path-al-git"
 
 # Carpeta del codigo en Unity
-UNITYDIR="/c/Users/Adrian/Documents/Unity/IceGame/Assets/source"
+UNITYDIR="tu-path-al-unityproject-assets-source"
 
 # Mensaje de commit
 MSG=$1
 
-`cp -rf $UNITYDIR/ $GITDIR/`
+`cp -rf $UNITYDIR/ $GITDIR/client/`
 `cd $GITDIR`
 `find . -type f -name '*.meta' -delete`
 `git add .`
