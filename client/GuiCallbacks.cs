@@ -5,8 +5,6 @@ using UnityEngine.EventSystems;
 public class GuiCallbacks : MonoBehaviour
 {
     private GameController _gameController;
-    Debug.Log("Pene");
-
     public void SetGameController(GameController gc)
     {
         _gameController = gc;
