@@ -448,16 +448,16 @@ public class Player : MonoBehaviour {
 
                     if (_actionDirection == Direction.Left)
                     {
-                        ray.origin = transform.position + new Vector3(-0.31f, 0f, 0f);
+                        ray.origin = new Vector3(Mathf.Round(transform.position.x-1), Mathf.Round(transform.position.y), 0f); //transform.position + new Vector3(-0.31f, 0f, 0f);
                         ray.direction = Vector2.left;
                     }
                     else if(_actionDirection == Direction.Right)
                     {
-                        ray.origin = transform.position + new Vector3(0.31f, 0f, 0f);
+                        ray.origin = new Vector3(Mathf.Round(transform.position.x + 1), Mathf.Round(transform.position.y), 0f);//transform.position + new Vector3(0.31f, 0f, 0f);
                         ray.direction = Vector2.right;
                     }
                     
-                    if ((_actionDirection == Direction.Right || _actionDirection == Direction.Left) && !Physics2D.Raycast(ray.origin, ray.direction, 1.0f))
+                    if ((_actionDirection == Direction.Right || _actionDirection == Direction.Left) && !Physics2D.Raycast(ray.origin, ray.direction, 0.1f))
                     {
                         float ent_pointX = Mathf.Round(transform.position.x);
                         GameObject go_block = null;
