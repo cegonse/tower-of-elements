@@ -12,6 +12,19 @@ public enum PlayerActions : int
     None
 }
 
+public enum PlayerAnimState : int
+{
+    IddleFront,
+    Turning,
+    IdleTurned,
+    BeginMove,
+    Jump,
+    Action,
+    Death,
+    Move,
+    EndMove
+}
+
 public class Player : MonoBehaviour {
 
     private float _speed = 3f;
@@ -65,6 +78,9 @@ public class Player : MonoBehaviour {
     
     private Level _activeLevel;
     private GameController _gameController;
+
+    //AnimState
+    private PlayerAnimState _animState = PlayerAnimState.IddleFront;
     
     public void SetActiveLevel(Level lv)
     {
@@ -112,6 +128,8 @@ public class Player : MonoBehaviour {
             AdjustVelocityByParams();
 
             MovingPlayer();
+
+            AnimatingPlayer();
         }
 
     }
@@ -467,7 +485,8 @@ public class Player : MonoBehaviour {
                 
             case PlayerActions.Wind:
             
-                    if(_state == State.Grounded && _velocity.magnitude == 0){
+                    if(_state == State.Grounded && _velocity.magnitude == 0)
+                    {
                         
                         Ray2D ray = new Ray2D();
 
@@ -501,6 +520,15 @@ public class Player : MonoBehaviour {
                                         goHitBlock.Kick(_actionDirection);
                                         SetUsesOfElem(type, GetUsesOfElem(type) - 1);
                                     }
+                                    //Check if it is a Lever
+                                    /*
+                                    Lever goHitLever = goHit.GetComponent<Lever>();
+                                    if(goHitLever != null)
+                                    {
+                                        goHitLever.Move();
+                                    }
+                                    */
+
                                 }
                             }
                         }
@@ -584,6 +612,49 @@ public class Player : MonoBehaviour {
         }
         
         _action = PlayerActions.None;
+    }
+
+    public void AnimatingPlayer()
+    {
+        SpriteAnimator sprite_animator = GetComponent<SpriteAnimator>();
+        switch (_animState)
+        {
+            case PlayerAnimState.Action:
+                
+                break;
+
+            case PlayerAnimState.BeginMove:
+
+                break;
+
+            case PlayerAnimState.Death:
+
+                break;
+
+            case PlayerAnimState.EndMove:
+
+                break;
+
+            case PlayerAnimState.IddleFront:
+
+                break;
+
+            case PlayerAnimState.IdleTurned:
+
+                break;
+
+            case PlayerAnimState.Jump:
+
+                break;
+
+            case PlayerAnimState.Move:
+
+                break;
+
+            case PlayerAnimState.Turning:
+
+                break;
+        }
     }
 
     public void SetTargetDirection(Direction tg_dir)

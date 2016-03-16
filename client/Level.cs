@@ -257,7 +257,23 @@ public class Level
 
         GameObject go_prueba2 = CreateEnemy(EnemyType.Flyer, 5, 4, "Blocks/EnemyFlyer_1/EnemyFlyer_1", (BaseEnemyData)prueba2);
         AddEntity(go_prueba2, "flyer_enemy" + "_" + prueba2.p0.x.ToString() + "_" + prueba2.p0.y.ToString());
+        
+
+        WalkerEnemyData prueba3 = new WalkerEnemyData();
+        prueba3.p0 = new Vector2(-3, 0);
+        prueba3.p1 = new Vector2(4, 4);
+
+        GameObject go_prueba3 = CreateEnemy(EnemyType.Walker, 0, 0, "Blocks/EnemyFlyer_1/EnemyFlyer_1", (BaseEnemyData)prueba3);
+        AddEntity(go_prueba3, "walker_enemy" + "_" + prueba3.p0.x.ToString() + "_" + prueba3.p0.y.ToString());
         */
+
+        LeverDoorData prueba4 = new LeverDoorData();
+        prueba4.p0 = new Vector2(0, 0);
+        prueba4.p1 = new Vector2(2, 0);
+
+        GameObject go_prueba4 = CreateEnemy(EnemyType.Door, 0, 0, "Blocks/Wood/WoodBox_1", (BaseEnemyData)prueba4);
+        AddEntity(go_prueba4, "lever_door" + "_" + prueba4.p0.x.ToString() + "_" + prueba4.p0.y.ToString());
+
     }
 	
 	public void LoadBlock(BlockType type, int x, int y, string name, float length = 1)
@@ -602,27 +618,26 @@ public class Level
 				break;
 		}
 		
-		//tex = (Texture2D) _levelController.GetGameController().
-		//		GetTextureController().GetTexture(name);
-        //float texSize = _levelController.GetGameController().
-        //            GetTextureController().GetTextureSize(name);
+		tex = (Texture2D) _levelController.GetGameController().
+				GetTextureController().GetTexture(name);
+        float texSize = _levelController.GetGameController().
+                    GetTextureController().GetTextureSize(name);
 		SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
-		//Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
-        //    new Vector2(0.5f, 0.5f), texSize);
+		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
+            new Vector2(0.5f, 0.5f), texSize);
 			
-		//rend.sprite = spr;
+		rend.sprite = spr;
 		rend.sortingOrder = 100;
 
         SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
-		if (_levelController.GetGameController().GetTextureController().GetAnimation(name+"_Anim") != null)
-		{
+        if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim") != null)
+        {
             sprite_animator.AddAnimation("WALKING", _levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim"));
-		}
-		else
-		{
-			Debug.Log("WARNING!! Enemy without an assigned animation: "+name);
-		}
-
+        }
+        else
+        {
+            Debug.Log("WARNING!! Enemy without an assigned animation: " + name);
+        }
         if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim_2") != null)
         {
             sprite_animator.AddAnimation("TURNING", _levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim_2"));
@@ -632,9 +647,7 @@ public class Level
             Debug.Log("WARNING!! Enemy without an assigned animation: " + name);
         }
 
-        sprite_animator.SetActiveAnimation("WALKING");
-
-		return go;
+        return go;
 	}
 
     public void ClearLevel()

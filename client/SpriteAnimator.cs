@@ -70,11 +70,11 @@ public class SpriteAnimator : MonoBehaviour
         }
         //Add the animation to the dictionary and set the activeAnimation
         _animations.Add(animation_name, animation);
-        _activeAnimation = animation_name;
-
-        //Add the animation init_sprite sprite to the renderer sprite and set the animationIndex
-        _animationIndex = init_sprite;
-        _renderer.sprite = _animations[_activeAnimation][_animationIndex].sprite;
+        if (string.IsNullOrEmpty(_activeAnimation))
+        {
+            SetActiveAnimation(animation_name);
+        }
+        
     }
 
     public void SetActiveAnimation(string animation_name, int animationIndex = 0)
