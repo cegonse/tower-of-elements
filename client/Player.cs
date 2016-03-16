@@ -525,7 +525,7 @@ public class Player : MonoBehaviour {
                                     Lever goHitLever = goHit.GetComponent<Lever>();
                                     if(goHitLever != null)
                                     {
-                                        goHitLever.Move();
+                                        goHitLever.ChangeLeverDirection();
                                     }
                                     
 
