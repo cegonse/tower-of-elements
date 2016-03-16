@@ -52,6 +52,9 @@
     <Reference Include="WeifenLuo.WinFormsUI.Docking">
       <HintPath>lib\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
     </Reference>
+    <Reference Include="WinSCPnet">
+      <HintPath>lib\WinSCPnet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutForm.cs">
@@ -109,6 +112,12 @@
     <Compile Include="ResourcesLocationForm.Designer.cs">
       <DependentUpon>ResourcesLocationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="SyncForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SyncForm.Designer.cs">
+      <DependentUpon>SyncForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="TextureListForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -154,6 +163,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ResourcesLocationForm.resx">
       <DependentUpon>ResourcesLocationForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyncForm.resx">
+      <DependentUpon>SyncForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TextureListForm.resx">
       <DependentUpon>TextureListForm.cs</DependentUpon>

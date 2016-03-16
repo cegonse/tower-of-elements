@@ -654,5 +654,18 @@ namespace IceGameEditor
                 comboBoxEnemyDirection.BackColor = Color.Red;
             }
         }
+
+        private void textBoxEnemySpeed_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                textBoxEnemySpeed.BackColor = Color.White;
+                _selectedEnemy.speed = int.Parse(textBoxEnemySpeed.Text);
+            }
+            catch
+            {
+                textBoxEnemySpeed.BackColor = Color.Red;
+            }
+        }
     }
 }

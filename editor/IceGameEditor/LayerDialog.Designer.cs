@@ -48,6 +48,11 @@
             // numericUpDownActiveLayer
             // 
             this.numericUpDownActiveLayer.Location = new System.Drawing.Point(15, 29);
+            this.numericUpDownActiveLayer.Maximum = new decimal(new int[] {
+            999,
+            0,
+            0,
+            0});
             this.numericUpDownActiveLayer.Name = "numericUpDownActiveLayer";
             this.numericUpDownActiveLayer.Size = new System.Drawing.Size(120, 22);
             this.numericUpDownActiveLayer.TabIndex = 1;
