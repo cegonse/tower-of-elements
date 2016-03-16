@@ -12,6 +12,7 @@ using System.Diagnostics;
 using WeifenLuo.WinFormsUI.Docking;
 using System.Security.Principal;
 using System.Runtime.InteropServices;
+using WinSCP;
 
 public enum CurrentTool
 {
@@ -151,12 +152,55 @@ namespace IceGameEditor
             }
 
             // Rebuild the texture database and load the textures
-            RebuildTextureList();
-            RebuildAnimationList();
-            LoadBlockTextures();
+            try
+            {
+                RebuildTextureList();
+                RebuildAnimationList();
+                RebuildLevelList();
 
-            // Load textures for enemies and selection buttons
-            LoadAdditionalTextures();
+                LoadBlockTextures();
+                LoadAdditionalTextures();
+            }
+            catch { }
+        }
+
+        public void RebuildLevelList()
+        {
+            string path = _settings.ResourcesPath + Path.DirectorySeparatorChar + "Levels";
+            List<string> fileList = Directory.EnumerateFiles(path, "*.txt", SearchOption.AllDirectories).ToList();
+
+            if (fileList != null)
+            {
+                JSONObject jsonTexList = new JSONObject(JSONObject.Type.OBJECT);
+
+                for (int i = 0; i < fileList.Count; i++)
+                {
+                    // Remove the path left from the Blocks folder
+                    // and the extension. This is done because in
+                    // Unity the resource loader appends them automatically.
+                    string fn = "";
+
+                    if (!string.IsNullOrEmpty(fileList[i]))
+                    {
+                        fileList[i] = fileList[i].Replace(path.Replace("Textures", ""), "");
+                        string[] ffn = fileList[i].Split(Path.DirectorySeparatorChar);
+
+                        for (int j = 1; j < ffn.Length; j++)
+                        {
+                            fn += ffn[j];
+                            fn += Path.DirectorySeparatorChar;
+                        }
+
+                        // Paths are always separated by / inside the game files
+                        fn = fn.Replace(Path.DirectorySeparatorChar, '/');
+                        fn = fn.Split('.')[0];
+
+                        jsonTexList.Add(fn);
+                    }
+                }
+
+                File.WriteAllText(_settings.ResourcesPath + Path.DirectorySeparatorChar + "level_list.txt", jsonTexList.Print(true));
+            }
         }
 
         public void RebuildTextureList()
@@ -184,9 +228,10 @@ namespace IceGameEditor
 
                     if (!string.IsNullOrEmpty(fileList[i]))
                     {
+                        fileList[i] = fileList[i].Replace(path.Replace("Textures",""), "");
                         string[] ffn = fileList[i].Split(Path.DirectorySeparatorChar);
 
-                        for (int j = 1; j < ffn.Length; j++)
+                        for (int j = 0; j < ffn.Length; j++)
                         {
                             fn += ffn[j];
                             fn += Path.DirectorySeparatorChar;
@@ -226,6 +271,7 @@ namespace IceGameEditor
 
                     if (!string.IsNullOrEmpty(fileList[i]))
                     {
+                        fileList[i] = fileList[i].Replace(path.Replace("Textures", ""), "");
                         string[] ffn = fileList[i].Split(Path.DirectorySeparatorChar);
 
                         for (int j = 1; j < ffn.Length; j++)
@@ -305,23 +351,28 @@ namespace IceGameEditor
                     string path = _settings.ResourcesPath + Path.DirectorySeparatorChar + texList[i]["id"].str + ".png";
                     Bitmap bmp = null;
 
-                    if (path.Contains("Blocks"))
+                    if (path.Contains("Blocks") || path.Contains("Enemies"))
                     {
-                       // try
-                       // {
+                        try
+                        {
                             bmp = new Bitmap(path);
-                        //}
-                      //  catch
-                      //  {
-                      //      MessageBox.Show("Falta la textura " + texList[i].str + ".", "Error abriendo editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                     //       Application.Exit();
-                      //  }
+                        }
+                        catch
+                        {
+                            MessageBox.Show("Falta la textura " + texList[i].str + ".", "Error abriendo editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            Application.Exit();
+                        }
 
                         string[] fileSplit = path.Split('/');
                         string fileName = fileSplit[fileSplit.Length - 1];
 
-                        string[] fileNameSplit = fileName.Split('_');
-                        int texType = int.Parse(fileNameSplit[1].Split('.')[0]);
+                        int texType = 0;
+
+                        if (!texList[i]["id"].str.Contains("Background"))
+                        {
+                            string[] fileNameSplit = fileName.Split('_');
+                            texType = int.Parse(fileNameSplit[1].Split('.')[0]);
+                        }
 
                         _blocks.Add(texList[i]["id"].str, bmp);
 
@@ -337,6 +388,25 @@ namespace IceGameEditor
                     }
                 }
             }
+        }
+
+        public void Syncronize()
+        {
+            try
+            {
+                RebuildTextureList();
+                RebuildAnimationList();
+                RebuildLevelList();
+            }
+            catch { }
+
+            SyncForm sf = new SyncForm(this);
+            sf.Show();
+        }
+        
+        public EditorSettings GetSettings()
+        {
+            return _settings;
         }
 
         public int GetActiveLayer()
@@ -454,7 +524,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Blocks/EnemyFlyer/EnemyFlyer_1";
+            d.texture = "Textures/Enemies/EnemyFlyer/EnemyFlyer_1";
             d.type = EnemyType.Flyer;
 
             _activeLevel.SetEnemy(p, (EnemyData)d);
@@ -469,7 +539,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Blocks/Personaje_1";
+            d.texture = "Textures/Enemies/EnemyWalker/EnemyWalker_1";
             d.type = EnemyType.Walker;
 
             _activeLevel.SetEnemy(p, (EnemyData)d);
@@ -484,7 +554,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Blocks/Personaje_1";
+            d.texture = "Textures/Enemies/EnemyRoamer/EnemyRoamer_1";
             d.type = EnemyType.Roamer;
 
             _activeLevel.SetEnemy(p, (EnemyData)d);
@@ -722,6 +792,11 @@ namespace IceGameEditor
                 _layers = new LayerDialog(this);
                 _layers.Show();
             }
+        }
+
+        private void sincronizarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Syncronize();
         }
     }
 }
