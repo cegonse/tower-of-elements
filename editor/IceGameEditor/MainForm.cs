@@ -102,6 +102,7 @@ namespace IceGameEditor
 
             // Rebuild the texture database and load the textures
             RebuildTextureList();
+            RebuildAnimationList();
             LoadBlockTextures();
 
             // Load textures for enemies and selection buttons
@@ -113,6 +114,55 @@ namespace IceGameEditor
             string path = "data" + Path.DirectorySeparatorChar + "Blocks";
             List<string> fileList = Directory.EnumerateFiles(path, "*.png", SearchOption.AllDirectories).ToList();
             
+            if (fileList != null)
+            {
+                JSONObject jsonTexList = new JSONObject(JSONObject.Type.OBJECT);
+
+                for (int i = 0; i < fileList.Count; i++)
+                {
+                    // Get the image size which will be used
+                    // by the client.
+                    Image tmp = Image.FromFile(fileList[i]);
+                    int width = tmp.Width;
+                    tmp.Dispose();
+                    tmp = null;
+
+                    // Remove the path left from the Blocks folder
+                    // and the extension. This is done because in
+                    // Unity the resource loader appends them automatically.
+                    string fn = "";
+
+                    if (!string.IsNullOrEmpty(fileList[i]))
+                    {
+                        string[] ffn = fileList[i].Split(Path.DirectorySeparatorChar);
+
+                        for (int j = 1; j < ffn.Length; j++)
+                        {
+                            fn += ffn[j];
+                            fn += Path.DirectorySeparatorChar;
+                        }
+
+                        // Paths are always separated by / inside the game files
+                        fn = fn.Replace(Path.DirectorySeparatorChar, '/');
+                        fn = fn.Split('.')[0];
+
+                        JSONObject jstex = new JSONObject(JSONObject.Type.OBJECT);
+                        jstex.AddField("id", fn);
+                        jstex.AddField("size", width);
+
+                        jsonTexList.Add(jstex);
+                    }
+                }
+
+                File.WriteAllText("data" + Path.DirectorySeparatorChar + "texture_list.txt", jsonTexList.Print(true));
+            }
+        }
+
+        public void RebuildAnimationList()
+        {
+            string path = "data" + Path.DirectorySeparatorChar + "Blocks";
+            List<string> fileList = Directory.EnumerateFiles(path, "*Anim.txt", SearchOption.AllDirectories).ToList();
+
             if (fileList != null)
             {
                 JSONObject jsonTexList = new JSONObject(JSONObject.Type.OBJECT);
@@ -137,11 +187,12 @@ namespace IceGameEditor
                         // Paths are always separated by / inside the game files
                         fn = fn.Replace(Path.DirectorySeparatorChar, '/');
                         fn = fn.Split('.')[0];
+                        
                         jsonTexList.Add(fn);
                     }
                 }
-                
-                File.WriteAllText("data" + Path.DirectorySeparatorChar + "texture_list.txt", jsonTexList.Print(true));
+
+                File.WriteAllText("data" + Path.DirectorySeparatorChar + "animation_list.txt", jsonTexList.Print(true));
             }
         }
 
@@ -201,7 +252,7 @@ namespace IceGameEditor
 
                 for (int i = 0; i < texList.Count; i++)
                 {
-                    string path = "data" + Path.DirectorySeparatorChar + texList[i].str + ".png";
+                    string path = "data" + Path.DirectorySeparatorChar + texList[i]["id"].str + ".png";
                     Bitmap bmp = null;
 
                     try
@@ -220,16 +271,16 @@ namespace IceGameEditor
                     string[] fileNameSplit = fileName.Split('_');
                     int texType = int.Parse(fileNameSplit[1].Split('.')[0]);
 
-                    _blocks.Add(texList[i].str, bmp);
+                    _blocks.Add(texList[i]["id"].str, bmp);
 
-                    if (texType == 1 && !texList[i].str.Contains("Frame"))
+                    if (texType == 1 && !texList[i]["id"].str.Contains("Frame"))
                     {
-                        _toolbox.AddBlockTool(texList[i].str, bmp);
+                        _toolbox.AddBlockTool(texList[i]["id"].str, bmp);
                     }
 
-                    if (texList[i].str.Contains("Background"))
+                    if (texList[i]["id"].str.Contains("Background"))
                     {
-                        _toolbox.AddBackgroundTool(texList[i].str, bmp);
+                        _toolbox.AddBackgroundTool(texList[i]["id"].str, bmp);
                     }
                 }
             }
@@ -350,7 +401,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "";
+            d.texture = "Blocks/EnemyFlyer/EnemyFlyer_1";
             d.type = EnemyType.Flyer;
 
             _activeLevel.SetEnemy(p, (EnemyData)d);
@@ -365,7 +416,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "";
+            d.texture = "Blocks/Personaje_1";
             d.type = EnemyType.Walker;
 
             _activeLevel.SetEnemy(p, (EnemyData)d);
@@ -380,7 +431,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "";
+            d.texture = "Blocks/Personaje_1";
             d.type = EnemyType.Roamer;
 
             _activeLevel.SetEnemy(p, (EnemyData)d);
@@ -544,6 +595,10 @@ namespace IceGameEditor
         {
             if (_activeLevel != null)
             {
+                // Rebuild the texture and animation lists
+                RebuildTextureList();
+                RebuildAnimationList();
+
                 try
                 {
                     File.WriteAllText("data\\bin\\debuglevel.txt", _activeLevel.SerializeLevel());

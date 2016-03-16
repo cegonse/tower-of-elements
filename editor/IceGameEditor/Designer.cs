@@ -254,41 +254,27 @@ namespace IceGameEditor
                 foreach (KeyValuePair<Vector2, EnemyData> tex in _main.GetActiveLevel().GetEnemyList())
                 {
                     Rectangle rect;
-                    Bitmap texptr = null;
 
-                    if (tex.Value.texture == "")
+                    if (!string.IsNullOrEmpty(tex.Value.texture))
                     {
                         if (tex.Value.type == EnemyType.Flyer)
                         {
-                            texptr = _main.GetFlyerEnemyTexture();
+                            // Draw the path line  
+                            Point p0 = new Point((_xSize / 2 + tex.Value.p0.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Value.p0.y) * 64 + panel.AutoScrollPosition.Y + 32);
+                            Point pf = new Point((_xSize / 2 + tex.Value.pf.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Value.pf.y) * 64 + panel.AutoScrollPosition.Y + 32);
+
+                            g.DrawLine(_yellowPen, p0, pf);
                         }
-                        else if (tex.Value.type == EnemyType.Roamer)
+
+                        rect = new Rectangle((_xSize / 2 + tex.Key.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Key.y) * 64 + panel.AutoScrollPosition.Y, 64, 64);
+                        g.DrawImage(_blockTextures[tex.Value.texture], rect);
+
+                        if (_tool == CurrentTool.EnemySelect)
                         {
-                            texptr = _main.GetRoamerEnemyTexture();
-                        }
-                        else if (tex.Value.type == EnemyType.Walker)
-                        {
-                            texptr = _main.GetWalkerEnemyTexture();
-                        }
-                    }
-
-                    if (tex.Value.type == EnemyType.Flyer)
-                    {
-                        // Draw the path line  
-                        Point p0 = new Point((_xSize / 2 + tex.Value.p0.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Value.p0.y) * 64 + panel.AutoScrollPosition.Y + 32);
-                        Point pf = new Point((_xSize / 2 + tex.Value.pf.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Value.pf.y) * 64 + panel.AutoScrollPosition.Y + 32);
-
-                        g.DrawLine(_yellowPen, p0, pf);
-                    }
-
-                    rect = new Rectangle((_xSize / 2 + tex.Key.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Key.y) * 64 + panel.AutoScrollPosition.Y, 64, 64);
-                    g.DrawImage(texptr, rect);
-
-                    if (_tool == CurrentTool.EnemySelect)
-                    {
-                        if (rect.Contains(_lastX, _lastY))
-                        {
-                            g.DrawRectangle(_yellowPen, rect);
+                            if (rect.Contains(_lastX, _lastY))
+                            {
+                                g.DrawRectangle(_yellowPen, rect);
+                            }
                         }
                     }
                 }

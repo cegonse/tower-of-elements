@@ -161,6 +161,8 @@ namespace IceGameEditor
             JSONObject json = new JSONObject();
             JSONObject jsonAnim = new JSONObject(JSONObject.Type.ARRAY);
 
+            json.AddField("interval", (int)(checkBoxRandomInterval.Checked == true ? 1 : 0));
+
             for (int i = 0; i < _frames.Count; i++)
             {
                 JSONObject jsonFrame = new JSONObject(JSONObject.Type.OBJECT);
@@ -199,6 +201,11 @@ namespace IceGameEditor
             {
                 string data = File.ReadAllText(openFileDialog.FileName);
                 JSONObject json = new JSONObject(data);
+
+                if (json["interval"] != null)
+                {
+                    checkBoxRandomInterval.Checked = ((int)json["interval"].n) == 1 ? true : false;
+                }
 
                 JSONObject jsonAnim = json["animation"];
                 _frames.Clear();

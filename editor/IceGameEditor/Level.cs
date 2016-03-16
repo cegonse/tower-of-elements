@@ -234,7 +234,9 @@ public class Level
             jsonEnemies.Add(jsonEnemy);
         }
 
-        return json.Print();
+        json.AddField("enemies", jsonEnemies);
+
+        return json.Print(true);
     }
 
 	public void LoadLevel(string data)
