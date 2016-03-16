@@ -28,9 +28,17 @@ public enum CurrentTool
     RoamerEnemy
 }
 
-
 namespace IceGameEditor
 {
+    public struct EditorSettings
+    {
+        public string ResourcesPath;
+        public string SSHAddress;
+        public int SSHPort;
+        public string SSHUsername;
+        public string SSHPassword;
+    };
+
     public partial class MainForm : Form
     {
         [DllImport("user32.dll")]
@@ -61,33 +69,75 @@ namespace IceGameEditor
         Bitmap _flyerTex = null;
         Bitmap _roamerTex = null;
 
+        EditorSettings _settings;
+
         public MainForm()
         {
             InitializeComponent();
-
-            WindowsIdentity identity = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new WindowsPrincipal(identity);
-
-            #if !DEBUG
-            /*if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
-            {
-                ProcessStartInfo startInfo = new ProcessStartInfo("IceGameEditor.exe") { Verb = "runas" };
-                Process.Start(startInfo);
-                Environment.Exit(0);
-            }*/
-            #endif
 
             dockPanel.Theme = new VS2013BlueTheme();
 
             _levels = new List<Level>();
             _designers = new List<Designer>();
 
+            _blocks = new Dictionary<string, Bitmap>();
+            _layerList = new Dictionary<int,bool>();
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            string setPath = "data" + Path.DirectorySeparatorChar + "settings.json";
+
+            if (File.Exists(setPath))
+            {
+                string strSet = File.ReadAllText(setPath);
+                JSONObject jsonSet = new JSONObject(strSet);
+
+                _settings.ResourcesPath = jsonSet["path"].str;
+                _settings.SSHAddress = jsonSet["addr"].str;
+                _settings.SSHPassword = jsonSet["pass"].str;
+                _settings.SSHPort = (int)jsonSet["port"].n;
+                _settings.SSHUsername = jsonSet["user"].str;
+
+                _toolbox = new Toolbox(this);
+                _toolbox.Show(dockPanel, DockState.DockLeft);
+
+                BeginResourceLoad();
+            }
+            else
+            {
+                ResourcesLocationForm rcForm = new ResourcesLocationForm(this);
+                rcForm.Show();
+            }
+        }
+
+        public void SetSettings(string path, string addr, int port, string user, string pass)
+        {
+            string setPath = "data" + Path.DirectorySeparatorChar + "settings.json";
+
+            _settings.ResourcesPath = path;
+            _settings.SSHAddress = addr;
+            _settings.SSHPassword = pass;
+            _settings.SSHPort = port;
+            _settings.SSHUsername = user;
+
+            JSONObject json = new JSONObject(JSONObject.Type.OBJECT);
+            json.AddField("path", path);
+            json.AddField("addr", addr);
+            json.AddField("pass", pass);
+            json.AddField("user", user);
+            json.AddField("port", port);
+
+            File.WriteAllText(setPath, json.Print(true));
+
             _toolbox = new Toolbox(this);
             _toolbox.Show(dockPanel, DockState.DockLeft);
 
-            _blocks = new Dictionary<string, Bitmap>();
-            _layerList = new Dictionary<int,bool>();
+            BeginResourceLoad();
+        }
 
+        public void BeginResourceLoad()
+        {
             try
             {
                 _spawnTexture = new Bitmap("data" + Path.DirectorySeparatorChar + "spawn.png");
@@ -111,7 +161,7 @@ namespace IceGameEditor
 
         public void RebuildTextureList()
         {
-            string path = "data" + Path.DirectorySeparatorChar + "Blocks";
+            string path = _settings.ResourcesPath + Path.DirectorySeparatorChar + "Textures";
             List<string> fileList = Directory.EnumerateFiles(path, "*.png", SearchOption.AllDirectories).ToList();
             
             if (fileList != null)
@@ -154,13 +204,13 @@ namespace IceGameEditor
                     }
                 }
 
-                File.WriteAllText("data" + Path.DirectorySeparatorChar + "texture_list.txt", jsonTexList.Print(true));
+                File.WriteAllText(_settings.ResourcesPath + Path.DirectorySeparatorChar + "texture_list.txt", jsonTexList.Print(true));
             }
         }
 
         public void RebuildAnimationList()
         {
-            string path = "data" + Path.DirectorySeparatorChar + "Blocks";
+            string path = _settings.ResourcesPath + Path.DirectorySeparatorChar + "Textures";
             List<string> fileList = Directory.EnumerateFiles(path, "*Anim.txt", SearchOption.AllDirectories).ToList();
 
             if (fileList != null)
@@ -192,7 +242,7 @@ namespace IceGameEditor
                     }
                 }
 
-                File.WriteAllText("data" + Path.DirectorySeparatorChar + "animation_list.txt", jsonTexList.Print(true));
+                File.WriteAllText(_settings.ResourcesPath + Path.DirectorySeparatorChar + "animation_list.txt", jsonTexList.Print(true));
             }
         }
 
@@ -236,7 +286,7 @@ namespace IceGameEditor
 
             try
             {
-                tex = File.ReadAllText("data" + Path.DirectorySeparatorChar + "texture_list.txt");
+                tex = File.ReadAllText(_settings.ResourcesPath + Path.DirectorySeparatorChar + "texture_list.txt");
             }
             catch
             {
@@ -252,35 +302,38 @@ namespace IceGameEditor
 
                 for (int i = 0; i < texList.Count; i++)
                 {
-                    string path = "data" + Path.DirectorySeparatorChar + texList[i]["id"].str + ".png";
+                    string path = _settings.ResourcesPath + Path.DirectorySeparatorChar + texList[i]["id"].str + ".png";
                     Bitmap bmp = null;
 
-                    try
+                    if (path.Contains("Blocks"))
                     {
-                        bmp = new Bitmap(path);
-                    }
-                    catch
-                    {
-                        MessageBox.Show("Falta la textura " + texList[i].str + ".", "Error abriendo editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        Application.Exit();
-                    }
+                       // try
+                       // {
+                            bmp = new Bitmap(path);
+                        //}
+                      //  catch
+                      //  {
+                      //      MessageBox.Show("Falta la textura " + texList[i].str + ".", "Error abriendo editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                     //       Application.Exit();
+                      //  }
 
-                    string[] fileSplit = path.Split('/');
-                    string fileName = fileSplit[fileSplit.Length - 1];
+                        string[] fileSplit = path.Split('/');
+                        string fileName = fileSplit[fileSplit.Length - 1];
 
-                    string[] fileNameSplit = fileName.Split('_');
-                    int texType = int.Parse(fileNameSplit[1].Split('.')[0]);
+                        string[] fileNameSplit = fileName.Split('_');
+                        int texType = int.Parse(fileNameSplit[1].Split('.')[0]);
 
-                    _blocks.Add(texList[i]["id"].str, bmp);
+                        _blocks.Add(texList[i]["id"].str, bmp);
 
-                    if (texType == 1 && !texList[i]["id"].str.Contains("Frame"))
-                    {
-                        _toolbox.AddBlockTool(texList[i]["id"].str, bmp);
-                    }
+                        if (texType == 1 && !texList[i]["id"].str.Contains("Frame"))
+                        {
+                            _toolbox.AddBlockTool(texList[i]["id"].str, bmp);
+                        }
 
-                    if (texList[i]["id"].str.Contains("Background"))
-                    {
-                        _toolbox.AddBackgroundTool(texList[i]["id"].str, bmp);
+                        if (texList[i]["id"].str.Contains("Background"))
+                        {
+                            _toolbox.AddBackgroundTool(texList[i]["id"].str, bmp);
+                        }
                     }
                 }
             }

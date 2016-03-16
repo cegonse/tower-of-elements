@@ -103,6 +103,12 @@
     <Compile Include="RemoteDebug.Designer.cs">
       <DependentUpon>RemoteDebug.cs</DependentUpon>
     </Compile>
+    <Compile Include="ResourcesLocationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResourcesLocationForm.Designer.cs">
+      <DependentUpon>ResourcesLocationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="TextureListForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -145,6 +151,9 @@
     </Compile>
     <EmbeddedResource Include="RemoteDebug.resx">
       <DependentUpon>RemoteDebug.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResourcesLocationForm.resx">
+      <DependentUpon>ResourcesLocationForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TextureListForm.resx">
       <DependentUpon>TextureListForm.cs</DependentUpon>
