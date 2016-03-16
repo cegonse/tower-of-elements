@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # Carpeta del codigo en el Git
-GITDIR="/c/Users/Adrian/Documents/ice-game"
+GITDIR="tu-path-al-git"
 
 # Carpeta del codigo en Unity
-UNITYDIR="/c/Users/Adrian/Documents/Unity/IceGame/Assets/source"
+UNITYDIR="tu-path-a-assets-source"
 
-
-`cd $GITDIR`
-`git pull`
-`cp -rf $GITDIR/ $UNITYDIR/`
+cd $GITDIR
+git pull
+cp -rf $GITDIR/client/ $UNITYDIR/

@@ -103,6 +103,12 @@
     <Compile Include="RemoteDebug.Designer.cs">
       <DependentUpon>RemoteDebug.cs</DependentUpon>
     </Compile>
+    <Compile Include="ResourcesLocationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResourcesLocationForm.Designer.cs">
+      <DependentUpon>ResourcesLocationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="TextureListForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -145,6 +151,9 @@
     </Compile>
     <EmbeddedResource Include="RemoteDebug.resx">
       <DependentUpon>RemoteDebug.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResourcesLocationForm.resx">
+      <DependentUpon>ResourcesLocationForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TextureListForm.resx">
       <DependentUpon>TextureListForm.cs</DependentUpon>
@@ -215,6 +224,21 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Reset.ico" />
+    <None Include="Resources\Buttons\bk_16.png" />
+    <None Include="Resources\Buttons\bk_15.png" />
+    <None Include="Resources\Buttons\bk_14.png" />
+    <None Include="Resources\Buttons\bk_13.png" />
+    <None Include="Resources\Buttons\bk_12.png" />
+    <None Include="Resources\Buttons\bk_11.png" />
+    <None Include="Resources\Buttons\bk_10.png" />
+    <None Include="Resources\Buttons\bk_9.png" />
+    <None Include="Resources\Buttons\bk_8.png" />
+    <None Include="Resources\Buttons\bk_7.png" />
+    <None Include="Resources\Buttons\bk_6.png" />
+    <None Include="Resources\Buttons\bk_5.png" />
+    <None Include="Resources\Buttons\bk_4.png" />
+    <None Include="Resources\Buttons\bk_3.png" />
+    <None Include="Resources\Buttons\bk_1.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

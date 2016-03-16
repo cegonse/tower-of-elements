@@ -1,18 +1,17 @@
-ï»¿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
 public class GuiCallbacks : MonoBehaviour
 {
     private GameController _gameController;
-
     public void SetGameController(GameController gc)
     {
         _gameController = gc;
     }
 
     /*
-      Estos mÃ©todos se llaman cuando un botÃ³n acciona un callback
+      Estos métodos se llaman cuando un botón acciona un callback
     */
     public void PointerDown(UnityEngine.UI.Image img)
     {
