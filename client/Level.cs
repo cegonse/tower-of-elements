@@ -579,6 +579,44 @@ public class Level
         rend.sprite = spr;
 		rend.sortingOrder = 100;
 
+        SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
+
+        //Animations
+        string[] anim = new string[9];
+        anim[0] = "Player/IdleFront/IdleFront_1_Anim";      //IDLE_FRONT
+        anim[1] = "Player/Action/Action_1_Anim";            //ACTION
+        anim[2] = "Player/BeginMove/BeginMove_1_Anim";      //BEGIN_MOVE
+        anim[3] = "Player/Death/Death_1_Anim";              //DEATH
+        anim[4] = "Player/EndMove/EndMove_1_Anim";          //END_MOVE
+        anim[5] = "Player/IdleTurned/IdleTurned_1_Anim";    //IDLE_TURNED
+        anim[6] = "Player/Jump/Jump_1_Anim";                //JUMP
+        anim[7] = "Player/Move/Move_1_Anim";                //MOVE
+        anim[8] = "Player/Turning/Turning_1_Anim";          //TURNING
+
+        string[] animName = new string[9];
+        animName[0] = "IDLE_FRONT";     //IDLE_FRONT
+        animName[1] = "ACTION";         //ACTION
+        animName[2] = "BEGIN_MOVE";     //BEGIN_MOVE
+        animName[3] = "DEATH";          //DEATH
+        animName[4] = "END_MOVE";       //END_MOVE
+        animName[5] = "IDLE_TURNED";    //IDLE_TURNED
+        animName[6] = "JUMP";           //JUMP
+        animName[7] = "MOVE";           //MOVE
+        animName[8] = "TURNING";        //TURNING
+
+        for (int i = 0; i < anim.Length; i++)
+        {
+            if (_levelController.GetGameController().GetTextureController().GetAnimation(anim[i]) != null)
+            {
+                sprite_animator.AddAnimation(animName[i], _levelController.GetGameController().GetTextureController().GetAnimation(anim[i]));
+            }
+            else
+            {
+                Debug.Log("WARNING!! Enemy without an assigned animation: " + anim[i]);
+            }
+        }
+            
+
         return go;
     }
 	
