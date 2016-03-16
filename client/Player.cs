@@ -521,13 +521,13 @@ public class Player : MonoBehaviour {
                                         SetUsesOfElem(type, GetUsesOfElem(type) - 1);
                                     }
                                     //Check if it is a Lever
-                                    /*
+                                    
                                     Lever goHitLever = goHit.GetComponent<Lever>();
                                     if(goHitLever != null)
                                     {
                                         goHitLever.Move();
                                     }
-                                    */
+                                    
 
                                 }
                             }

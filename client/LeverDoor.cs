@@ -9,15 +9,16 @@ public class LeverDoorData : BaseEnemyData
 
 public class LeverDoor : EnemyBase {
 
-    private Lever _lever;
     private Vector2 _target;
     private int _targetIndex;
     private LeverDoorData _leverDoorData;
+    private bool _moving;
 
 	// Use this for initialization
 	void Start () {
 
         _targetIndex = 0;
+        _moving = false;
 	
 	}
 	
@@ -29,9 +30,13 @@ public class LeverDoor : EnemyBase {
 
     public void Move()
     {
-        Vector3 p = transform.position;
-        p = Vector2.SmoothDamp(transform.position, _target, ref _velocity, _speed / 4, _speed, Time.deltaTime);
-        transform.position = new Vector3(p.x, p.y, 0f);
+        if (_moving)
+        {
+            Vector3 p = transform.position;
+            p = Vector2.SmoothDamp(transform.position, _target, ref _velocity, _speed / 4, _speed, Time.deltaTime);
+            transform.position = new Vector3(p.x, p.y, 0f);
+            
+        }
     }
 
     public void ChangeTargetDirection()
@@ -40,11 +45,13 @@ public class LeverDoor : EnemyBase {
         {
             _target = _leverDoorData.p1;
             _targetIndex = 1;
+            _moving = true;
         }
         else if (_targetIndex == 1)
         {
             _target = _leverDoorData.p0;
             _targetIndex = 0;
+            _moving = true;
         }
     }
 }
