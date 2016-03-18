@@ -242,13 +242,13 @@ public class Level
 			}
         }
 
-        /*
+        
         RoamerEnemyData prueba = new RoamerEnemyData();
 
-        int dir = (int)Direction.Right;
+        /*int dir = (int)Direction.Right;
         prueba.direction = (Direction)dir;
         Vector2 spawn = new Vector2(3, 4);
-        GameObject go_prueba = CreateEnemy(EnemyType.Roamer, 5, 4, "Blocks/Fireball/Fireball_1", (BaseEnemyData)prueba);
+        GameObject go_prueba = CreateEnemy(EnemyType.Roamer, 5, 4, "Blocks/Ice/Ice_1", (BaseEnemyData)prueba);
         AddEntity(go_prueba, "roamer_enemy" + "_" + spawn.x.ToString() + "_" + spawn.y.ToString());
         
         FlyerEnemyData prueba2 = new FlyerEnemyData();
@@ -267,12 +267,12 @@ public class Level
         AddEntity(go_prueba3, "walker_enemy" + "_" + prueba3.p0.x.ToString() + "_" + prueba3.p0.y.ToString());
         */
 
-        LeverDoorData prueba4 = new LeverDoorData();
-        prueba4.p0 = new Vector2(0, 0);
-        prueba4.p1 = new Vector2(-4, 0);
+        //LeverDoorData prueba4 = new LeverDoorData();
+        //prueba4.p0 = new Vector2(0, 0);
+        //prueba4.p1 = new Vector2(-4, 0);
 
-        GameObject go_prueba4 = CreateEnemy(EnemyType.Door, -1, 1, "Blocks/Ice/Ice_1", (BaseEnemyData)prueba4);
-        AddEntity(go_prueba4, "lever_door" + "_" + prueba4.p0.x.ToString() + "_" + prueba4.p0.y.ToString());
+        //GameObject go_prueba4 = CreateEnemy(EnemyType.Door, -1, 1, "Blocks/Ice/Ice_1", (BaseEnemyData)prueba4);
+        //AddEntity(go_prueba4, "lever_door" + "_" + prueba4.p0.x.ToString() + "_" + prueba4.p0.y.ToString());
 
     }
 	

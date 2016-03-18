@@ -15,9 +15,9 @@ namespace IceGameEditor
     public partial class SyncForm : Form
     {
         private MainForm _main;
-        private int _fileCount;
         private int _currentFile = 1;
         private SynchronizationResult _synchronizationResult;
+        private Thread _t;
 
         public SyncForm(MainForm mf)
         {
@@ -27,8 +27,8 @@ namespace IceGameEditor
 
         private void SyncForm_Load(object sender, EventArgs e)
         {
-            Thread t = new Thread(StartTrasfer);
-            t.Start();
+            _t = new Thread(StartTrasfer);
+            _t.Start();
         }
 
         private void StartTrasfer()
@@ -61,19 +61,11 @@ namespace IceGameEditor
 
                     // Synchronize files
                     _synchronizationResult =
-                        session.SynchronizeDirectories(SynchronizationMode.Remote, _main.GetSettings().ResourcesPath,
-                        "/home/jumble/Icegame/Resources", false, false, SynchronizationCriteria.Either);
+                        session.SynchronizeDirectories(SynchronizationMode.Both, _main.GetSettings().ResourcesPath,
+                        "/home/"+_main.GetSettings().SSHUsername+"/Icegame/Resources", false, false, SynchronizationCriteria.Time);
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al sincronizar: " + ex.Message, "Error de SCP", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                
-                Invoke(new Action(() =>
-                {
-                    Close();
-                }));
-            }
+            catch { }
         }
 
         private void FileTransferred(object sender, TransferEventArgs e)
@@ -87,12 +79,16 @@ namespace IceGameEditor
                     labelTotal.Text = "Progreso total: " + _currentFile.ToString() + " ficheros.";
                 }));
 
-                if (_synchronizationResult.IsSuccess)
+                if (_synchronizationResult == null)
                 {
+                    MessageBox.Show(_currentFile + " ficheros sincronizados.", "Sincronización Completada", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                     Invoke(new Action(() =>
                     {
                         Close();
                     }));
+
+                    _t.Join();
                 }
             }
             else
@@ -108,11 +104,18 @@ namespace IceGameEditor
 
         private void FileTransferProgress(object sender, FileTransferProgressEventArgs e)
         {
-            Invoke(new Action(() =>
+            try
             {
-                progressBarFile.Value = (int)(e.FileProgress * 100.0);
-                labelFile.Text = e.FileName;
-            }));
+                Invoke(new Action(() =>
+                {
+                    progressBarOverall.Value = (int)(e.OverallProgress * 100.0);
+                    labelOverall.Text = (e.OverallProgress * 100.0).ToString() + "%";
+
+                    progressBarFile.Value = (int)(e.FileProgress * 100.0);
+                    labelFile.Text = "Comprobando: " + e.FileName;
+                }));
+            }
+            catch { }
         }
     }
 }

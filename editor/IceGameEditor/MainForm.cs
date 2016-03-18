@@ -158,6 +158,10 @@ namespace IceGameEditor
                 RebuildAnimationList();
                 RebuildLevelList();
 
+                File.WriteAllText(Application.StartupPath + Path.DirectorySeparatorChar + "data" +
+                 Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "rcpath.txt",
+                 _settings.ResourcesPath);
+
                 LoadBlockTextures();
                 LoadAdditionalTextures();
             }
@@ -182,7 +186,7 @@ namespace IceGameEditor
 
                     if (!string.IsNullOrEmpty(fileList[i]))
                     {
-                        fileList[i] = fileList[i].Replace(path.Replace("Textures", ""), "");
+                        fileList[i] = fileList[i].Replace(path.Replace("Levels", ""), "");
                         string[] ffn = fileList[i].Split(Path.DirectorySeparatorChar);
 
                         for (int j = 1; j < ffn.Length; j++)
@@ -228,13 +232,17 @@ namespace IceGameEditor
 
                     if (!string.IsNullOrEmpty(fileList[i]))
                     {
-                        fileList[i] = fileList[i].Replace(path.Replace("Textures",""), "");
+                        fileList[i] = fileList[i].Replace(path.Replace("Textures" + Path.DirectorySeparatorChar,""), "");
+
                         string[] ffn = fileList[i].Split(Path.DirectorySeparatorChar);
 
                         for (int j = 0; j < ffn.Length; j++)
                         {
-                            fn += ffn[j];
-                            fn += Path.DirectorySeparatorChar;
+                            if (!string.IsNullOrEmpty(ffn[j]))
+                            {
+                                fn += ffn[j];
+                                fn += Path.DirectorySeparatorChar;
+                            }
                         }
 
                         // Paths are always separated by / inside the game files
@@ -348,7 +356,9 @@ namespace IceGameEditor
 
                 for (int i = 0; i < texList.Count; i++)
                 {
-                    string path = _settings.ResourcesPath + Path.DirectorySeparatorChar + texList[i]["id"].str + ".png";
+                    string path = _settings.ResourcesPath + Path.DirectorySeparatorChar + "Textures" + 
+                        Path.DirectorySeparatorChar + texList[i]["id"].str + ".png";
+
                     Bitmap bmp = null;
 
                     if (path.Contains("Blocks") || path.Contains("Enemies"))
@@ -524,7 +534,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Textures/Enemies/EnemyFlyer/EnemyFlyer_1";
+            d.texture = "Enemies/EnemyFlyer_1/EnemyFlyer_1";
             d.type = EnemyType.Flyer;
 
             _activeLevel.SetEnemy(p, (EnemyData)d);
@@ -539,7 +549,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Textures/Enemies/EnemyWalker/EnemyWalker_1";
+            d.texture = "Enemies/EnemyWalker/EnemyWalker_1";
             d.type = EnemyType.Walker;
 
             _activeLevel.SetEnemy(p, (EnemyData)d);
@@ -554,7 +564,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Textures/Enemies/EnemyRoamer/EnemyRoamer_1";
+            d.texture = "Enemies/EnemyRoamer/EnemyRoamer_1";
             d.type = EnemyType.Roamer;
 
             _activeLevel.SetEnemy(p, (EnemyData)d);
@@ -609,29 +619,33 @@ namespace IceGameEditor
 
         private void cargarNivelToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            openFileDialog.ShowDialog();
-            string lvPath = openFileDialog.FileName;
-            string lvData = File.ReadAllText(lvPath);
+            try
+            {
+                openFileDialog.ShowDialog();
+                string lvPath = openFileDialog.FileName;
+                string lvData = File.ReadAllText(lvPath);
 
-            _activeLevel = new Level();
-            _activeLevel.LoadLevel(lvData);
-            _levels.Add(_activeLevel);
-            _layerList.Clear();
-            UpdateLayerList();
+                _activeLevel = new Level();
+                _activeLevel.LoadLevel(lvData);
+                _levels.Add(_activeLevel);
+                _layerList.Clear();
+                UpdateLayerList();
 
-            _designer = new Designer(this, _designers.Count);
-            _designers.Add(_designer);
+                _designer = new Designer(this, _designers.Count);
+                _designers.Add(_designer);
 
-            _designer.Show(dockPanel, DockState.Document);
-            _designer.SetTextures(_blocks);
-            _designer.SetSpawnTexture(_spawnTexture);
-            _designer.SetDoorTexture(_doorTexture);
+                _designer.Show(dockPanel, DockState.Document);
+                _designer.SetTextures(_blocks);
+                _designer.SetSpawnTexture(_spawnTexture);
+                _designer.SetDoorTexture(_doorTexture);
 
-            _designer.SetBlockTextures(_activeLevel.GetBlockList());
-            _designer.Text = _activeLevel.GetPublicName();
+                _designer.SetBlockTextures(_activeLevel.GetBlockList());
+                _designer.Text = _activeLevel.GetPublicName();
 
-            _toolbox.SetActiveLevel(_activeLevel);
-            _toolbox.UpdateLevelData();
+                _toolbox.SetActiveLevel(_activeLevel);
+                _toolbox.UpdateLevelData();
+            }
+            catch { }
         }
 
         private void menuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)

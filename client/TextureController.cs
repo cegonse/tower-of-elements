@@ -8,6 +8,7 @@ public class TextureController
     private Dictionary<string, float> _textureSizes;
 	private Dictionary<string, List<AnimationFrame> > _animations;
 	private GameController _gameController;
+	private string _resourcesPath;
 	
 	public TextureController(GameController game)
 	{
@@ -21,10 +22,10 @@ public class TextureController
 		
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
-			string texListPath = Path.GetFullPath(".") + 
-				Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "texture_list.txt";
-				
-			textureList = File.ReadAllText(texListPath);
+			_resourcesPath = File.ReadAllText(Path.GetFullPath(".") + Path.DirectorySeparatorChar + "data" + 
+				Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "rcpath.txt");
+			
+			textureList = File.ReadAllText(_resourcesPath + Path.DirectorySeparatorChar + "texture_list.txt");
 		}
 		else
 		{
@@ -49,9 +50,7 @@ public class TextureController
 		
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
-			string animListPath = Path.GetFullPath(".") + 
-				Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "animation_list.txt";
-				
+			string animListPath = _resourcesPath + Path.DirectorySeparatorChar + "animation_list.txt";	
 			animationList = File.ReadAllText(animListPath);
 		}
 		else
@@ -102,11 +101,13 @@ public class TextureController
 		
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
-			string texPath = Path.GetFullPath(".") + 
-				Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + name + ".png";
+			string texPath = _resourcesPath + Path.DirectorySeparatorChar + "Textures" + 
+				Path.DirectorySeparatorChar + name + ".png";
 				
 			byte[] texData = File.ReadAllBytes(texPath);
-			Texture2D tx = new Texture2D(256, 256);
+			int sz = (int)GetTextureSize(name);
+			
+			Texture2D tx = new Texture2D(sz, sz);
 			tx.LoadImage(texData);
 			tex = (Texture)tx;
 		}
@@ -133,8 +134,8 @@ public class TextureController
 		
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
-			string animPath = Path.GetFullPath(".") + 
-				Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + name + ".txt";
+			string animPath = _resourcesPath + Path.DirectorySeparatorChar + "Textures" + 
+				Path.DirectorySeparatorChar + name + ".txt";
 				
 			animData = File.ReadAllText(animPath);
 		}

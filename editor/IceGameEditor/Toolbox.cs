@@ -350,6 +350,7 @@ namespace IceGameEditor
                 textBoxEnemyEndX.Text = _selectedEnemy.pf.x.ToString();
                 textBoxEnemyEndY.Text = _selectedEnemy.p0.y.ToString();
                 comboBoxEnemyDirection.SelectedIndex = _selectedEnemy.direction;
+                textBoxEnemySpeed.Text = _selectedEnemy.speed.ToString();
             }
         }
 
