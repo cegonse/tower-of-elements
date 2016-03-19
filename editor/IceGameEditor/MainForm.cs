@@ -215,6 +215,13 @@ namespace IceGameEditor
             if (fileList != null)
             {
                 JSONObject jsonTexList = new JSONObject(JSONObject.Type.OBJECT);
+                JSONObject jsonOverwrite = null;
+                string overwritePath = _settings.ResourcesPath + Path.DirectorySeparatorChar + "overwrite_texture_list.txt";
+
+                if (File.Exists(overwritePath))
+                {
+                    jsonOverwrite = new JSONObject(File.ReadAllText(overwritePath));
+                }
 
                 for (int i = 0; i < fileList.Count; i++)
                 {
@@ -251,6 +258,20 @@ namespace IceGameEditor
 
                         JSONObject jstex = new JSONObject(JSONObject.Type.OBJECT);
                         jstex.AddField("id", fn);
+
+                        // Check the overwrite list to see if
+                        // the sprite uses a different size.
+                        if (jsonOverwrite != null)
+                        {
+                            for (int j = 0; j < jsonOverwrite.list.Count; j++)
+                            {
+                                if (jsonOverwrite.list[j]["id"].str.Contains(fn))
+                                {
+                                    width = (int)jsonOverwrite.list[j]["size"].n;
+                                }
+                            }
+                        }
+
                         jstex.AddField("size", width);
 
                         jsonTexList.Add(jstex);
@@ -537,7 +558,7 @@ namespace IceGameEditor
             d.texture = "Enemies/EnemyFlyer_1/EnemyFlyer_1";
             d.type = EnemyType.Flyer;
 
-            _activeLevel.SetEnemy(p, (EnemyData)d);
+            _activeLevel.SetEnemy(p, d);
         }
 
         public void PlaceWalkerEnemy(Vector2 p)
@@ -552,7 +573,7 @@ namespace IceGameEditor
             d.texture = "Enemies/EnemyWalker/EnemyWalker_1";
             d.type = EnemyType.Walker;
 
-            _activeLevel.SetEnemy(p, (EnemyData)d);
+            _activeLevel.SetEnemy(p, d);
         }
 
         public void PlaceRoamerEnemy(Vector2 p)
@@ -567,7 +588,7 @@ namespace IceGameEditor
             d.texture = "Enemies/EnemyRoamer/EnemyRoamer_1";
             d.type = EnemyType.Roamer;
 
-            _activeLevel.SetEnemy(p, (EnemyData)d);
+            _activeLevel.SetEnemy(p, d);
         }
 
         public Bitmap GetFlyerEnemyTexture()
@@ -621,29 +642,33 @@ namespace IceGameEditor
         {
             try
             {
-                openFileDialog.ShowDialog();
-                string lvPath = openFileDialog.FileName;
-                string lvData = File.ReadAllText(lvPath);
+                DialogResult dr = openFileDialog.ShowDialog();
 
-                _activeLevel = new Level();
-                _activeLevel.LoadLevel(lvData);
-                _levels.Add(_activeLevel);
-                _layerList.Clear();
-                UpdateLayerList();
+                if (dr == DialogResult.OK)
+                {
+                    string lvPath = openFileDialog.FileName;
+                    string lvData = File.ReadAllText(lvPath);
 
-                _designer = new Designer(this, _designers.Count);
-                _designers.Add(_designer);
+                    _activeLevel = new Level();
+                    _activeLevel.LoadLevel(lvData);
+                    _levels.Add(_activeLevel);
+                    _layerList.Clear();
+                    UpdateLayerList();
 
-                _designer.Show(dockPanel, DockState.Document);
-                _designer.SetTextures(_blocks);
-                _designer.SetSpawnTexture(_spawnTexture);
-                _designer.SetDoorTexture(_doorTexture);
+                    _designer = new Designer(this, _designers.Count);
+                    _designers.Add(_designer);
 
-                _designer.SetBlockTextures(_activeLevel.GetBlockList());
-                _designer.Text = _activeLevel.GetPublicName();
+                    _designer.Show(dockPanel, DockState.Document);
+                    _designer.SetTextures(_blocks);
+                    _designer.SetSpawnTexture(_spawnTexture);
+                    _designer.SetDoorTexture(_doorTexture);
 
-                _toolbox.SetActiveLevel(_activeLevel);
-                _toolbox.UpdateLevelData();
+                    _designer.SetBlockTextures(_activeLevel.GetBlockList());
+                    _designer.Text = _activeLevel.GetPublicName();
+
+                    _toolbox.SetActiveLevel(_activeLevel);
+                    _toolbox.UpdateLevelData();
+                }
             }
             catch { }
         }
