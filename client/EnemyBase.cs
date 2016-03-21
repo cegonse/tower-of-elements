@@ -4,9 +4,9 @@ using System.Collections.Generic;
 public enum EnemyType : int
 {
 	Flyer,
+    Door,
     Walker,
-	Roamer,
-	Door
+	Roamer
 }
 public enum EnemyState : int
 {

@@ -14,7 +14,7 @@ public enum PlayerActions : int
 
 public enum PlayerAnimState : int
 {
-    IddleFront,
+    IdleFront,
     Turning,
     IdleTurned,
     BeginMove,
@@ -80,7 +80,10 @@ public class Player : MonoBehaviour {
     private GameController _gameController;
 
     //AnimState
-    private PlayerAnimState _animState = PlayerAnimState.IddleFront;
+    private PlayerAnimState _animState = PlayerAnimState.IdleFront;
+    private bool _changeAnimation = true;
+    private bool _canMove = false;
+    private Direction _animationDirection = Direction.None;
     
     public void SetActiveLevel(Level lv)
     {
@@ -124,10 +127,13 @@ public class Player : MonoBehaviour {
             SetPreviousPlayerDirection();
 
             CheckMovingCollisions();
-
-            AdjustVelocityByParams();
-
-            MovingPlayer();
+            
+            if (_canMove)
+            {
+                AdjustVelocityByParams();
+                MovingPlayer();
+            }
+            AdjustCamera();
 
             AnimatingPlayer();
         }
@@ -346,13 +352,17 @@ public class Player : MonoBehaviour {
         }
 		
         transform.position = p;
-        //_gameController.GetCamera().transform.position = p;
 		
-		Vector3 camPos = _gameController.GetCamera().transform.position;
-		camPos = Vector3.SmoothDamp(camPos, p, ref _cameraVelocity, _cameraDampingTime);
 		
-		_gameController.GetCamera().transform.position = camPos;
-		_gameController.GetCamera().transform.position += _cameraOffset;
+    }
+
+    public void AdjustCamera()
+    {
+        Vector3 camPos = _gameController.GetCamera().transform.position;
+        camPos = Vector3.SmoothDamp(camPos, transform.position, ref _cameraVelocity, _cameraDampingTime);
+
+        _gameController.GetCamera().transform.position = camPos;
+        _gameController.GetCamera().transform.position += _cameraOffset;
     }
     
     //Adjust the jumping values in funtion of the desired player's direction (_targetDirection)
@@ -617,42 +627,105 @@ public class Player : MonoBehaviour {
     public void AnimatingPlayer()
     {
         SpriteAnimator sprite_animator = GetComponent<SpriteAnimator>();
+
+        switch (_animationDirection)
+        {
+            case Direction.Right:
+
+                transform.localScale = new Vector3(1f, 1f, 1f);
+
+                break;
+            case Direction.Left:
+
+                transform.localScale = new Vector3(-1f, 1f, 1f);
+
+                break;
+        }
+
+        
         switch (_animState)
         {
+            //ACTION
             case PlayerAnimState.Action:
                 
                 break;
-
+            //BEGIN_MOVE
             case PlayerAnimState.BeginMove:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("BEGIN_MOVE");
+                    _changeAnimation = false;
+                    _canMove = true;
+                }
+                if (sprite_animator.IsTheLastFrame())
+                {
+                    _animState = PlayerAnimState.Move;
+                    _changeAnimation = true;
+                }
                 break;
-
+            //DEATH
             case PlayerAnimState.Death:
 
                 break;
-
+            //END_MOVE
             case PlayerAnimState.EndMove:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("END_MOVE");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
+                if (sprite_animator.IsTheLastFrame())
+                {
+                    _animState = PlayerAnimState.IdleTurned;
+                    _changeAnimation = true;
+                }
                 break;
-
-            case PlayerAnimState.IddleFront:
-
+            //IDLE_FRONT
+            case PlayerAnimState.IdleFront:
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("IDLE_FRONT");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
                 break;
-
+            //IDLE_TURNED
             case PlayerAnimState.IdleTurned:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("IDLE_TURNED");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
                 break;
-
+            //JUMP
             case PlayerAnimState.Jump:
 
                 break;
-
+            //MOVE
             case PlayerAnimState.Move:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("MOVE");
+                    _changeAnimation = false;
+                    _canMove = true;
+                }
                 break;
-
+            //TURNING
             case PlayerAnimState.Turning:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("TURNING");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
+                
+                if (sprite_animator.IsTheLastFrame())
+                {
+                    _animState = PlayerAnimState.BeginMove;
+                    _changeAnimation = true;
+                }
                 break;
         }
     }
@@ -660,9 +733,31 @@ public class Player : MonoBehaviour {
     public void SetTargetDirection(Direction tg_dir)
     {
         _targetDirection = tg_dir;
-        
+
         if (_targetDirection != Direction.None)
+        {
             _actionDirection = _targetDirection;
+            if ((_animState == PlayerAnimState.IdleTurned || _animState == PlayerAnimState.BeginMove || _animState == PlayerAnimState.EndMove) && _animationDirection == _targetDirection)
+            {
+                _animState = PlayerAnimState.BeginMove;
+            }
+            else
+            {
+                _animState = PlayerAnimState.Turning;
+            }
+            
+            _changeAnimation = true;
+            _animationDirection = _targetDirection;
+        }
+        else
+        {
+            _animState = PlayerAnimState.EndMove;
+            _changeAnimation = true;
+        }
+
+        
+        Debug.Log("jijiij jodete");
+        
     }
     
     public Direction GetDirection ()

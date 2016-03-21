@@ -72,7 +72,7 @@ public class SpriteAnimator : MonoBehaviour
         _animations.Add(animation_name, animation);
         if (string.IsNullOrEmpty(_activeAnimation))
         {
-            SetActiveAnimation(animation_name);
+            SetActiveAnimation(animation_name, init_sprite);
         }
         
     }
@@ -102,5 +102,13 @@ public class SpriteAnimator : MonoBehaviour
     public float GetAnimationTimerScaler()
     {
         return _animationTimerScaler;
+    }
+
+    public bool IsTheLastFrame()
+    {
+        Debug.Log(_animationIndex.ToString());
+        Debug.Log((_animations[_activeAnimation].Count - 1).ToString());
+        return _animationIndex == _animations[_activeAnimation].Count - 1;
+
     }
 }
