@@ -55,12 +55,12 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(69, 13);
             this.label2.TabIndex = 1;
-            this.label2.Text = "Versión 0.6f2";
+            this.label2.Text = "Versión 0.6f3";
             // 
             // buttonQuit
             // 
             this.buttonQuit.Location = new System.Drawing.Point(220, 124);
-            this.buttonQuit.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonQuit.Margin = new System.Windows.Forms.Padding(2);
             this.buttonQuit.Name = "buttonQuit";
             this.buttonQuit.Size = new System.Drawing.Size(66, 22);
             this.buttonQuit.TabIndex = 3;
@@ -82,7 +82,7 @@
             // 
             this.pictureBox1.Image = global::IceGameEditor.Properties.Resources.JumbleDevs;
             this.pictureBox1.Location = new System.Drawing.Point(9, 10);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(115, 123);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -111,7 +111,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "AboutForm";
