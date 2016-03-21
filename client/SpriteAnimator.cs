@@ -106,8 +106,6 @@ public class SpriteAnimator : MonoBehaviour
 
     public bool IsTheLastFrame()
     {
-        Debug.Log(_animationIndex.ToString());
-        Debug.Log((_animations[_activeAnimation].Count - 1).ToString());
         return _animationIndex == _animations[_activeAnimation].Count - 1;
 
     }

@@ -83,7 +83,11 @@ public class Player : MonoBehaviour {
     private PlayerAnimState _animState = PlayerAnimState.IdleFront;
     private bool _changeAnimation = true;
     private bool _canMove = false;
+    private bool _isDying = false;
+    private bool _beginFalling = true;
+    private bool _falling = false;
     private Direction _animationDirection = Direction.None;
+    private PlayerAnimState _animStateAfterJump = PlayerAnimState.BeginMove;
     
     public void SetActiveLevel(Level lv)
     {
@@ -117,6 +121,8 @@ public class Player : MonoBehaviour {
 
 		_cameraOffset = new Vector3(0,0,-1); 
 		_cameraVelocity = new Vector3();
+
+        _animState = PlayerAnimState.IdleFront;
 	}
 	
 	// Update is called once per frame
@@ -124,15 +130,17 @@ public class Player : MonoBehaviour {
 
         if (!_activeLevel.GetLevelController().GetGameController().IsGamePaused())
         {
-            SetPreviousPlayerDirection();
-
-            CheckMovingCollisions();
-            
-            if (_canMove)
+            if (!_isDying)
             {
+                SetPreviousPlayerDirection();
+
+                CheckMovingCollisions();
+
                 AdjustVelocityByParams();
+
                 MovingPlayer();
             }
+
             AdjustCamera();
 
             AnimatingPlayer();
@@ -281,27 +289,29 @@ public class Player : MonoBehaviour {
         switch(_state)
         {
             case State.Grounded:
-            
-                _velocity.y = 0;
-                _accSpeed = _minAccSpeed;
-                switch (_playerDirection)
-                {
-                    case Direction.Right:
-    
-                        _velocity.x = _speed;
-    
-                        break;
-                    case Direction.Left:
-    
-                        _velocity.x = -_speed;
-    
-                        break;
-    
-                    default:
-                        _velocity.x = 0;
-                        break;
-                }
-            
+                //if (_canMove)
+                //{
+                    _velocity.y = 0;
+                    _accSpeed = _minAccSpeed;
+                    switch (_playerDirection)
+                    {
+                        case Direction.Right:
+
+                            _velocity.x = _speed;
+
+                            break;
+                        case Direction.Left:
+
+                            _velocity.x = -_speed;
+
+                            break;
+
+                        default:
+                            _velocity.x = 0;
+                            break;
+                    }
+                //}
+
                 break;
             
             case State.Falling:
@@ -322,11 +332,29 @@ public class Player : MonoBehaviour {
         switch(_state)
         {
             case State.Grounded:
-                p.x += Time.deltaTime * _velocity.x;
+                if (_canMove)
+                {
+                    p.x += Time.deltaTime * _velocity.x;
+                }
                 
+                if (_falling)
+                {
+                    _falling = false;
+                    //Animation
+                    _animState = _animStateAfterJump;
+                    _changeAnimation = true;
+                }
+
                 break;
             
             case State.Jumping:
+
+                if (_jumpTimeActive == 0f)
+                {
+                    //Animation
+                    _animState = PlayerAnimState.Jump;
+                    _changeAnimation = true;
+                }
             
                 if(_jumpTimeActive < 1f)
                 {
@@ -335,19 +363,32 @@ public class Player : MonoBehaviour {
                         _jumpTimeActive * _jumpTimeActive * _jumpPoint2;
     
                     _jumpTimeActive += Time.deltaTime /_jumpTime;
+
                 }
                 else
                 {
                     _state = State.Normal;
                     //Ajustar posicion del jugador
                     p = _jumpPoint2; //Por algun motivo no se ejecuta bien
+
+                    //Animation
+                    _animState = _animStateAfterJump;
+                    _changeAnimation = true;
                 }
                 
                 break;
             
             case State.Falling:
                 p.y += Time.deltaTime * _velocity.y * _accSpeed;
-                
+
+                if (_beginFalling)
+                {
+                    //Animation
+                    _animState = PlayerAnimState.Jump;
+                    _changeAnimation = true;
+                    _beginFalling = false;
+                    _falling = true;
+                }
                 break;
         }
 		
@@ -448,14 +489,16 @@ public class Player : MonoBehaviour {
     public void DoAction(PlayerActions type)
     {
         _action = type;
-        
+        Debug.Log("He entrado en DoAction");
+        Debug.Log(_velocity.x);
+        Debug.Log(_velocity.x);
         switch (type)
         {
             case PlayerActions.Ice:
                 if (_state == State.Grounded && _velocity.magnitude == 0)
                 {
                     Ray2D ray = new Ray2D();
-
+                    Debug.Log("He entrado en ICE!");
                     if (_actionDirection == Direction.Left)
                     {
                         ray.origin = new Vector3(Mathf.Round(transform.position.x-1), Mathf.Round(transform.position.y), 0f); //transform.position + new Vector3(-0.31f, 0f, 0f);
@@ -626,18 +669,18 @@ public class Player : MonoBehaviour {
 
     public void AnimatingPlayer()
     {
-        SpriteAnimator sprite_animator = GetComponent<SpriteAnimator>();
+        SpriteAnimator sprite_animator = GetComponentInChildren<SpriteAnimator>();
 
         switch (_animationDirection)
         {
             case Direction.Right:
 
-                transform.localScale = new Vector3(1f, 1f, 1f);
+                transform.GetChild(0).localScale = new Vector3(1f, 1f, 1f);
 
                 break;
             case Direction.Left:
 
-                transform.localScale = new Vector3(-1f, 1f, 1f);
+                transform.GetChild(0).localScale = new Vector3(-1f, 1f, 1f);
 
                 break;
         }
@@ -665,7 +708,16 @@ public class Player : MonoBehaviour {
                 break;
             //DEATH
             case PlayerAnimState.Death:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("DEATH");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
+                if (sprite_animator.IsTheLastFrame())
+                {
+                    OnPlayerDestroyed();
+                }
                 break;
             //END_MOVE
             case PlayerAnimState.EndMove:
@@ -701,7 +753,12 @@ public class Player : MonoBehaviour {
                 break;
             //JUMP
             case PlayerAnimState.Jump:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("JUMP");
+                    _changeAnimation = false;
+                    _canMove = true;
+                }
                 break;
             //MOVE
             case PlayerAnimState.Move:
@@ -732,39 +789,61 @@ public class Player : MonoBehaviour {
 
     public void SetTargetDirection(Direction tg_dir)
     {
-        _targetDirection = tg_dir;
-
-        if (_targetDirection != Direction.None)
+        if (!_isDying)
         {
-            _actionDirection = _targetDirection;
-            if ((_animState == PlayerAnimState.IdleTurned || _animState == PlayerAnimState.BeginMove || _animState == PlayerAnimState.EndMove) && _animationDirection == _targetDirection)
+            _targetDirection = tg_dir;
+
+            if (_targetDirection != Direction.None)
             {
-                _animState = PlayerAnimState.BeginMove;
+                _actionDirection = _targetDirection;
+                //ANIMATION
+
+                if ((_animState == PlayerAnimState.IdleTurned || _animState == PlayerAnimState.BeginMove || _animState == PlayerAnimState.EndMove) && _animationDirection == _targetDirection)
+                {
+                    _animState = PlayerAnimState.BeginMove;
+                    _changeAnimation = true;
+                }
+                else if (_animState != PlayerAnimState.Jump)
+                {
+                    _animState = PlayerAnimState.Turning;
+                    _changeAnimation = true;
+                }
+
+                _animationDirection = _targetDirection;
+                _animStateAfterJump = PlayerAnimState.BeginMove;
             }
             else
             {
-                _animState = PlayerAnimState.Turning;
+
+                _animState = PlayerAnimState.EndMove;
+                _animStateAfterJump = PlayerAnimState.IdleTurned;
+                _changeAnimation = true;
+
             }
-            
-            _changeAnimation = true;
-            _animationDirection = _targetDirection;
-        }
-        else
-        {
-            _animState = PlayerAnimState.EndMove;
-            _changeAnimation = true;
         }
 
-        
-        Debug.Log("jijiij jodete");
-        
+        Debug.Log("Me ejecuto y no debo");
     }
     
     public Direction GetDirection ()
     {
         return _playerDirection;
     }
-    
-    
+
+    public void DestroyPlayer()
+    {
+        if (!_isDying)
+        {
+            _animState = PlayerAnimState.Death;
+            _changeAnimation = true;
+            _isDying = true;
+        }
+    }
+
+    public void OnPlayerDestroyed()
+    {
+        GameObject.Destroy(gameObject);
+        //_level.RemoveEntity("player"); TO DO!
+    }
     
 }

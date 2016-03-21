@@ -567,19 +567,26 @@ public class Level
 		p.SetGameController(_levelController.GetGameController());
 		p.SetActions(ice, fire, wind, earth);
 
+        GameObject child = new GameObject("player_child");
+        child.transform.position = new Vector3(x, y, 0);
+        child.transform.parent = go.transform;
+
+        TransformSinTweener tst = child.AddComponent<TransformSinTweener>();
+        tst.SetParams(0f, 0.005f, 0.05f);
+
         Texture2D tex = null;
 
         tex = (Texture2D)_levelController.GetGameController().
                     GetTextureController().GetTexture("Blocks/Personaje_1");
         float texSize = _levelController.GetGameController().
                     GetTextureController().GetTextureSize("Blocks/Personaje_1");
-        SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+        SpriteRenderer rend = child.AddComponent<SpriteRenderer>();
         Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
             new Vector2(0.5f, 0.5f), texSize);
         rend.sprite = spr;
 		rend.sortingOrder = 100;
 
-        SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
+        SpriteAnimator sprite_animator = child.AddComponent<SpriteAnimator>();
 
         //Animations
         string[] anim = new string[9];

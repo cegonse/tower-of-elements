@@ -85,6 +85,8 @@ public class EnemyBase : MonoBehaviour
         RaycastHit2D hit_down = Physics2D.Raycast(_downRay.origin, _downRay.direction, 0.9f);
         RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.9f);
 
+        bool killThaPlayer = false;
+
         if (hit_right.collider != null)
         {
             GameObject goHitRight = hit_right.collider.gameObject;
@@ -92,7 +94,7 @@ public class EnemyBase : MonoBehaviour
             {
                 if (goHitRight.transform.position.x - transform.position.x < 0.5)
                 {
-                    _level.RemoveEntity("player");
+                    killThaPlayer = true;
                 }   
             }
         }
@@ -104,7 +106,7 @@ public class EnemyBase : MonoBehaviour
             {
                 if (transform.position.x - goHitLeft.transform.position.x < 0.5)
                 {
-                    _level.RemoveEntity("player");
+                    killThaPlayer = true;
                 } 
             }
         }
@@ -116,7 +118,7 @@ public class EnemyBase : MonoBehaviour
             {
                 if (goHitUp.transform.position.y - goHitUp.transform.position.y < 0.5)
                 {
-                    _level.RemoveEntity("player");
+                    killThaPlayer = true;
                 } 
             }
         }
@@ -128,8 +130,19 @@ public class EnemyBase : MonoBehaviour
             {
                 if (transform.position.y - goHitDown.transform.position.y < 0.5)
                 {
-                    _level.RemoveEntity("player");
+                    killThaPlayer = true;
                 } 
+            }
+        }
+
+        if (killThaPlayer)
+        {
+            GameObject go = _level.GetEntity("player");
+            Player player = go.GetComponent<Player>();
+            if (player)
+            {
+                player.DestroyPlayer();
+                Debug.Log("Se llama a DestroyPlayer");
             }
         }
     }
