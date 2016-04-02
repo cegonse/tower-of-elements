@@ -1,0 +1,9 @@
+-Velocidad de animación de EnemyFlyer solo en X, cambiarlo a magnitude.
+
+-Comprobar EnemyWalker.
+
+-Parte izquierda de EnemyRoamer.
+
+-Cambiar tamaño de bola de fuego.
+
+-Arreglar puertas de palancas.
