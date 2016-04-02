@@ -450,6 +450,7 @@ public class Level
                 Sprite sprOne = Sprite.Create(texOne, new Rect(0, 0, texOne.width, texOne.height),
                     new Vector2(0.5f, 0.5f), texSizeOne);
                 rendOne.sprite = sprOne;
+                rendOne.sortingOrder = 100;
 
                 break;
         }

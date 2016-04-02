@@ -44,9 +44,10 @@ public class Player : MonoBehaviour {
     //Wish direction to walk
     private Direction _targetDirection = Direction.None;
     //Real direction to walk
-    private Direction _actionDirection = Direction.None;
-    //Direction on where to make actions
     private Direction _playerDirection = Direction.None;
+    //Direction on where to make actions
+    private Direction _actionDirection = Direction.None;
+    private Direction _actionDirectionSaved = Direction.None;
     
     private State _state = State.Normal;
     private PlayerActions _action = PlayerActions.None;
@@ -64,6 +65,8 @@ public class Player : MonoBehaviour {
     
     private const float _rayDownCollisionOffset = 0.25f;
     private const float _raySidesCollisionOffset = 0.31f;
+
+    private Ray2D _actionRay;
 
     //Jumping
 
@@ -86,6 +89,8 @@ public class Player : MonoBehaviour {
     private bool _isDying = false;
     private bool _beginFalling = true;
     private bool _falling = false;
+    private bool _actionHappen = false;
+    private GameObject _actionObjectAux;
     private Direction _animationDirection = Direction.None;
     private PlayerAnimState _animStateAfterJump = PlayerAnimState.BeginMove;
     
@@ -488,182 +493,192 @@ public class Player : MonoBehaviour {
     
     public void DoAction(PlayerActions type)
     {
-        _action = type;
-        Debug.Log("He entrado en DoAction");
-        Debug.Log(_velocity.x);
-        Debug.Log(_velocity.x);
-        switch (type)
+        if (!_isDying && _animState != PlayerAnimState.Action)
         {
-            case PlayerActions.Ice:
-                if (_state == State.Grounded && _velocity.magnitude == 0)
-                {
-                    Ray2D ray = new Ray2D();
-                    Debug.Log("He entrado en ICE!");
-                    if (_actionDirection == Direction.Left)
-                    {
-                        ray.origin = new Vector3(Mathf.Round(transform.position.x-1), Mathf.Round(transform.position.y), 0f); //transform.position + new Vector3(-0.31f, 0f, 0f);
-                        ray.direction = Vector2.left;
-                    }
-                    else if(_actionDirection == Direction.Right)
-                    {
-                        ray.origin = new Vector3(Mathf.Round(transform.position.x + 1), Mathf.Round(transform.position.y), 0f);//transform.position + new Vector3(0.31f, 0f, 0f);
-                        ray.direction = Vector2.right;
-                    }
-                    
-                    if ((_actionDirection == Direction.Right || _actionDirection == Direction.Left) && !Physics2D.Raycast(ray.origin, ray.direction, 0.1f))
-                    {
-                        float ent_pointX = Mathf.Round(transform.position.x);
-                        GameObject go_block = null;
-                        
-                        if (true) //_ice > 0)
-                        {
-                            if (_actionDirection == Direction.Right)
-                            {
-                                go_block = _activeLevel.CreateBlock(BlockType.Ice, (int)ent_pointX+1, 
-                                    (int)transform.position.y, "Blocks/Ice/Ice_1");
-                            }
-                            else
-                            {
-                                go_block = _activeLevel.CreateBlock(BlockType.Ice, (int)ent_pointX-1, 
-                                    (int)transform.position.y, "Blocks/Ice/Ice_1");
-                            }
-                            
-                            _activeLevel.AddEntity(go_block, go_block.name);
-
-                            SetUsesOfElem(type, GetUsesOfElem(type) - 1);
-                        }
-                    }
-                }
-                break;
-                
-            case PlayerActions.Wind:
+            _action = type;
             
-                    if(_state == State.Grounded && _velocity.magnitude == 0)
+            Debug.Log("He entrado en DoAction");
+            Debug.Log(_velocity.x);
+            Debug.Log(_velocity.x);
+
+            _actionHappen = false;
+            _actionDirectionSaved = _actionDirection;
+
+            if (_state == State.Grounded && _velocity.magnitude == 0)
+            {
+
+                _actionRay = new Ray2D();
+                if (_actionDirectionSaved == Direction.Left)
+                {
+                    _actionRay.origin = new Vector3(Mathf.Round(transform.position.x - 1), Mathf.Round(transform.position.y), 0f); //transform.position + new Vector3(-0.31f, 0f, 0f);
+                    _actionRay.direction = Vector2.left;
+                }
+                else if (_actionDirectionSaved == Direction.Right)
+                {
+                    _actionRay.origin = new Vector3(Mathf.Round(transform.position.x + 1), Mathf.Round(transform.position.y), 0f);//transform.position + new Vector3(0.31f, 0f, 0f);
+                    _actionRay.direction = Vector2.right;
+                }
+
+
+                if ((_actionDirectionSaved == Direction.Right || _actionDirectionSaved == Direction.Left))
+                {
+                    switch (_action)
                     {
-                        
-                        Ray2D ray = new Ray2D();
-
-                        if (_actionDirection == Direction.Left)
-                        {
-                            ray.origin = transform.position + new Vector3(-0.31f, 0f, 0f);
-                            ray.direction = Vector2.left;
-                        }
-                        else if(_actionDirection == Direction.Right)
-                        {
-                            ray.origin = transform.position + new Vector3(0.31f, 0f, 0f);
-                            ray.direction = Vector2.right;
-                        }
-                        
-                        
-                        if(true) //_wind > 0)
-                        {
-                            if (_actionDirection == Direction.Right || _actionDirection == Direction.Left)
+                        case PlayerActions.Ice:
+                            if (!Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f))
                             {
-                                RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, 0.4f);
-                                
-                                //Check if there is something on the player's Left
-                                if (hit.collider != null)
+                                if (true) //_ice > 0)
                                 {
-                                    GameObject goHit = hit.collider.gameObject;
-                                    
-                                    //Check if it is a Block
-                                    Block goHitBlock = goHit.GetComponent<Block>();
-                                    if (goHitBlock != null && goHitBlock.IsMovable())
-                                    {
-                                        goHitBlock.Kick(_actionDirection);
-                                        SetUsesOfElem(type, GetUsesOfElem(type) - 1);
-                                    }
-                                    //Check if it is a Lever
-                                    
-                                    Lever goHitLever = goHit.GetComponent<Lever>();
-                                    if(goHitLever != null)
-                                    {
-                                        goHitLever.ChangeLeverDirection();
-                                    }
-                                    
-
+                                    _actionHappen = true;
                                 }
                             }
-                        }
+
+                            break;
+                        case PlayerActions.Wind:
+
+                            if (true) //_wind > 0)
+                            {
+                                if (_actionDirectionSaved == Direction.Right || _actionDirectionSaved == Direction.Left)
+                                {
+                                    RaycastHit2D hit = Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f);
+
+                                    //Check if there is something on the player's Left or Right
+                                    if (hit.collider != null)
+                                    {
+                                        _actionObjectAux = hit.collider.gameObject;
+
+                                        //Check if it is a Block
+                                        Block goHitBlock = _actionObjectAux.GetComponent<Block>();
+                                        if (goHitBlock != null && goHitBlock.IsMovable())
+                                        {
+                                            _actionHappen = true;
+                                        }
+                                        //Check if it is a Lever
+                                        Lever goHitLever = _actionObjectAux.GetComponent<Lever>();
+                                        if (goHitLever != null)
+                                        {
+                                            _actionHappen = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        _actionObjectAux = null;
+                                    }
+                                }
+                            }
+
+                            break;
+
+                        case PlayerActions.Fire:
+
+                            if (true) //_fire > 0)
+                            {
+                                _actionHappen = true;
+                            }
+
+                            break;
+
+                        case PlayerActions.Earth:
+
+                            if (!Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f))
+                            {
+                                if (true) //_earth > 0)
+                                {
+                                    _actionHappen = true;
+                                }
+                            }
+
+                            break;
                     }
-            
+
+                }
+            }
+
+            if (_actionHappen)
+            {
+                //Animation
+                _animState = PlayerAnimState.Action;
+                _changeAnimation = true;
+
+                //AnimationObject
+                GameObject go = new GameObject("AnimationObject_" + type.ToString());
+                go.transform.position = _actionRay.origin;
+
+                AnimationObject animObj = go.AddComponent<AnimationObject>();
+                animObj.SetParams(_activeLevel, "Actions/" + type.ToString() + "Action/" + type.ToString() + "Action_1_Anim");
+            }
+        }
+    }
+
+    private void MakeTheActionHappen()
+    {
+        GameObject goToPut = null;
+
+        switch (_action)
+        {
+            case PlayerActions.Ice:
+                 goToPut = _activeLevel.CreateBlock(BlockType.Ice, (int)_actionRay.origin.x,
+                                            (int)transform.position.y, "Blocks/Ice/Ice_1");
+
+                 _activeLevel.AddEntity(goToPut, goToPut.name);
+                 SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
+                break;
+
+            case PlayerActions.Wind:
+
+                if (_actionObjectAux)
+                {
+                    //Check if it is a Block
+                    Block goHitBlock = _actionObjectAux.GetComponent<Block>();
+                    if (goHitBlock != null && goHitBlock.IsMovable())
+                    {
+                        goHitBlock.Kick(_actionDirectionSaved);
+                        SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
+
+                    }
+                    //Check if it is a Lever
+                    Lever goHitLever = _actionObjectAux.GetComponent<Lever>();
+                    if (goHitLever != null)
+                    {
+                        goHitLever.ChangeLeverDirection();
+                    }
+
+                }
+                
                 break;
 
             case PlayerActions.Fire:
 
-                if (_state == State.Grounded && _velocity.magnitude == 0)
+                if (_actionDirectionSaved == Direction.Right)
                 {
-                    
-                    if ((_actionDirection == Direction.Right || _actionDirection == Direction.Left))
-                    {
-                        float ent_pointX = Mathf.Round(transform.position.x);
-                        GameObject go_fire = null;
-                        
-                        if (true) //_fire > 0)
-                        {
-                            if (_actionDirection == Direction.Right)
-                            {
-                                go_fire = _activeLevel.CreateFireBall(transform.position.x+0.3f, transform.position.y, _actionDirection);
-                            }
-                            else
-                            {
-                                go_fire = _activeLevel.CreateFireBall(transform.position.x - 0.3f, transform.position.y, _actionDirection);
-                            }
-
-                            _activeLevel.AddEntity(go_fire, go_fire.name);
-
-                            SetUsesOfElem(type, GetUsesOfElem(type) - 1);
-                        }
-                    }
+                    goToPut = _activeLevel.CreateFireBall(transform.position.x + 0.3f, transform.position.y, _actionDirectionSaved);
                 }
+                else
+                {
+                    goToPut = _activeLevel.CreateFireBall(transform.position.x - 0.3f, transform.position.y, _actionDirectionSaved);
+                    goToPut.transform.localScale = new Vector3(-1f, 1f, 1f);
+                }
+
+                _activeLevel.AddEntity(goToPut, goToPut.name);
+
+                SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
+
                 break;
 
             case PlayerActions.Earth:
-                if (_state == State.Grounded && _velocity.magnitude == 0)
-                {
-                    Ray2D ray = new Ray2D();
 
-                    if (_actionDirection == Direction.Left)
-                    {
-                        ray.origin = transform.position + new Vector3(-0.31f, 0f, 0f);
-                        ray.direction = Vector2.left;
-                    }
-                    else if (_actionDirection == Direction.Right)
-                    {
-                        ray.origin = transform.position + new Vector3(0.31f, 0f, 0f);
-                        ray.direction = Vector2.right;
-                    }
+                int rockIndex = Random.Range(1, 4);
 
-                    if ((_actionDirection == Direction.Right || _actionDirection == Direction.Left) && !Physics2D.Raycast(ray.origin, ray.direction, 1.0f))
-                    {
-                        //float decpart = transform.position.x - Mathf.Abs(Mathf.Floor(transform.position.x));
-                        float ent_pointX = Mathf.Round(transform.position.x);
-                        GameObject go_block = null;
+                goToPut = _activeLevel.CreateBlock(BlockType.Rock, (int)_actionRay.origin.x,
+                                            (int)transform.position.y, "Blocks/Stone/Stone_" + rockIndex.ToString());
 
-                        if (true) //_earth > 0)
-                        {
-							int rockIndex = Random.Range(1, 4);
-						
-                            if (_actionDirection == Direction.Right)
-                            {
-                                go_block = _activeLevel.CreateBlock(BlockType.Crate, (int)ent_pointX + 1,
-                                    (int)transform.position.y, "Blocks/Stone/Stone_" + rockIndex.ToString());
-                            }
-                            else
-                            {
-                                go_block = _activeLevel.CreateBlock(BlockType.Crate, (int)ent_pointX - 1,
-                                    (int)transform.position.y, "Blocks/Stone/Stone_" + rockIndex.ToString());
-                            }
+                _activeLevel.AddEntity(goToPut, goToPut.name);
 
-                            _activeLevel.AddEntity(go_block, go_block.name);
+                SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
 
-                            SetUsesOfElem(type, GetUsesOfElem(type) - 1);
-                        }
-                    }
-                }
                 break;
+
         }
-        
         _action = PlayerActions.None;
     }
 
@@ -690,7 +705,22 @@ public class Player : MonoBehaviour {
         {
             //ACTION
             case PlayerAnimState.Action:
-                
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("ACTION");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
+                if (sprite_animator.GetAnimationIndex() == 2)
+                {
+                    MakeTheActionHappen();
+                }
+                if (sprite_animator.IsTheLastFrame())
+                {
+                    _animState = _animStateAfterJump;
+                    _changeAnimation = true;
+                    _animationDirection = _actionDirection;
+                }
                 break;
             //BEGIN_MOVE
             case PlayerAnimState.BeginMove:
@@ -796,33 +826,51 @@ public class Player : MonoBehaviour {
             if (_targetDirection != Direction.None)
             {
                 _actionDirection = _targetDirection;
-                //ANIMATION
-
-                if ((_animState == PlayerAnimState.IdleTurned || _animState == PlayerAnimState.BeginMove || _animState == PlayerAnimState.EndMove) && _animationDirection == _targetDirection)
+                if (_animState != PlayerAnimState.Action)
                 {
-                    _animState = PlayerAnimState.BeginMove;
-                    _changeAnimation = true;
-                }
-                else if (_animState != PlayerAnimState.Jump)
-                {
-                    _animState = PlayerAnimState.Turning;
-                    _changeAnimation = true;
-                }
+                    //ANIMATION
+                    if ((_animState == PlayerAnimState.IdleTurned || _animState == PlayerAnimState.BeginMove || _animState == PlayerAnimState.EndMove) && _animationDirection == _targetDirection)
+                    {
+                        _animState = PlayerAnimState.BeginMove;
+                        _changeAnimation = true;
 
-                _animationDirection = _targetDirection;
-                _animStateAfterJump = PlayerAnimState.BeginMove;
+                    }
+                    else if (_animState != PlayerAnimState.Jump)
+                    {
+                        _animState = PlayerAnimState.Turning;
+                        _changeAnimation = true;
+                    }
+
+                    _animationDirection = _targetDirection;
+                    _animStateAfterJump = PlayerAnimState.BeginMove;
+                }
+                else
+                {
+                    _animStateAfterJump = PlayerAnimState.BeginMove;
+                }
+                
+                
             }
             else
             {
-
-                _animState = PlayerAnimState.EndMove;
-                _animStateAfterJump = PlayerAnimState.IdleTurned;
-                _changeAnimation = true;
-
+                if (_animState == PlayerAnimState.Action)
+                {
+                    _animStateAfterJump = PlayerAnimState.IdleTurned;
+                    //_animationDirection = _actionDirection;
+                }
+                else if(_animState == PlayerAnimState.Jump)
+                {
+                    _animStateAfterJump = PlayerAnimState.IdleTurned;
+                }
+                else
+                {
+                    _animState = PlayerAnimState.EndMove;
+                    _animStateAfterJump = PlayerAnimState.IdleTurned;
+                    _changeAnimation = true;
+                }
             }
         }
 
-        Debug.Log("Me ejecuto y no debo");
     }
     
     public Direction GetDirection ()
