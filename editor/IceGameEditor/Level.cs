@@ -45,6 +45,7 @@ public struct PlayerData
 public enum EnemyType
 {
     Flyer = 0,
+    Lever,
     Walker,
     Roamer
 }
@@ -236,6 +237,37 @@ public class Level
         }
 
         json.AddField("enemies", jsonEnemies);
+
+        // Bounds for the camera zooming
+        int minX = 0, minY = 0, maxX = 0, maxY = 0;
+        int tx, ty;
+
+        foreach (KeyValuePair<Vector2,BlockData> bl in _blocks)
+        {
+            tx = bl.Key.x;
+            ty = bl.Key.y;
+
+            if (tx < minX && ty < minY)
+            {
+                minX = tx;
+                minY = ty;
+            }
+
+            if (tx >= maxX && ty >= maxY)
+            {
+                maxX = tx;
+                maxY = ty;
+            }
+        }
+
+        JSONObject jsonBounds = new JSONObject(JSONObject.Type.OBJECT);
+
+        jsonBounds.AddField("minx", minX);
+        jsonBounds.AddField("miny", minY);
+        jsonBounds.AddField("maxx", maxX);
+        jsonBounds.AddField("maxy", maxY);
+
+        json.AddField("bounds", jsonBounds);
 
         return json.Print(true);
     }

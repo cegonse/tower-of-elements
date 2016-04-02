@@ -26,7 +26,8 @@ public enum CurrentTool
     EnemyDelete,
     FlyerEnemy,
     WalkerEnemy,
-    RoamerEnemy
+    RoamerEnemy,
+    LeverEnemy
 }
 
 namespace IceGameEditor
@@ -69,6 +70,7 @@ namespace IceGameEditor
         Bitmap _walkerTex = null;
         Bitmap _flyerTex = null;
         Bitmap _roamerTex = null;
+        Bitmap _leverTex = null;
 
         EditorSettings _settings;
 
@@ -334,6 +336,7 @@ namespace IceGameEditor
                 _walkerTex = new Bitmap("data" + Path.DirectorySeparatorChar + "enemywalker.png");
                 _flyerTex = new Bitmap("data" + Path.DirectorySeparatorChar + "enemyflyer.png");
                 _roamerTex = new Bitmap("data" + Path.DirectorySeparatorChar + "enemyroamer.png");
+                _leverTex = new Bitmap("data" + Path.DirectorySeparatorChar + "lever.png");
             }
             catch
             {
@@ -350,6 +353,7 @@ namespace IceGameEditor
             _toolbox.AddEnemyTool("Volador", _flyerTex);
             _toolbox.AddEnemyTool("Caminador", _walkerTex);
             _toolbox.AddEnemyTool("Roamer", _roamerTex);
+            _toolbox.AddEnemyTool("Palanca", _leverTex);
             _toolbox.AddEnemyTool("Eliminar", removeTex);
             _toolbox.AddEnemyTool("Seleccionar", selectTex);
         }
@@ -521,6 +525,11 @@ namespace IceGameEditor
         {
             _designer.OnRoamerEnemySelected();
         }
+
+        public void OnLeverEnemySelected()
+        {
+            _designer.OnLeverEnemySelected();
+        }
         
         public void PlaceBlock(Vector2 p)
         {
@@ -587,6 +596,21 @@ namespace IceGameEditor
             d.pf = p;
             d.texture = "Enemies/EnemyRoamer/EnemyRoamer_1";
             d.type = EnemyType.Roamer;
+
+            _activeLevel.SetEnemy(p, d);
+        }
+
+        public void PlaceLeverEnemy(Vector2 p)
+        {
+            EnemyData d = new EnemyData();
+
+            d.hp = 1;
+            d.speed = 3f;
+            d.spawn = p;
+            d.p0 = p;
+            d.pf = p;
+            d.texture = "Blocks/Lever/Lever_1_Background_1";
+            d.type = EnemyType.Lever;
 
             _activeLevel.SetEnemy(p, d);
         }

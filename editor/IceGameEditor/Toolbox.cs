@@ -159,6 +159,10 @@ namespace IceGameEditor
             {
                 _main.OnRoamerEnemySelected();
             }
+            else if (b.Text.Contains("Palanca"))
+            {
+                _main.OnLeverEnemySelected();
+            }
         }
 
         private void buttonBlockLightColor_Click(object sender, EventArgs e)
