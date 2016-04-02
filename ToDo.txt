@@ -1,5 +1,3 @@
--Velocidad de animación de EnemyFlyer solo en X, cambiarlo a magnitude.
-
 -Comprobar EnemyWalker.
 
 -Parte izquierda de EnemyRoamer.

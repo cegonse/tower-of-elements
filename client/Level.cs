@@ -663,7 +663,7 @@ public class Level
                 er.SetEnemyData(data);
 				break;
 
-            case EnemyType.Door:
+            case EnemyType.Lever:
                 Lever lv = go.AddComponent<Lever>();
                 GameObject bl = CreateBlock(BlockType.Crate, x, y, "Blocks/Wood/WoodBox_1", 2);
                 AddEntity(bl, bl.name);

@@ -93,6 +93,8 @@ public class Player : MonoBehaviour {
     private GameObject _actionObjectAux;
     private Direction _animationDirection = Direction.None;
     private PlayerAnimState _animStateAfterJump = PlayerAnimState.BeginMove;
+
+    private bool _beginning = true;
     
     public void SetActiveLevel(Level lv)
     {
@@ -853,21 +855,29 @@ public class Player : MonoBehaviour {
             }
             else
             {
-                if (_animState == PlayerAnimState.Action)
+                if (!_beginning)
                 {
-                    _animStateAfterJump = PlayerAnimState.IdleTurned;
-                    //_animationDirection = _actionDirection;
-                }
-                else if(_animState == PlayerAnimState.Jump)
-                {
-                    _animStateAfterJump = PlayerAnimState.IdleTurned;
+                    if (_animState == PlayerAnimState.Action)
+                    {
+                        _animStateAfterJump = PlayerAnimState.IdleTurned;
+                        //_animationDirection = _actionDirection;
+                    }
+                    else if (_animState == PlayerAnimState.Jump)
+                    {
+                        _animStateAfterJump = PlayerAnimState.IdleTurned;
+                    }
+                    else
+                    {
+                        _animState = PlayerAnimState.EndMove;
+                        _animStateAfterJump = PlayerAnimState.IdleTurned;
+                        _changeAnimation = true;
+                    }
                 }
                 else
                 {
-                    _animState = PlayerAnimState.EndMove;
-                    _animStateAfterJump = PlayerAnimState.IdleTurned;
-                    _changeAnimation = true;
+                    _beginning = false;
                 }
+                
             }
         }
 
