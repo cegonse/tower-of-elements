@@ -238,6 +238,21 @@ public class Level
 						GameObject go_en = CreateEnemy(EnemyType.Roamer, spawnx, spawny, texture, (BaseEnemyData)dd);
 						AddEntity(go_en, "roamer_enemy" + "_" + spawnx.ToString() + "_" + spawny.ToString());
 					}
+                    else if (type == EnemyType.Lever)
+                    {
+                        LeverDoorData dd = new LeverDoorData();
+
+                        int p0x = (int)jsonEnemies[i]["x0"].n;
+                        int p0y = (int)jsonEnemies[i]["y0"].n;
+                        int pfx = (int)jsonEnemies[i]["xf"].n;
+                        int pfy = (int)jsonEnemies[i]["yf"].n;
+
+                        dd.p0 = new Vector2(p0x, p0y);
+                        dd.p1 = new Vector2(pfx, pfy);
+
+                        GameObject go_en = CreateEnemy(EnemyType.Lever, spawnx, spawny, texture, (BaseEnemyData)dd);
+                        AddEntity(go_en, "lever_door" + "_" + dd.p0.x.ToString() + "_" + dd.p0.y.ToString());
+                    }
 				}
 			}
         }
@@ -665,7 +680,7 @@ public class Level
 
             case EnemyType.Lever:
                 Lever lv = go.AddComponent<Lever>();
-                GameObject bl = CreateBlock(BlockType.Crate, x, y, "Blocks/Wood/WoodBox_1", 2);
+                GameObject bl = CreateBlock(BlockType.Crate, x, y, name, 2);
                 AddEntity(bl, bl.name);
                 lv.SetDoor(bl);
                 lv.SetEnemyData(data);
