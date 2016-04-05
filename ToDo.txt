@@ -1,0 +1,7 @@
+-Comprobar EnemyWalker.
+
+-Parte izquierda de EnemyRoamer.
+
+-Cambiar tamaño de bola de fuego.
+
+-Arreglar puertas de palancas.

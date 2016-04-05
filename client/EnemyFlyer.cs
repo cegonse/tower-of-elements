@@ -78,7 +78,7 @@ public class EnemyFlyer : EnemyBase
             case EnemyState.WALKING:
                 
                 SpriteAnimator saW = GetComponent<SpriteAnimator>();
-                saW.SetAnimationTimerScaler(Mathf.Abs(_velocity.x));
+                saW.SetAnimationTimerScaler(Mathf.Abs(_velocity.magnitude));
                 break;
 
             case EnemyState.TURNING:

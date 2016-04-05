@@ -39,6 +39,7 @@
             this.compilarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.probarEnLocalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.probarEnRemotoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sincronizarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.herramientasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editorDeAnimacionesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.capasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -122,7 +123,8 @@
             this.compilarToolStripMenuItem.BackColor = System.Drawing.Color.PaleGoldenrod;
             this.compilarToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.probarEnLocalToolStripMenuItem,
-            this.probarEnRemotoToolStripMenuItem});
+            this.probarEnRemotoToolStripMenuItem,
+            this.sincronizarToolStripMenuItem});
             this.compilarToolStripMenuItem.Name = "compilarToolStripMenuItem";
             this.compilarToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
             this.compilarToolStripMenuItem.Text = "Compilar";
@@ -142,6 +144,14 @@
             this.probarEnRemotoToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
             this.probarEnRemotoToolStripMenuItem.Text = "Probar en Remoto";
             this.probarEnRemotoToolStripMenuItem.Click += new System.EventHandler(this.probarEnRemotoToolStripMenuItem_Click);
+            // 
+            // sincronizarToolStripMenuItem
+            // 
+            this.sincronizarToolStripMenuItem.Name = "sincronizarToolStripMenuItem";
+            this.sincronizarToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
+            this.sincronizarToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
+            this.sincronizarToolStripMenuItem.Text = "Sincronizar";
+            this.sincronizarToolStripMenuItem.Click += new System.EventHandler(this.sincronizarToolStripMenuItem_Click);
             // 
             // herramientasToolStripMenuItem
             // 
@@ -211,7 +221,7 @@
             this.MainMenuStrip = this.menuStrip;
             this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "MainForm";
-            this.Text = "Editor de Frozen Cubes";
+            this.Text = "Editor de Ice Game";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
@@ -240,6 +250,7 @@
         private System.Windows.Forms.ToolStripMenuItem herramientasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editorDeAnimacionesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem capasToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sincronizarToolStripMenuItem;
     }
 }
 

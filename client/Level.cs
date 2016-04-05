@@ -238,6 +238,21 @@ public class Level
 						GameObject go_en = CreateEnemy(EnemyType.Roamer, spawnx, spawny, texture, (BaseEnemyData)dd);
 						AddEntity(go_en, "roamer_enemy" + "_" + spawnx.ToString() + "_" + spawny.ToString());
 					}
+                    else if (type == EnemyType.Lever)
+                    {
+                        LeverDoorData dd = new LeverDoorData();
+
+                        int p0x = (int)jsonEnemies[i]["x0"].n;
+                        int p0y = (int)jsonEnemies[i]["y0"].n;
+                        int pfx = (int)jsonEnemies[i]["xf"].n;
+                        int pfy = (int)jsonEnemies[i]["yf"].n;
+
+                        dd.p0 = new Vector2(p0x, p0y);
+                        dd.p1 = new Vector2(pfx, pfy);
+
+                        GameObject go_en = CreateEnemy(EnemyType.Lever, spawnx, spawny, texture, (BaseEnemyData)dd);
+                        AddEntity(go_en, "lever_door" + "_" + dd.p0.x.ToString() + "_" + dd.p0.y.ToString());
+                    }
 				}
 			}
         }
@@ -255,25 +270,25 @@ public class Level
         prueba2.p0 = new Vector2(-1, 4);
         prueba2.pf = new Vector2(5, 4);
 
-        GameObject go_prueba2 = CreateEnemy(EnemyType.Flyer, 5, 4, "Blocks/EnemyFlyer_1/EnemyFlyer_1", (BaseEnemyData)prueba2);
+        GameObject go_prueba2 = CreateEnemy(EnemyType.Flyer, 5, 4, "Enemies/EnemyFlyer_1/EnemyFlyer_1", (BaseEnemyData)prueba2);
         AddEntity(go_prueba2, "flyer_enemy" + "_" + prueba2.p0.x.ToString() + "_" + prueba2.p0.y.ToString());
         
-
+        
         WalkerEnemyData prueba3 = new WalkerEnemyData();
         prueba3.p0 = new Vector2(-3, 0);
         prueba3.p1 = new Vector2(4, 4);
 
-        GameObject go_prueba3 = CreateEnemy(EnemyType.Walker, 0, 0, "Blocks/EnemyFlyer_1/EnemyFlyer_1", (BaseEnemyData)prueba3);
+        GameObject go_prueba3 = CreateEnemy(EnemyType.Walker, 0, 0, "Enemies/EnemyFlyer_1/EnemyFlyer_1", (BaseEnemyData)prueba3);
         AddEntity(go_prueba3, "walker_enemy" + "_" + prueba3.p0.x.ToString() + "_" + prueba3.p0.y.ToString());
-        */
+        
 
         LeverDoorData prueba4 = new LeverDoorData();
-        prueba4.p0 = new Vector2(0, 0);
-        prueba4.p1 = new Vector2(2, 0);
+        prueba4.p0 = new Vector2(0, -1);
+        prueba4.p1 = new Vector2(0, 4);
 
-        GameObject go_prueba4 = CreateEnemy(EnemyType.Door, 1, 0, "Blocks/Wood/WoodBox_1", (BaseEnemyData)prueba4);
+        GameObject go_prueba4 = CreateEnemy(EnemyType.Door, -1, 0, "Blocks/Ice/Ice_1", (BaseEnemyData)prueba4);
         AddEntity(go_prueba4, "lever_door" + "_" + prueba4.p0.x.ToString() + "_" + prueba4.p0.y.ToString());
-
+        */
     }
 	
 	public void LoadBlock(BlockType type, int x, int y, string name, float length = 1)
@@ -450,6 +465,7 @@ public class Level
                 Sprite sprOne = Sprite.Create(texOne, new Rect(0, 0, texOne.width, texOne.height),
                     new Vector2(0.5f, 0.5f), texSizeOne);
                 rendOne.sprite = sprOne;
+                rendOne.sortingOrder = 100;
 
                 break;
         }
@@ -567,17 +583,62 @@ public class Level
 		p.SetGameController(_levelController.GetGameController());
 		p.SetActions(ice, fire, wind, earth);
 
+        GameObject child = new GameObject("player_child");
+        child.transform.position = new Vector3(x, y, 0);
+        child.transform.parent = go.transform;
+
+        TransformSinTweener tst = child.AddComponent<TransformSinTweener>();
+        tst.SetParams(0f, 0.005f, 0.05f);
+
         Texture2D tex = null;
 
         tex = (Texture2D)_levelController.GetGameController().
                     GetTextureController().GetTexture("Blocks/Personaje_1");
         float texSize = _levelController.GetGameController().
                     GetTextureController().GetTextureSize("Blocks/Personaje_1");
-        SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+        SpriteRenderer rend = child.AddComponent<SpriteRenderer>();
         Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
             new Vector2(0.5f, 0.5f), texSize);
         rend.sprite = spr;
 		rend.sortingOrder = 100;
+
+        SpriteAnimator sprite_animator = child.AddComponent<SpriteAnimator>();
+
+        //Animations
+        string[] anim = new string[9];
+        anim[0] = "Player/IdleFront/IdleFront_1_Anim";      //IDLE_FRONT
+        anim[1] = "Player/Action/Action_1_Anim";            //ACTION
+        anim[2] = "Player/BeginMove/BeginMove_1_Anim";      //BEGIN_MOVE
+        anim[3] = "Player/Death/Death_1_Anim";              //DEATH
+        anim[4] = "Player/EndMove/EndMove_1_Anim";          //END_MOVE
+        anim[5] = "Player/IdleTurned/IdleTurned_1_Anim";    //IDLE_TURNED
+        anim[6] = "Player/Jump/Jump_1_Anim";                //JUMP
+        anim[7] = "Player/Move/Move_1_Anim";                //MOVE
+        anim[8] = "Player/Turning/Turning_1_Anim";          //TURNING
+
+        string[] animName = new string[9];
+        animName[0] = "IDLE_FRONT";     //IDLE_FRONT
+        animName[1] = "ACTION";         //ACTION
+        animName[2] = "BEGIN_MOVE";     //BEGIN_MOVE
+        animName[3] = "DEATH";          //DEATH
+        animName[4] = "END_MOVE";       //END_MOVE
+        animName[5] = "IDLE_TURNED";    //IDLE_TURNED
+        animName[6] = "JUMP";           //JUMP
+        animName[7] = "MOVE";           //MOVE
+        animName[8] = "TURNING";        //TURNING
+
+        for (int i = 0; i < anim.Length; i++)
+        {
+            if (_levelController.GetGameController().GetTextureController().GetAnimation(anim[i]) != null)
+            {
+                sprite_animator.AddAnimation(animName[i], _levelController.GetGameController().GetTextureController().GetAnimation(anim[i]));
+            }
+            else
+            {
+                Debug.Log("WARNING!! Enemy without an assigned animation: " + anim[i]);
+            }
+        }
+            
 
         return go;
     }
@@ -617,16 +678,12 @@ public class Level
                 er.SetEnemyData(data);
 				break;
 
-            case EnemyType.Door:
-                LeverDoor ld = go.AddComponent<LeverDoor>();
-                ld.SetType(type);
-                ld.SetLevel(this);
-                ld.SetEnemyData(data);
-                go.transform.position = new Vector3(((LeverDoorData) data).p0.x, ((LeverDoorData)data).p0.y, 0);
-
-                CreateLever(x, y, "Blocks/Lever/Lever_1_Frame_1", ld);
-                
-
+            case EnemyType.Lever:
+                Lever lv = go.AddComponent<Lever>();
+                GameObject bl = CreateBlock(BlockType.Crate, x, y, name, 2);
+                AddEntity(bl, bl.name);
+                lv.SetDoor(bl);
+                lv.SetEnemyData(data);
                 break;
         }
 		
@@ -650,9 +707,9 @@ public class Level
         {
             Debug.Log("WARNING!! Enemy without an assigned animation: " + name);
         }
-        if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim_2") != null)
+        if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_2_Anim") != null)
         {
-            sprite_animator.AddAnimation("TURNING", _levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim_2"));
+            sprite_animator.AddAnimation("TURNING", _levelController.GetGameController().GetTextureController().GetAnimation(name + "_2_Anim"));
         }
         else
         {
@@ -662,33 +719,6 @@ public class Level
         return go;
 	}
 
-    public void CreateLever(float x, float y, string name, LeverDoor leverDoor)
-    {
-        GameObject go = new GameObject(x.ToString() + "_" + y.ToString() + "_" + "_lever");
-        go.transform.position = new Vector3(x, y, 0);
-
-        BoxCollider2D box = go.AddComponent<BoxCollider2D>();
-        box.size = new Vector2(1f, 1f);
-        Rigidbody2D r = go.AddComponent<Rigidbody2D>();
-        r.isKinematic = true;
-
-        Texture2D tex = null;
-
-        Lever l = go.AddComponent<Lever>();
-        l.SetLevel(this);
-
-        tex = (Texture2D)_levelController.GetGameController().
-                GetTextureController().GetTexture(name);
-        float texSize = _levelController.GetGameController().
-                    GetTextureController().GetTextureSize(name);
-        SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
-        Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
-            new Vector2(0.5f, 0.5f), texSize);
-
-        rend.sprite = spr;
-        rend.sortingOrder = 100;
-
-    }
 
     public void ClearLevel()
 	{

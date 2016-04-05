@@ -257,7 +257,7 @@ namespace IceGameEditor
 
                     if (!string.IsNullOrEmpty(tex.Value.texture))
                     {
-                        if (tex.Value.type == EnemyType.Flyer)
+                        if (tex.Value.type == EnemyType.Flyer || tex.Value.type == EnemyType.Lever)
                         {
                             // Draw the path line  
                             Point p0 = new Point((_xSize / 2 + tex.Value.p0.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Value.p0.y) * 64 + panel.AutoScrollPosition.Y + 32);
@@ -342,6 +342,11 @@ namespace IceGameEditor
         public void OnRoamerEnemySelected()
         {
             _tool = CurrentTool.RoamerEnemy;
+        }
+
+        public void OnLeverEnemySelected()
+        {
+            _tool = CurrentTool.LeverEnemy;
         }
 
         private void panel_MouseMove(object sender, MouseEventArgs e)
@@ -455,6 +460,15 @@ namespace IceGameEditor
                     p.y = -(((_lastY - panel.AutoScrollPosition.Y) / 64) - (_ySize / 2));
 
                     _main.PlaceRoamerEnemy(p);
+                }
+                else if (_tool == CurrentTool.LeverEnemy)
+                {
+                    Vector2 p = new Vector2();
+
+                    p.x = ((_lastX - panel.AutoScrollPosition.X) / 64) - (_xSize / 2);
+                    p.y = -(((_lastY - panel.AutoScrollPosition.Y) / 64) - (_ySize / 2));
+
+                    _main.PlaceLeverEnemy(p);
                 }
                 else if (_tool == CurrentTool.EnemyDelete)
                 {
