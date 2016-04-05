@@ -83,6 +83,10 @@
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.panelEnemies = new System.Windows.Forms.Panel();
             this.panelEnemiesTool = new System.Windows.Forms.Panel();
+            this.textBoxHp = new System.Windows.Forms.TextBox();
+            this.label34 = new System.Windows.Forms.Label();
+            this.textBoxEnemySpeed = new System.Windows.Forms.TextBox();
+            this.label33 = new System.Windows.Forms.Label();
             this.comboBoxEnemyDirection = new System.Windows.Forms.ComboBox();
             this.label32 = new System.Windows.Forms.Label();
             this.textBoxEnemyEndY = new System.Windows.Forms.TextBox();
@@ -127,8 +131,6 @@
             this.textBoxLevelName = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.colorDialogBlockLight = new System.Windows.Forms.ColorDialog();
-            this.label33 = new System.Windows.Forms.Label();
-            this.textBoxEnemySpeed = new System.Windows.Forms.TextBox();
             this.tabControl.SuspendLayout();
             this.tabPageBlocks.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -165,7 +167,7 @@
             this.tabControl.Controls.Add(this.tabPageLevel);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
-            this.tabControl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(376, 1037);
@@ -175,9 +177,9 @@
             // 
             this.tabPageBlocks.Controls.Add(this.splitContainer1);
             this.tabPageBlocks.Location = new System.Drawing.Point(4, 25);
-            this.tabPageBlocks.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPageBlocks.Margin = new System.Windows.Forms.Padding(4);
             this.tabPageBlocks.Name = "tabPageBlocks";
-            this.tabPageBlocks.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPageBlocks.Padding = new System.Windows.Forms.Padding(4);
             this.tabPageBlocks.Size = new System.Drawing.Size(368, 1008);
             this.tabPageBlocks.TabIndex = 0;
             this.tabPageBlocks.Text = "Bloques";
@@ -187,7 +189,7 @@
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(4, 4);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -230,7 +232,7 @@
             this.panelBlocks.AutoScroll = true;
             this.panelBlocks.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelBlocks.Location = new System.Drawing.Point(0, 0);
-            this.panelBlocks.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panelBlocks.Margin = new System.Windows.Forms.Padding(4);
             this.panelBlocks.Name = "panelBlocks";
             this.panelBlocks.Size = new System.Drawing.Size(360, 337);
             this.panelBlocks.TabIndex = 0;
@@ -239,7 +241,7 @@
             // 
             this.textBoxIceLength.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxIceLength.Location = new System.Drawing.Point(7, 462);
-            this.textBoxIceLength.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxIceLength.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxIceLength.Name = "textBoxIceLength";
             this.textBoxIceLength.Size = new System.Drawing.Size(346, 22);
             this.textBoxIceLength.TabIndex = 21;
@@ -260,7 +262,7 @@
             // 
             this.textBoxBlockLightRadius.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxBlockLightRadius.Location = new System.Drawing.Point(7, 423);
-            this.textBoxBlockLightRadius.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxBlockLightRadius.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxBlockLightRadius.Name = "textBoxBlockLightRadius";
             this.textBoxBlockLightRadius.Size = new System.Drawing.Size(346, 22);
             this.textBoxBlockLightRadius.TabIndex = 19;
@@ -281,7 +283,7 @@
             // 
             this.buttonBlockLightColor.Dock = System.Windows.Forms.DockStyle.Top;
             this.buttonBlockLightColor.Location = new System.Drawing.Point(7, 378);
-            this.buttonBlockLightColor.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockLightColor.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockLightColor.Name = "buttonBlockLightColor";
             this.buttonBlockLightColor.Size = new System.Drawing.Size(346, 28);
             this.buttonBlockLightColor.TabIndex = 17;
@@ -305,7 +307,7 @@
             this.checkBoxBlockIlluminated.AutoSize = true;
             this.checkBoxBlockIlluminated.Dock = System.Windows.Forms.DockStyle.Top;
             this.checkBoxBlockIlluminated.Location = new System.Drawing.Point(7, 340);
-            this.checkBoxBlockIlluminated.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBoxBlockIlluminated.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxBlockIlluminated.Name = "checkBoxBlockIlluminated";
             this.checkBoxBlockIlluminated.Size = new System.Drawing.Size(346, 21);
             this.checkBoxBlockIlluminated.TabIndex = 15;
@@ -316,7 +318,7 @@
             // 
             this.textBoxBlockDestructionSound.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxBlockDestructionSound.Location = new System.Drawing.Point(7, 318);
-            this.textBoxBlockDestructionSound.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxBlockDestructionSound.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxBlockDestructionSound.Name = "textBoxBlockDestructionSound";
             this.textBoxBlockDestructionSound.Size = new System.Drawing.Size(346, 22);
             this.textBoxBlockDestructionSound.TabIndex = 14;
@@ -337,7 +339,7 @@
             // 
             this.textBoxBlockMoveSound.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxBlockMoveSound.Location = new System.Drawing.Point(7, 279);
-            this.textBoxBlockMoveSound.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxBlockMoveSound.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxBlockMoveSound.Name = "textBoxBlockMoveSound";
             this.textBoxBlockMoveSound.Size = new System.Drawing.Size(346, 22);
             this.textBoxBlockMoveSound.TabIndex = 12;
@@ -358,7 +360,7 @@
             // 
             this.textBoxBlockWalkSound.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxBlockWalkSound.Location = new System.Drawing.Point(7, 240);
-            this.textBoxBlockWalkSound.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxBlockWalkSound.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxBlockWalkSound.Name = "textBoxBlockWalkSound";
             this.textBoxBlockWalkSound.Size = new System.Drawing.Size(346, 22);
             this.textBoxBlockWalkSound.TabIndex = 10;
@@ -417,7 +419,7 @@
             this.buttonBlockTexture1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture1.Image = global::IceGameEditor.Properties.Resources.bk_1;
             this.buttonBlockTexture1.Location = new System.Drawing.Point(4, 4);
-            this.buttonBlockTexture1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture1.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture1.Name = "buttonBlockTexture1";
             this.buttonBlockTexture1.Size = new System.Drawing.Size(35, 32);
             this.buttonBlockTexture1.TabIndex = 0;
@@ -428,7 +430,7 @@
             // 
             this.buttonBlockTexture2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture2.Location = new System.Drawing.Point(47, 4);
-            this.buttonBlockTexture2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture2.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture2.Name = "buttonBlockTexture2";
             this.buttonBlockTexture2.Size = new System.Drawing.Size(35, 32);
             this.buttonBlockTexture2.TabIndex = 1;
@@ -440,7 +442,7 @@
             this.buttonBlockTexture3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture3.Image = global::IceGameEditor.Properties.Resources.bk_3;
             this.buttonBlockTexture3.Location = new System.Drawing.Point(90, 4);
-            this.buttonBlockTexture3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture3.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture3.Name = "buttonBlockTexture3";
             this.buttonBlockTexture3.Size = new System.Drawing.Size(35, 32);
             this.buttonBlockTexture3.TabIndex = 2;
@@ -452,7 +454,7 @@
             this.buttonBlockTexture4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture4.Image = global::IceGameEditor.Properties.Resources.bk_4;
             this.buttonBlockTexture4.Location = new System.Drawing.Point(133, 4);
-            this.buttonBlockTexture4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture4.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture4.Name = "buttonBlockTexture4";
             this.buttonBlockTexture4.Size = new System.Drawing.Size(35, 32);
             this.buttonBlockTexture4.TabIndex = 3;
@@ -464,7 +466,7 @@
             this.buttonBlockTexture5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture5.Image = global::IceGameEditor.Properties.Resources.bk_5;
             this.buttonBlockTexture5.Location = new System.Drawing.Point(176, 4);
-            this.buttonBlockTexture5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture5.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture5.Name = "buttonBlockTexture5";
             this.buttonBlockTexture5.Size = new System.Drawing.Size(35, 32);
             this.buttonBlockTexture5.TabIndex = 4;
@@ -476,7 +478,7 @@
             this.buttonBlockTexture6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture6.Image = global::IceGameEditor.Properties.Resources.bk_6;
             this.buttonBlockTexture6.Location = new System.Drawing.Point(219, 4);
-            this.buttonBlockTexture6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture6.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture6.Name = "buttonBlockTexture6";
             this.buttonBlockTexture6.Size = new System.Drawing.Size(35, 32);
             this.buttonBlockTexture6.TabIndex = 5;
@@ -488,7 +490,7 @@
             this.buttonBlockTexture7.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture7.Image = global::IceGameEditor.Properties.Resources.bk_7;
             this.buttonBlockTexture7.Location = new System.Drawing.Point(262, 4);
-            this.buttonBlockTexture7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture7.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture7.Name = "buttonBlockTexture7";
             this.buttonBlockTexture7.Size = new System.Drawing.Size(35, 32);
             this.buttonBlockTexture7.TabIndex = 6;
@@ -500,7 +502,7 @@
             this.buttonBlockTexture8.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture8.Image = global::IceGameEditor.Properties.Resources.bk_8;
             this.buttonBlockTexture8.Location = new System.Drawing.Point(305, 4);
-            this.buttonBlockTexture8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture8.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture8.Name = "buttonBlockTexture8";
             this.buttonBlockTexture8.Size = new System.Drawing.Size(37, 32);
             this.buttonBlockTexture8.TabIndex = 7;
@@ -512,7 +514,7 @@
             this.buttonBlockTexture9.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture9.Image = global::IceGameEditor.Properties.Resources.bk_9;
             this.buttonBlockTexture9.Location = new System.Drawing.Point(4, 44);
-            this.buttonBlockTexture9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture9.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture9.Name = "buttonBlockTexture9";
             this.buttonBlockTexture9.Size = new System.Drawing.Size(35, 33);
             this.buttonBlockTexture9.TabIndex = 8;
@@ -524,7 +526,7 @@
             this.buttonBlockTexture10.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture10.Image = global::IceGameEditor.Properties.Resources.bk_10;
             this.buttonBlockTexture10.Location = new System.Drawing.Point(47, 44);
-            this.buttonBlockTexture10.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture10.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture10.Name = "buttonBlockTexture10";
             this.buttonBlockTexture10.Size = new System.Drawing.Size(35, 33);
             this.buttonBlockTexture10.TabIndex = 9;
@@ -536,7 +538,7 @@
             this.buttonBlockTexture11.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture11.Image = global::IceGameEditor.Properties.Resources.bk_11;
             this.buttonBlockTexture11.Location = new System.Drawing.Point(90, 44);
-            this.buttonBlockTexture11.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture11.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture11.Name = "buttonBlockTexture11";
             this.buttonBlockTexture11.Size = new System.Drawing.Size(35, 33);
             this.buttonBlockTexture11.TabIndex = 10;
@@ -548,7 +550,7 @@
             this.buttonBlockTexture12.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture12.Image = global::IceGameEditor.Properties.Resources.bk_12;
             this.buttonBlockTexture12.Location = new System.Drawing.Point(133, 44);
-            this.buttonBlockTexture12.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture12.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture12.Name = "buttonBlockTexture12";
             this.buttonBlockTexture12.Size = new System.Drawing.Size(35, 33);
             this.buttonBlockTexture12.TabIndex = 11;
@@ -560,7 +562,7 @@
             this.buttonBlockTexture13.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture13.Image = global::IceGameEditor.Properties.Resources.bk_13;
             this.buttonBlockTexture13.Location = new System.Drawing.Point(176, 44);
-            this.buttonBlockTexture13.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture13.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture13.Name = "buttonBlockTexture13";
             this.buttonBlockTexture13.Size = new System.Drawing.Size(35, 33);
             this.buttonBlockTexture13.TabIndex = 12;
@@ -572,7 +574,7 @@
             this.buttonBlockTexture14.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture14.Image = global::IceGameEditor.Properties.Resources.bk_14;
             this.buttonBlockTexture14.Location = new System.Drawing.Point(219, 44);
-            this.buttonBlockTexture14.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture14.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture14.Name = "buttonBlockTexture14";
             this.buttonBlockTexture14.Size = new System.Drawing.Size(35, 33);
             this.buttonBlockTexture14.TabIndex = 13;
@@ -584,7 +586,7 @@
             this.buttonBlockTexture15.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture15.Image = global::IceGameEditor.Properties.Resources.bk_15;
             this.buttonBlockTexture15.Location = new System.Drawing.Point(262, 44);
-            this.buttonBlockTexture15.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture15.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture15.Name = "buttonBlockTexture15";
             this.buttonBlockTexture15.Size = new System.Drawing.Size(35, 33);
             this.buttonBlockTexture15.TabIndex = 14;
@@ -596,7 +598,7 @@
             this.buttonBlockTexture16.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonBlockTexture16.Image = global::IceGameEditor.Properties.Resources.bk_16;
             this.buttonBlockTexture16.Location = new System.Drawing.Point(305, 44);
-            this.buttonBlockTexture16.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonBlockTexture16.Margin = new System.Windows.Forms.Padding(4);
             this.buttonBlockTexture16.Name = "buttonBlockTexture16";
             this.buttonBlockTexture16.Size = new System.Drawing.Size(37, 33);
             this.buttonBlockTexture16.TabIndex = 15;
@@ -623,7 +625,7 @@
             "Ice",
             "Crate"});
             this.comboBoxBlockType.Location = new System.Drawing.Point(7, 101);
-            this.comboBoxBlockType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBoxBlockType.Margin = new System.Windows.Forms.Padding(4);
             this.comboBoxBlockType.Name = "comboBoxBlockType";
             this.comboBoxBlockType.Size = new System.Drawing.Size(346, 24);
             this.comboBoxBlockType.TabIndex = 5;
@@ -644,7 +646,7 @@
             // 
             this.textBoxBlockPosY.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxBlockPosY.Location = new System.Drawing.Point(7, 62);
-            this.textBoxBlockPosY.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxBlockPosY.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxBlockPosY.Name = "textBoxBlockPosY";
             this.textBoxBlockPosY.Size = new System.Drawing.Size(346, 22);
             this.textBoxBlockPosY.TabIndex = 3;
@@ -664,7 +666,7 @@
             // 
             this.textBoxBlockPosX.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxBlockPosX.Location = new System.Drawing.Point(7, 23);
-            this.textBoxBlockPosX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxBlockPosX.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxBlockPosX.Name = "textBoxBlockPosX";
             this.textBoxBlockPosX.Size = new System.Drawing.Size(346, 22);
             this.textBoxBlockPosX.TabIndex = 1;
@@ -684,9 +686,9 @@
             // 
             this.tabPageBackgrounds.Controls.Add(this.splitContainer2);
             this.tabPageBackgrounds.Location = new System.Drawing.Point(4, 25);
-            this.tabPageBackgrounds.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPageBackgrounds.Margin = new System.Windows.Forms.Padding(4);
             this.tabPageBackgrounds.Name = "tabPageBackgrounds";
-            this.tabPageBackgrounds.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPageBackgrounds.Padding = new System.Windows.Forms.Padding(4);
             this.tabPageBackgrounds.Size = new System.Drawing.Size(368, 1008);
             this.tabPageBackgrounds.TabIndex = 1;
             this.tabPageBackgrounds.Text = "Fondos";
@@ -696,7 +698,7 @@
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer2.Location = new System.Drawing.Point(4, 4);
-            this.splitContainer2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitContainer2.Margin = new System.Windows.Forms.Padding(4);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -724,7 +726,7 @@
             this.panelBackgrounds.AutoScroll = true;
             this.panelBackgrounds.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelBackgrounds.Location = new System.Drawing.Point(0, 0);
-            this.panelBackgrounds.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panelBackgrounds.Margin = new System.Windows.Forms.Padding(4);
             this.panelBackgrounds.Name = "panelBackgrounds";
             this.panelBackgrounds.Size = new System.Drawing.Size(360, 327);
             this.panelBackgrounds.TabIndex = 0;
@@ -733,7 +735,7 @@
             // 
             this.textBoxBackgroundLayer.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxBackgroundLayer.Location = new System.Drawing.Point(0, 113);
-            this.textBoxBackgroundLayer.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxBackgroundLayer.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxBackgroundLayer.Name = "textBoxBackgroundLayer";
             this.textBoxBackgroundLayer.Size = new System.Drawing.Size(360, 22);
             this.textBoxBackgroundLayer.TabIndex = 5;
@@ -755,7 +757,7 @@
             // 
             this.textBoxBackgroundY.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxBackgroundY.Location = new System.Drawing.Point(0, 68);
-            this.textBoxBackgroundY.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxBackgroundY.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxBackgroundY.Name = "textBoxBackgroundY";
             this.textBoxBackgroundY.Size = new System.Drawing.Size(360, 22);
             this.textBoxBackgroundY.TabIndex = 3;
@@ -776,7 +778,7 @@
             // 
             this.textBoxBackgroundX.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxBackgroundX.Location = new System.Drawing.Point(0, 23);
-            this.textBoxBackgroundX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxBackgroundX.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxBackgroundX.Name = "textBoxBackgroundX";
             this.textBoxBackgroundX.Size = new System.Drawing.Size(360, 22);
             this.textBoxBackgroundX.TabIndex = 1;
@@ -797,7 +799,7 @@
             // 
             this.tabPageEnemies.Controls.Add(this.splitContainer3);
             this.tabPageEnemies.Location = new System.Drawing.Point(4, 25);
-            this.tabPageEnemies.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPageEnemies.Margin = new System.Windows.Forms.Padding(4);
             this.tabPageEnemies.Name = "tabPageEnemies";
             this.tabPageEnemies.Size = new System.Drawing.Size(368, 1008);
             this.tabPageEnemies.TabIndex = 2;
@@ -808,7 +810,7 @@
             // 
             this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer3.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitContainer3.Margin = new System.Windows.Forms.Padding(4);
             this.splitContainer3.Name = "splitContainer3";
             this.splitContainer3.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -830,13 +832,15 @@
             this.panelEnemies.AutoSize = true;
             this.panelEnemies.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelEnemies.Location = new System.Drawing.Point(0, 0);
-            this.panelEnemies.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panelEnemies.Margin = new System.Windows.Forms.Padding(4);
             this.panelEnemies.Name = "panelEnemies";
             this.panelEnemies.Size = new System.Drawing.Size(368, 358);
             this.panelEnemies.TabIndex = 0;
             // 
             // panelEnemiesTool
             // 
+            this.panelEnemiesTool.Controls.Add(this.textBoxHp);
+            this.panelEnemiesTool.Controls.Add(this.label34);
             this.panelEnemiesTool.Controls.Add(this.textBoxEnemySpeed);
             this.panelEnemiesTool.Controls.Add(this.label33);
             this.panelEnemiesTool.Controls.Add(this.comboBoxEnemyDirection);
@@ -855,11 +859,45 @@
             this.panelEnemiesTool.Controls.Add(this.label26);
             this.panelEnemiesTool.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelEnemiesTool.Location = new System.Drawing.Point(0, 0);
-            this.panelEnemiesTool.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panelEnemiesTool.Margin = new System.Windows.Forms.Padding(4);
             this.panelEnemiesTool.Name = "panelEnemiesTool";
-            this.panelEnemiesTool.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panelEnemiesTool.Padding = new System.Windows.Forms.Padding(4);
             this.panelEnemiesTool.Size = new System.Drawing.Size(368, 645);
             this.panelEnemiesTool.TabIndex = 0;
+            // 
+            // textBoxHp
+            // 
+            this.textBoxHp.Location = new System.Drawing.Point(7, 397);
+            this.textBoxHp.Name = "textBoxHp";
+            this.textBoxHp.Size = new System.Drawing.Size(357, 22);
+            this.textBoxHp.TabIndex = 17;
+            this.textBoxHp.TextChanged += new System.EventHandler(this.textBoxHp_TextChanged);
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(8, 377);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(135, 17);
+            this.label34.TabIndex = 16;
+            this.label34.Text = "Longitud si palanca:";
+            // 
+            // textBoxEnemySpeed
+            // 
+            this.textBoxEnemySpeed.Location = new System.Drawing.Point(7, 352);
+            this.textBoxEnemySpeed.Name = "textBoxEnemySpeed";
+            this.textBoxEnemySpeed.Size = new System.Drawing.Size(357, 22);
+            this.textBoxEnemySpeed.TabIndex = 15;
+            this.textBoxEnemySpeed.TextChanged += new System.EventHandler(this.textBoxEnemySpeed_TextChanged);
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(8, 332);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(247, 17);
+            this.label33.TabIndex = 14;
+            this.label33.Text = "Velocidad (0 horiz / 1 vert si palanca):";
             // 
             // comboBoxEnemyDirection
             // 
@@ -869,7 +907,7 @@
             "Clockwise",
             "Counter-Clockwise"});
             this.comboBoxEnemyDirection.Location = new System.Drawing.Point(4, 304);
-            this.comboBoxEnemyDirection.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBoxEnemyDirection.Margin = new System.Windows.Forms.Padding(4);
             this.comboBoxEnemyDirection.Name = "comboBoxEnemyDirection";
             this.comboBoxEnemyDirection.Size = new System.Drawing.Size(360, 24);
             this.comboBoxEnemyDirection.TabIndex = 13;
@@ -891,7 +929,7 @@
             // 
             this.textBoxEnemyEndY.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxEnemyEndY.Location = new System.Drawing.Point(4, 258);
-            this.textBoxEnemyEndY.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxEnemyEndY.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxEnemyEndY.Name = "textBoxEnemyEndY";
             this.textBoxEnemyEndY.Size = new System.Drawing.Size(360, 22);
             this.textBoxEnemyEndY.TabIndex = 11;
@@ -913,7 +951,7 @@
             // 
             this.textBoxEnemyEndX.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxEnemyEndX.Location = new System.Drawing.Point(4, 212);
-            this.textBoxEnemyEndX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxEnemyEndX.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxEnemyEndX.Name = "textBoxEnemyEndX";
             this.textBoxEnemyEndX.Size = new System.Drawing.Size(360, 22);
             this.textBoxEnemyEndX.TabIndex = 9;
@@ -935,7 +973,7 @@
             // 
             this.textBoxEnemyStartY.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxEnemyStartY.Location = new System.Drawing.Point(4, 166);
-            this.textBoxEnemyStartY.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxEnemyStartY.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxEnemyStartY.Name = "textBoxEnemyStartY";
             this.textBoxEnemyStartY.Size = new System.Drawing.Size(360, 22);
             this.textBoxEnemyStartY.TabIndex = 7;
@@ -957,7 +995,7 @@
             // 
             this.textBoxEnemyStartX.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxEnemyStartX.Location = new System.Drawing.Point(4, 120);
-            this.textBoxEnemyStartX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxEnemyStartX.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxEnemyStartX.Name = "textBoxEnemyStartX";
             this.textBoxEnemyStartX.Size = new System.Drawing.Size(360, 22);
             this.textBoxEnemyStartX.TabIndex = 5;
@@ -979,7 +1017,7 @@
             // 
             this.textBoxEnemyPositionY.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxEnemyPositionY.Location = new System.Drawing.Point(4, 74);
-            this.textBoxEnemyPositionY.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxEnemyPositionY.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxEnemyPositionY.Name = "textBoxEnemyPositionY";
             this.textBoxEnemyPositionY.Size = new System.Drawing.Size(360, 22);
             this.textBoxEnemyPositionY.TabIndex = 3;
@@ -1000,7 +1038,7 @@
             // 
             this.textBoxEnemyPositionX.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxEnemyPositionX.Location = new System.Drawing.Point(4, 28);
-            this.textBoxEnemyPositionX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxEnemyPositionX.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxEnemyPositionX.Name = "textBoxEnemyPositionX";
             this.textBoxEnemyPositionX.Size = new System.Drawing.Size(360, 22);
             this.textBoxEnemyPositionX.TabIndex = 1;
@@ -1029,10 +1067,10 @@
             this.tabPageLevel.Controls.Add(this.textBoxLevelName);
             this.tabPageLevel.Controls.Add(this.label10);
             this.tabPageLevel.Location = new System.Drawing.Point(4, 25);
-            this.tabPageLevel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPageLevel.Margin = new System.Windows.Forms.Padding(4);
             this.tabPageLevel.Name = "tabPageLevel";
             this.tabPageLevel.Padding = new System.Windows.Forms.Padding(7, 6, 7, 4);
-            this.tabPageLevel.Size = new System.Drawing.Size(368, 1021);
+            this.tabPageLevel.Size = new System.Drawing.Size(368, 1008);
             this.tabPageLevel.TabIndex = 3;
             this.tabPageLevel.Text = "Nivel";
             this.tabPageLevel.UseVisualStyleBackColor = true;
@@ -1047,9 +1085,9 @@
             this.groupBox2.Controls.Add(this.label19);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox2.Location = new System.Drawing.Point(7, 500);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox2.Size = new System.Drawing.Size(354, 185);
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
@@ -1059,7 +1097,7 @@
             // 
             this.textBoxTargetLevel.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxTargetLevel.Location = new System.Drawing.Point(4, 114);
-            this.textBoxTargetLevel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxTargetLevel.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxTargetLevel.Name = "textBoxTargetLevel";
             this.textBoxTargetLevel.Size = new System.Drawing.Size(346, 22);
             this.textBoxTargetLevel.TabIndex = 5;
@@ -1080,7 +1118,7 @@
             // 
             this.textBoxDoorY.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxDoorY.Location = new System.Drawing.Point(4, 75);
-            this.textBoxDoorY.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxDoorY.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxDoorY.Name = "textBoxDoorY";
             this.textBoxDoorY.Size = new System.Drawing.Size(346, 22);
             this.textBoxDoorY.TabIndex = 3;
@@ -1101,7 +1139,7 @@
             // 
             this.textBoxDoorX.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxDoorX.Location = new System.Drawing.Point(4, 36);
-            this.textBoxDoorX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxDoorX.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxDoorX.Name = "textBoxDoorX";
             this.textBoxDoorX.Size = new System.Drawing.Size(346, 22);
             this.textBoxDoorX.TabIndex = 1;
@@ -1135,9 +1173,9 @@
             this.groupBox1.Controls.Add(this.label13);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(7, 144);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox1.Size = new System.Drawing.Size(354, 356);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
@@ -1147,7 +1185,7 @@
             // 
             this.numericUpDownWindUses.Dock = System.Windows.Forms.DockStyle.Top;
             this.numericUpDownWindUses.Location = new System.Drawing.Point(4, 259);
-            this.numericUpDownWindUses.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDownWindUses.Margin = new System.Windows.Forms.Padding(4);
             this.numericUpDownWindUses.Name = "numericUpDownWindUses";
             this.numericUpDownWindUses.Size = new System.Drawing.Size(346, 22);
             this.numericUpDownWindUses.TabIndex = 12;
@@ -1168,7 +1206,7 @@
             // 
             this.numericUpDownEarthUses.Dock = System.Windows.Forms.DockStyle.Top;
             this.numericUpDownEarthUses.Location = new System.Drawing.Point(4, 220);
-            this.numericUpDownEarthUses.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDownEarthUses.Margin = new System.Windows.Forms.Padding(4);
             this.numericUpDownEarthUses.Name = "numericUpDownEarthUses";
             this.numericUpDownEarthUses.Size = new System.Drawing.Size(346, 22);
             this.numericUpDownEarthUses.TabIndex = 10;
@@ -1189,7 +1227,7 @@
             // 
             this.numericUpDownIceUses.Dock = System.Windows.Forms.DockStyle.Top;
             this.numericUpDownIceUses.Location = new System.Drawing.Point(4, 181);
-            this.numericUpDownIceUses.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDownIceUses.Margin = new System.Windows.Forms.Padding(4);
             this.numericUpDownIceUses.Name = "numericUpDownIceUses";
             this.numericUpDownIceUses.Size = new System.Drawing.Size(346, 22);
             this.numericUpDownIceUses.TabIndex = 8;
@@ -1210,7 +1248,7 @@
             // 
             this.numericUpDownFireUses.Dock = System.Windows.Forms.DockStyle.Top;
             this.numericUpDownFireUses.Location = new System.Drawing.Point(4, 142);
-            this.numericUpDownFireUses.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDownFireUses.Margin = new System.Windows.Forms.Padding(4);
             this.numericUpDownFireUses.Name = "numericUpDownFireUses";
             this.numericUpDownFireUses.Size = new System.Drawing.Size(346, 22);
             this.numericUpDownFireUses.TabIndex = 6;
@@ -1231,7 +1269,7 @@
             // 
             this.buttonSetSpawn.Dock = System.Windows.Forms.DockStyle.Top;
             this.buttonSetSpawn.Location = new System.Drawing.Point(4, 97);
-            this.buttonSetSpawn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonSetSpawn.Margin = new System.Windows.Forms.Padding(4);
             this.buttonSetSpawn.Name = "buttonSetSpawn";
             this.buttonSetSpawn.Size = new System.Drawing.Size(346, 28);
             this.buttonSetSpawn.TabIndex = 4;
@@ -1242,7 +1280,7 @@
             // 
             this.textBoxPlayerY.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxPlayerY.Location = new System.Drawing.Point(4, 75);
-            this.textBoxPlayerY.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxPlayerY.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxPlayerY.Name = "textBoxPlayerY";
             this.textBoxPlayerY.Size = new System.Drawing.Size(346, 22);
             this.textBoxPlayerY.TabIndex = 3;
@@ -1263,7 +1301,7 @@
             // 
             this.textBoxPlayerX.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxPlayerX.Location = new System.Drawing.Point(4, 36);
-            this.textBoxPlayerX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxPlayerX.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxPlayerX.Name = "textBoxPlayerX";
             this.textBoxPlayerX.Size = new System.Drawing.Size(346, 22);
             this.textBoxPlayerX.TabIndex = 1;
@@ -1284,7 +1322,7 @@
             // 
             this.textBoxSong.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxSong.Location = new System.Drawing.Point(7, 122);
-            this.textBoxSong.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxSong.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxSong.Name = "textBoxSong";
             this.textBoxSong.Size = new System.Drawing.Size(354, 22);
             this.textBoxSong.TabIndex = 6;
@@ -1306,7 +1344,7 @@
             this.checkBoxIlluminated.AutoSize = true;
             this.checkBoxIlluminated.Dock = System.Windows.Forms.DockStyle.Top;
             this.checkBoxIlluminated.Location = new System.Drawing.Point(7, 84);
-            this.checkBoxIlluminated.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBoxIlluminated.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxIlluminated.Name = "checkBoxIlluminated";
             this.checkBoxIlluminated.Size = new System.Drawing.Size(354, 21);
             this.checkBoxIlluminated.TabIndex = 4;
@@ -1318,7 +1356,7 @@
             // 
             this.numericUpDownDifficulty.Dock = System.Windows.Forms.DockStyle.Top;
             this.numericUpDownDifficulty.Location = new System.Drawing.Point(7, 62);
-            this.numericUpDownDifficulty.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDownDifficulty.Margin = new System.Windows.Forms.Padding(4);
             this.numericUpDownDifficulty.Name = "numericUpDownDifficulty";
             this.numericUpDownDifficulty.Size = new System.Drawing.Size(354, 22);
             this.numericUpDownDifficulty.TabIndex = 3;
@@ -1339,7 +1377,7 @@
             // 
             this.textBoxLevelName.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBoxLevelName.Location = new System.Drawing.Point(7, 23);
-            this.textBoxLevelName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxLevelName.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxLevelName.Name = "textBoxLevelName";
             this.textBoxLevelName.Size = new System.Drawing.Size(354, 22);
             this.textBoxLevelName.TabIndex = 1;
@@ -1356,23 +1394,6 @@
             this.label10.TabIndex = 0;
             this.label10.Text = "Nombre:";
             // 
-            // label33
-            // 
-            this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(8, 341);
-            this.label33.Name = "label33";
-            this.label33.Size = new System.Drawing.Size(74, 17);
-            this.label33.TabIndex = 14;
-            this.label33.Text = "Velocidad:";
-            // 
-            // textBoxEnemySpeed
-            // 
-            this.textBoxEnemySpeed.Location = new System.Drawing.Point(7, 361);
-            this.textBoxEnemySpeed.Name = "textBoxEnemySpeed";
-            this.textBoxEnemySpeed.Size = new System.Drawing.Size(357, 22);
-            this.textBoxEnemySpeed.TabIndex = 15;
-            this.textBoxEnemySpeed.TextChanged += new System.EventHandler(this.textBoxEnemySpeed_TextChanged);
-            // 
             // Toolbox
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1382,7 +1403,7 @@
             this.Controls.Add(this.tabControl);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Toolbox";
             this.Text = "Toolbox";
             this.tabControl.ResumeLayout(false);
@@ -1524,6 +1545,8 @@
         private System.Windows.Forms.Label label28;
         private System.Windows.Forms.TextBox textBoxEnemySpeed;
         private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.TextBox textBoxHp;
 
 
     }

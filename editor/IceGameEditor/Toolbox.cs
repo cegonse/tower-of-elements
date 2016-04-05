@@ -667,5 +667,18 @@ namespace IceGameEditor
                 textBoxEnemySpeed.BackColor = Color.Red;
             }
         }
+
+        private void textBoxHp_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                textBoxHp.BackColor = Color.White;
+                _selectedEnemy.hp = int.Parse(textBoxHp.Text);
+            }
+            catch
+            {
+                textBoxHp.BackColor = Color.Red;
+            }
+        }
     }
 }
