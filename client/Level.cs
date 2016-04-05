@@ -247,6 +247,7 @@ public class Level
                         int pfx = (int)jsonEnemies[i]["xf"].n;
                         int pfy = (int)jsonEnemies[i]["yf"].n;
 
+
                         dd.p0 = new Vector2(p0x, p0y);
                         dd.p1 = new Vector2(pfx, pfy);
 
@@ -283,10 +284,10 @@ public class Level
         
 
         LeverDoorData prueba4 = new LeverDoorData();
-        prueba4.p0 = new Vector2(0, -1);
+        prueba4.p0 = new Vector2(0, 0);
         prueba4.p1 = new Vector2(0, 4);
 
-        GameObject go_prueba4 = CreateEnemy(EnemyType.Door, -1, 0, "Blocks/Ice/Ice_1", (BaseEnemyData)prueba4);
+        GameObject go_prueba4 = CreateEnemy(EnemyType.Lever, -2, -3, "Blocks/Wood/WoodBox_1", (BaseEnemyData)prueba4);
         AddEntity(go_prueba4, "lever_door" + "_" + prueba4.p0.x.ToString() + "_" + prueba4.p0.y.ToString());
         */
     }
@@ -297,14 +298,23 @@ public class Level
         AddEntity(go, go.name);
 	}
 
-    public GameObject CreateBlock(BlockType type, int x, int y, string texture, float length = 1)
+    public GameObject CreateBlock(BlockType type, int x, int y, string texture, float length = 1, bool vertical = false)
     {
         GameObject go = new GameObject("_" + x.ToString() + "_" + y.ToString() + "_" + Random.Range(0, 5000).ToString() + "_blockEntity");
         go.transform.position = new Vector3(x, y, 0);
 
         BoxCollider2D boxColl = go.AddComponent<BoxCollider2D>();
-        boxColl.size = new Vector2(length, 1f);
-        boxColl.offset = new Vector2((length / 2) - 0.5f, 0f);
+        if (vertical)
+        {
+            boxColl.size = new Vector2(1f, length);
+            boxColl.offset = new Vector2(0f, (length / 2) - 0.5f);
+        }
+        else
+        {
+            boxColl.size = new Vector2(length, 1f);
+            boxColl.offset = new Vector2((length / 2) - 0.5f, 0f);
+        }
+        
         Rigidbody2D r = go.AddComponent<Rigidbody2D>();
         r.isKinematic = true;
 
@@ -317,12 +327,8 @@ public class Level
         //****************
         //  Add textures
         //****************
-        switch (type)
-        {
-            //------------------------------
-            //Blocks with more than one unit
-            case BlockType.Ice:
 
+            
 
                 if (length == 1) //Create only one texture for the 'go' object
                 {
@@ -347,6 +353,8 @@ public class Level
                         sprite_animator.AddAnimation("STANDING",_levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
                     }
                 }
+            //------------------------------
+            //Blocks with more than one unit
                 else
                 {
                     //Create go's childs with the right texture
@@ -368,7 +376,15 @@ public class Level
                     GameObject go_child = new GameObject("child_0_" + go.name);
                     go_child.transform.parent = go.transform;
                     //Make the child stay at the right position
-                    go_child.transform.position = new Vector3(x + leftPos, y, 0f);
+                    if (vertical)
+                    {
+                        go_child.transform.position = new Vector3(x, y + leftPos, 0f);
+                    }
+                    else
+                    {
+                        go_child.transform.position = new Vector3(x + leftPos, y, 0f);
+                    }
+                    
 
                     //Create the SpriteRenderer and attach an Sprite to it
                     SpriteRenderer rend = go_child.AddComponent<SpriteRenderer>();
@@ -399,7 +415,15 @@ public class Level
                         go_child = new GameObject("child_0_" + go.name);
                         go_child.transform.parent = go.transform;
                         //Make the child stay at the right position
-                        go_child.transform.position = new Vector3(x + leftPos + i, y, 0f);
+                        if (vertical)
+                        {
+                            go_child.transform.position = new Vector3(x, y + leftPos + i, 0f);
+                        }
+                        else
+                        {
+                            go_child.transform.position = new Vector3(x + leftPos + i, y, 0f);
+                        }
+                        
 
                         //Create the SpriteRenderer and attach an Sprite to it
                         rend = go_child.AddComponent<SpriteRenderer>();
@@ -430,7 +454,15 @@ public class Level
                     go_child = new GameObject("child_0_" + go.name);
                     go_child.transform.parent = go.transform;
                     //Make the child stay at the right position
-                    go_child.transform.position = new Vector3(x + leftPos + length - 1, y, 0f);
+                    if (vertical)
+                    {
+                        go_child.transform.position = new Vector3(x, y + leftPos + length -1, 0f);
+                    }
+                    else
+                    {
+                        go_child.transform.position = new Vector3(x + leftPos + length - 1, y, 0f);
+                    }
+                    
                     
                     //Create the SpriteRenderer and attach an Sprite to it
                     rend = go_child.AddComponent<SpriteRenderer>();
@@ -448,27 +480,6 @@ public class Level
                     }
 
                 }
-                break;
-
-            //---------------
-            //One unit blocks
-            case BlockType.Rock:
-            case BlockType.Crate:
-
-                Texture2D texOne = null;
-                texOne = (Texture2D)_levelController.GetGameController().
-                            GetTextureController().GetTexture(texture);
-                float texSizeOne = _levelController.GetGameController().
-                    GetTextureController().GetTextureSize(texture);
-
-                SpriteRenderer rendOne = go.AddComponent<SpriteRenderer>();
-                Sprite sprOne = Sprite.Create(texOne, new Rect(0, 0, texOne.width, texOne.height),
-                    new Vector2(0.5f, 0.5f), texSizeOne);
-                rendOne.sprite = sprOne;
-                rendOne.sortingOrder = 100;
-
-                break;
-        }
 
         return go;
     }
@@ -680,40 +691,62 @@ public class Level
 
             case EnemyType.Lever:
                 Lever lv = go.AddComponent<Lever>();
-                GameObject bl = CreateBlock(BlockType.Crate, x, y, name, 2);
+                lv.SetLevel(this);
+                GameObject bl = CreateBlock(BlockType.Crate, x, y, name, (data.speed > 0 ? data.speed : 1), (data.hp > 0 ? true : false));
                 AddEntity(bl, bl.name);
                 lv.SetDoor(bl);
                 lv.SetEnemyData(data);
                 break;
         }
-		
-		tex = (Texture2D) _levelController.GetGameController().
-				GetTextureController().GetTexture(name);
-        float texSize = _levelController.GetGameController().
-                    GetTextureController().GetTextureSize(name);
-		SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
-		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
-            new Vector2(0.5f, 0.5f), texSize);
-			
-		rend.sprite = spr;
-		rend.sortingOrder = 100;
 
-        SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
-        if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim") != null)
+        if (type == EnemyType.Lever)
         {
-            sprite_animator.AddAnimation("WALKING", _levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim"));
+            tex = (Texture2D)_levelController.GetGameController().
+                GetTextureController().GetTexture("Blocks/Lever/Lever_1_Frame_1");
+            float texSize = _levelController.GetGameController().
+                        GetTextureController().GetTextureSize(name);
+            SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+            Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
+                new Vector2(0.5f, 0.5f), texSize);
+
+            rend.sprite = spr;
+            rend.sortingOrder = 100;
+
+            Lever lv = go.GetComponent<Lever>();
+            lv.SetSprites("Blocks/Lever/Lever_1_Frame_1", "Blocks/Lever/Lever_1_Frame_2");
+
         }
         else
         {
-            Debug.Log("WARNING!! Enemy without an assigned animation: " + name);
-        }
-        if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_2_Anim") != null)
-        {
-            sprite_animator.AddAnimation("TURNING", _levelController.GetGameController().GetTextureController().GetAnimation(name + "_2_Anim"));
-        }
-        else
-        {
-            Debug.Log("WARNING!! Enemy without an assigned animation: " + name);
+            tex = (Texture2D)_levelController.GetGameController().
+                GetTextureController().GetTexture(name);
+            float texSize = _levelController.GetGameController().
+                        GetTextureController().GetTextureSize(name);
+            SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+            Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
+                new Vector2(0.5f, 0.5f), texSize);
+
+            rend.sprite = spr;
+            rend.sortingOrder = 100;
+
+
+            SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
+            if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim") != null)
+            {
+                sprite_animator.AddAnimation("WALKING", _levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim"));
+            }
+            else
+            {
+                Debug.Log("WARNING!! Enemy without an assigned animation: " + name);
+            }
+            if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_2_Anim") != null)
+            {
+                sprite_animator.AddAnimation("TURNING", _levelController.GetGameController().GetTextureController().GetAnimation(name + "_2_Anim"));
+            }
+            else
+            {
+                Debug.Log("WARNING!! Enemy without an assigned animation: " + name);
+            }
         }
 
         return go;

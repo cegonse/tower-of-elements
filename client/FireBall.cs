@@ -8,7 +8,7 @@ public class FireBall : MonoBehaviour
 	private Direction _actionDirection = Direction.None;
 	private Level _activeLevel;
     //Speed
-	private float _speed = 3f;
+	private float _speed = 5f;
 
     //velocity
     private Vector2 _velocity = new Vector2(0f, 0f);
