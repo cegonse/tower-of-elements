@@ -14,7 +14,7 @@ public enum PlayerActions : int
 
 public enum PlayerAnimState : int
 {
-    IddleFront,
+    IdleFront,
     Turning,
     IdleTurned,
     BeginMove,
@@ -44,9 +44,10 @@ public class Player : MonoBehaviour {
     //Wish direction to walk
     private Direction _targetDirection = Direction.None;
     //Real direction to walk
-    private Direction _actionDirection = Direction.None;
-    //Direction on where to make actions
     private Direction _playerDirection = Direction.None;
+    //Direction on where to make actions
+    private Direction _actionDirection = Direction.None;
+    private Direction _actionDirectionSaved = Direction.None;
     
     private State _state = State.Normal;
     private PlayerActions _action = PlayerActions.None;
@@ -65,6 +66,8 @@ public class Player : MonoBehaviour {
     private const float _rayDownCollisionOffset = 0.25f;
     private const float _raySidesCollisionOffset = 0.31f;
 
+    private Ray2D _actionRay;
+
     //Jumping
 
     private Vector2 _jumpPoint0, _jumpPoint1, _jumpPoint2;
@@ -80,7 +83,18 @@ public class Player : MonoBehaviour {
     private GameController _gameController;
 
     //AnimState
-    private PlayerAnimState _animState = PlayerAnimState.IddleFront;
+    private PlayerAnimState _animState = PlayerAnimState.IdleFront;
+    private bool _changeAnimation = true;
+    private bool _canMove = false;
+    private bool _isDying = false;
+    private bool _beginFalling = true;
+    private bool _falling = false;
+    private bool _actionHappen = false;
+    private GameObject _actionObjectAux;
+    private Direction _animationDirection = Direction.None;
+    private PlayerAnimState _animStateAfterJump = PlayerAnimState.BeginMove;
+
+    private bool _beginning = true;
     
     public void SetActiveLevel(Level lv)
     {
@@ -114,6 +128,8 @@ public class Player : MonoBehaviour {
 
 		_cameraOffset = new Vector3(0,0,-1); 
 		_cameraVelocity = new Vector3();
+
+        _animState = PlayerAnimState.IdleFront;
 	}
 	
 	// Update is called once per frame
@@ -121,13 +137,18 @@ public class Player : MonoBehaviour {
 
         if (!_activeLevel.GetLevelController().GetGameController().IsGamePaused())
         {
-            SetPreviousPlayerDirection();
+            if (!_isDying)
+            {
+                SetPreviousPlayerDirection();
 
-            CheckMovingCollisions();
+                CheckMovingCollisions();
 
-            AdjustVelocityByParams();
+                AdjustVelocityByParams();
 
-            MovingPlayer();
+                MovingPlayer();
+            }
+
+            AdjustCamera();
 
             AnimatingPlayer();
         }
@@ -275,27 +296,29 @@ public class Player : MonoBehaviour {
         switch(_state)
         {
             case State.Grounded:
-            
-                _velocity.y = 0;
-                _accSpeed = _minAccSpeed;
-                switch (_playerDirection)
-                {
-                    case Direction.Right:
-    
-                        _velocity.x = _speed;
-    
-                        break;
-                    case Direction.Left:
-    
-                        _velocity.x = -_speed;
-    
-                        break;
-    
-                    default:
-                        _velocity.x = 0;
-                        break;
-                }
-            
+                //if (_canMove)
+                //{
+                    _velocity.y = 0;
+                    _accSpeed = _minAccSpeed;
+                    switch (_playerDirection)
+                    {
+                        case Direction.Right:
+
+                            _velocity.x = _speed;
+
+                            break;
+                        case Direction.Left:
+
+                            _velocity.x = -_speed;
+
+                            break;
+
+                        default:
+                            _velocity.x = 0;
+                            break;
+                    }
+                //}
+
                 break;
             
             case State.Falling:
@@ -316,11 +339,29 @@ public class Player : MonoBehaviour {
         switch(_state)
         {
             case State.Grounded:
-                p.x += Time.deltaTime * _velocity.x;
+                if (_canMove)
+                {
+                    p.x += Time.deltaTime * _velocity.x;
+                }
                 
+                if (_falling)
+                {
+                    _falling = false;
+                    //Animation
+                    _animState = _animStateAfterJump;
+                    _changeAnimation = true;
+                }
+
                 break;
             
             case State.Jumping:
+
+                if (_jumpTimeActive == 0f)
+                {
+                    //Animation
+                    _animState = PlayerAnimState.Jump;
+                    _changeAnimation = true;
+                }
             
                 if(_jumpTimeActive < 1f)
                 {
@@ -329,30 +370,47 @@ public class Player : MonoBehaviour {
                         _jumpTimeActive * _jumpTimeActive * _jumpPoint2;
     
                     _jumpTimeActive += Time.deltaTime /_jumpTime;
+
                 }
                 else
                 {
                     _state = State.Normal;
                     //Ajustar posicion del jugador
                     p = _jumpPoint2; //Por algun motivo no se ejecuta bien
+
+                    //Animation
+                    _animState = _animStateAfterJump;
+                    _changeAnimation = true;
                 }
                 
                 break;
             
             case State.Falling:
                 p.y += Time.deltaTime * _velocity.y * _accSpeed;
-                
+
+                if (_beginFalling)
+                {
+                    //Animation
+                    _animState = PlayerAnimState.Jump;
+                    _changeAnimation = true;
+                    _beginFalling = false;
+                    _falling = true;
+                }
                 break;
         }
 		
         transform.position = p;
-        //_gameController.GetCamera().transform.position = p;
 		
-		Vector3 camPos = _gameController.GetCamera().transform.position;
-		camPos = Vector3.SmoothDamp(camPos, p, ref _cameraVelocity, _cameraDampingTime);
 		
-		_gameController.GetCamera().transform.position = camPos;
-		_gameController.GetCamera().transform.position += _cameraOffset;
+    }
+
+    public void AdjustCamera()
+    {
+        Vector3 camPos = _gameController.GetCamera().transform.position;
+        camPos = Vector3.SmoothDamp(camPos, transform.position, ref _cameraVelocity, _cameraDampingTime);
+
+        _gameController.GetCamera().transform.position = camPos;
+        _gameController.GetCamera().transform.position += _cameraOffset;
     }
     
     //Adjust the jumping values in funtion of the desired player's direction (_targetDirection)
@@ -437,239 +495,413 @@ public class Player : MonoBehaviour {
     
     public void DoAction(PlayerActions type)
     {
-        _action = type;
-        
-        switch (type)
+        if (!_isDying && _animState != PlayerAnimState.Action)
         {
-            case PlayerActions.Ice:
-                if (_state == State.Grounded && _velocity.magnitude == 0)
-                {
-                    Ray2D ray = new Ray2D();
-
-                    if (_actionDirection == Direction.Left)
-                    {
-                        ray.origin = transform.position + new Vector3(-0.31f, 0f, 0f);
-                        ray.direction = Vector2.left;
-                    }
-                    else if(_actionDirection == Direction.Right)
-                    {
-                        ray.origin = transform.position + new Vector3(0.31f, 0f, 0f);
-                        ray.direction = Vector2.right;
-                    }
-                    
-                    if ((_actionDirection == Direction.Right || _actionDirection == Direction.Left) && !Physics2D.Raycast(ray.origin, ray.direction, 1.0f))
-                    {
-                        float ent_pointX = Mathf.Round(transform.position.x);
-                        GameObject go_block = null;
-                        
-                        if (true) //_ice > 0)
-                        {
-                            if (_actionDirection == Direction.Right)
-                            {
-                                go_block = _activeLevel.CreateBlock(BlockType.Ice, (int)ent_pointX+1, 
-                                    (int)transform.position.y, "Blocks/Ice/Ice_1");
-                            }
-                            else
-                            {
-                                go_block = _activeLevel.CreateBlock(BlockType.Ice, (int)ent_pointX-1, 
-                                    (int)transform.position.y, "Blocks/Ice/Ice_1");
-                            }
-                            
-                            _activeLevel.AddEntity(go_block, go_block.name);
-
-                            SetUsesOfElem(type, GetUsesOfElem(type) - 1);
-                        }
-                    }
-                }
-                break;
-                
-            case PlayerActions.Wind:
+            _action = type;
             
-                    if(_state == State.Grounded && _velocity.magnitude == 0)
+            Debug.Log("He entrado en DoAction");
+            Debug.Log(_velocity.x);
+            Debug.Log(_velocity.x);
+
+            _actionHappen = false;
+            _actionDirectionSaved = _actionDirection;
+
+            if (_state == State.Grounded && _velocity.magnitude == 0)
+            {
+
+                _actionRay = new Ray2D();
+                if (_actionDirectionSaved == Direction.Left)
+                {
+                    _actionRay.origin = new Vector3(Mathf.Round(transform.position.x - 1), Mathf.Round(transform.position.y), 0f); //transform.position + new Vector3(-0.31f, 0f, 0f);
+                    _actionRay.direction = Vector2.left;
+                }
+                else if (_actionDirectionSaved == Direction.Right)
+                {
+                    _actionRay.origin = new Vector3(Mathf.Round(transform.position.x + 1), Mathf.Round(transform.position.y), 0f);//transform.position + new Vector3(0.31f, 0f, 0f);
+                    _actionRay.direction = Vector2.right;
+                }
+
+
+                if ((_actionDirectionSaved == Direction.Right || _actionDirectionSaved == Direction.Left))
+                {
+                    switch (_action)
                     {
-                        
-                        Ray2D ray = new Ray2D();
-
-                        if (_actionDirection == Direction.Left)
-                        {
-                            ray.origin = transform.position + new Vector3(-0.31f, 0f, 0f);
-                            ray.direction = Vector2.left;
-                        }
-                        else if(_actionDirection == Direction.Right)
-                        {
-                            ray.origin = transform.position + new Vector3(0.31f, 0f, 0f);
-                            ray.direction = Vector2.right;
-                        }
-                        
-                        
-                        if(true) //_wind > 0)
-                        {
-                            if (_actionDirection == Direction.Right || _actionDirection == Direction.Left)
+                        case PlayerActions.Ice:
+                            if (!Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f))
                             {
-                                RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, 0.4f);
-                                
-                                //Check if there is something on the player's Left
-                                if (hit.collider != null)
+                                if (true) //_ice > 0)
                                 {
-                                    GameObject goHit = hit.collider.gameObject;
-                                    
-                                    //Check if it is a Block
-                                    Block goHitBlock = goHit.GetComponent<Block>();
-                                    if (goHitBlock != null && goHitBlock.IsMovable())
-                                    {
-                                        goHitBlock.Kick(_actionDirection);
-                                        SetUsesOfElem(type, GetUsesOfElem(type) - 1);
-                                    }
-                                    //Check if it is a Lever
-                                    
-                                    Lever goHitLever = goHit.GetComponent<Lever>();
-                                    if(goHitLever != null)
-                                    {
-                                        goHitLever.Move();
-                                    }
-                                    
-
+                                    _actionHappen = true;
                                 }
                             }
-                        }
+
+                            break;
+                        case PlayerActions.Wind:
+
+                            if (true) //_wind > 0)
+                            {
+                                if (_actionDirectionSaved == Direction.Right || _actionDirectionSaved == Direction.Left)
+                                {
+                                    RaycastHit2D hit = Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f);
+
+                                    //Check if there is something on the player's Left or Right
+                                    if (hit.collider != null)
+                                    {
+                                        _actionObjectAux = hit.collider.gameObject;
+
+                                        //Check if it is a Block
+                                        Block goHitBlock = _actionObjectAux.GetComponent<Block>();
+                                        if (goHitBlock != null && goHitBlock.IsMovable())
+                                        {
+                                            _actionHappen = true;
+                                        }
+                                        //Check if it is a Lever
+                                        Lever goHitLever = _actionObjectAux.GetComponent<Lever>();
+                                        if (goHitLever != null)
+                                        {
+                                            _actionHappen = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        _actionObjectAux = null;
+                                    }
+                                }
+                            }
+
+                            break;
+
+                        case PlayerActions.Fire:
+
+                            if (true) //_fire > 0)
+                            {
+                                _actionHappen = true;
+                            }
+
+                            break;
+
+                        case PlayerActions.Earth:
+
+                            if (!Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f))
+                            {
+                                if (true) //_earth > 0)
+                                {
+                                    _actionHappen = true;
+                                }
+                            }
+
+                            break;
                     }
-            
+
+                }
+            }
+
+            if (_actionHappen)
+            {
+                //Animation
+                _animState = PlayerAnimState.Action;
+                _changeAnimation = true;
+
+                //AnimationObject
+                GameObject go = new GameObject("AnimationObject_" + type.ToString());
+                go.transform.position = _actionRay.origin;
+
+                AnimationObject animObj = go.AddComponent<AnimationObject>();
+                animObj.SetParams(_activeLevel, "Actions/" + type.ToString() + "Action/" + type.ToString() + "Action_1_Anim");
+            }
+        }
+    }
+
+    private void MakeTheActionHappen()
+    {
+        GameObject goToPut = null;
+
+        switch (_action)
+        {
+            case PlayerActions.Ice:
+                 goToPut = _activeLevel.CreateBlock(BlockType.Ice, (int)_actionRay.origin.x,
+                                            (int)transform.position.y, "Blocks/Ice/Ice_1");
+
+                 _activeLevel.AddEntity(goToPut, goToPut.name);
+                 SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
+                break;
+
+            case PlayerActions.Wind:
+
+                if (_actionObjectAux)
+                {
+                    //Check if it is a Block
+                    Block goHitBlock = _actionObjectAux.GetComponent<Block>();
+                    if (goHitBlock != null && goHitBlock.IsMovable())
+                    {
+                        goHitBlock.Kick(_actionDirectionSaved);
+                        SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
+
+                    }
+                    //Check if it is a Lever
+                    Lever goHitLever = _actionObjectAux.GetComponent<Lever>();
+                    if (goHitLever != null)
+                    {
+                        goHitLever.ChangeLeverDirection();
+                    }
+
+                }
+                
                 break;
 
             case PlayerActions.Fire:
 
-                if (_state == State.Grounded && _velocity.magnitude == 0)
+                if (_actionDirectionSaved == Direction.Right)
                 {
-                    
-                    if ((_actionDirection == Direction.Right || _actionDirection == Direction.Left))
-                    {
-                        float ent_pointX = Mathf.Round(transform.position.x);
-                        GameObject go_fire = null;
-                        
-                        if (true) //_fire > 0)
-                        {
-                            if (_actionDirection == Direction.Right)
-                            {
-                                go_fire = _activeLevel.CreateFireBall(transform.position.x+0.3f, transform.position.y, _actionDirection);
-                            }
-                            else
-                            {
-                                go_fire = _activeLevel.CreateFireBall(transform.position.x - 0.3f, transform.position.y, _actionDirection);
-                            }
-
-                            _activeLevel.AddEntity(go_fire, go_fire.name);
-
-                            SetUsesOfElem(type, GetUsesOfElem(type) - 1);
-                        }
-                    }
+                    goToPut = _activeLevel.CreateFireBall(transform.position.x + 0.3f, transform.position.y, _actionDirectionSaved);
                 }
+                else
+                {
+                    goToPut = _activeLevel.CreateFireBall(transform.position.x - 0.3f, transform.position.y, _actionDirectionSaved);
+                    goToPut.transform.localScale = new Vector3(-1f, 1f, 1f);
+                }
+
+                _activeLevel.AddEntity(goToPut, goToPut.name);
+
+                SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
+
                 break;
 
             case PlayerActions.Earth:
-                if (_state == State.Grounded && _velocity.magnitude == 0)
-                {
-                    Ray2D ray = new Ray2D();
 
-                    if (_actionDirection == Direction.Left)
-                    {
-                        ray.origin = transform.position + new Vector3(-0.31f, 0f, 0f);
-                        ray.direction = Vector2.left;
-                    }
-                    else if (_actionDirection == Direction.Right)
-                    {
-                        ray.origin = transform.position + new Vector3(0.31f, 0f, 0f);
-                        ray.direction = Vector2.right;
-                    }
+                int rockIndex = Random.Range(1, 4);
 
-                    if ((_actionDirection == Direction.Right || _actionDirection == Direction.Left) && !Physics2D.Raycast(ray.origin, ray.direction, 1.0f))
-                    {
-                        //float decpart = transform.position.x - Mathf.Abs(Mathf.Floor(transform.position.x));
-                        float ent_pointX = Mathf.Round(transform.position.x);
-                        GameObject go_block = null;
+                goToPut = _activeLevel.CreateBlock(BlockType.Rock, (int)_actionRay.origin.x,
+                                            (int)transform.position.y, "Blocks/Stone/Stone_" + rockIndex.ToString());
 
-                        if (true) //_earth > 0)
-                        {
-							int rockIndex = Random.Range(1, 4);
-						
-                            if (_actionDirection == Direction.Right)
-                            {
-                                go_block = _activeLevel.CreateBlock(BlockType.Crate, (int)ent_pointX + 1,
-                                    (int)transform.position.y, "Blocks/Stone/Stone_" + rockIndex.ToString());
-                            }
-                            else
-                            {
-                                go_block = _activeLevel.CreateBlock(BlockType.Crate, (int)ent_pointX - 1,
-                                    (int)transform.position.y, "Blocks/Stone/Stone_" + rockIndex.ToString());
-                            }
+                _activeLevel.AddEntity(goToPut, goToPut.name);
 
-                            _activeLevel.AddEntity(go_block, go_block.name);
+                SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
 
-                            SetUsesOfElem(type, GetUsesOfElem(type) - 1);
-                        }
-                    }
-                }
                 break;
+
         }
-        
         _action = PlayerActions.None;
     }
 
     public void AnimatingPlayer()
     {
-        SpriteAnimator sprite_animator = GetComponent<SpriteAnimator>();
+        SpriteAnimator sprite_animator = GetComponentInChildren<SpriteAnimator>();
+
+        switch (_animationDirection)
+        {
+            case Direction.Right:
+
+                transform.GetChild(0).localScale = new Vector3(1f, 1f, 1f);
+
+                break;
+            case Direction.Left:
+
+                transform.GetChild(0).localScale = new Vector3(-1f, 1f, 1f);
+
+                break;
+        }
+
+        
         switch (_animState)
         {
+            //ACTION
             case PlayerAnimState.Action:
-                
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("ACTION");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
+                if (sprite_animator.GetAnimationIndex() == 2)
+                {
+                    MakeTheActionHappen();
+                }
+                if (sprite_animator.IsTheLastFrame())
+                {
+                    _animState = _animStateAfterJump;
+                    _changeAnimation = true;
+                    _animationDirection = _actionDirection;
+                }
                 break;
-
+            //BEGIN_MOVE
             case PlayerAnimState.BeginMove:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("BEGIN_MOVE");
+                    _changeAnimation = false;
+                    _canMove = true;
+                }
+                if (sprite_animator.IsTheLastFrame())
+                {
+                    _animState = PlayerAnimState.Move;
+                    _changeAnimation = true;
+                }
                 break;
-
+            //DEATH
             case PlayerAnimState.Death:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("DEATH");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
+                if (sprite_animator.IsTheLastFrame())
+                {
+                    OnPlayerDestroyed();
+                }
                 break;
-
+            //END_MOVE
             case PlayerAnimState.EndMove:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("END_MOVE");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
+                if (sprite_animator.IsTheLastFrame())
+                {
+                    _animState = PlayerAnimState.IdleTurned;
+                    _changeAnimation = true;
+                }
                 break;
-
-            case PlayerAnimState.IddleFront:
-
+            //IDLE_FRONT
+            case PlayerAnimState.IdleFront:
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("IDLE_FRONT");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
                 break;
-
+            //IDLE_TURNED
             case PlayerAnimState.IdleTurned:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("IDLE_TURNED");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
                 break;
-
+            //JUMP
             case PlayerAnimState.Jump:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("JUMP");
+                    _changeAnimation = false;
+                    _canMove = true;
+                }
                 break;
-
+            //MOVE
             case PlayerAnimState.Move:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("MOVE");
+                    _changeAnimation = false;
+                    _canMove = true;
+                }
                 break;
-
+            //TURNING
             case PlayerAnimState.Turning:
-
+                if (_changeAnimation)
+                {
+                    sprite_animator.SetActiveAnimation("TURNING");
+                    _changeAnimation = false;
+                    _canMove = false;
+                }
+                
+                if (sprite_animator.IsTheLastFrame())
+                {
+                    _animState = PlayerAnimState.BeginMove;
+                    _changeAnimation = true;
+                }
                 break;
         }
     }
 
     public void SetTargetDirection(Direction tg_dir)
     {
-        _targetDirection = tg_dir;
-        
-        if (_targetDirection != Direction.None)
-            _actionDirection = _targetDirection;
+        if (!_isDying)
+        {
+            _targetDirection = tg_dir;
+
+            if (_targetDirection != Direction.None)
+            {
+                _actionDirection = _targetDirection;
+                if (_animState != PlayerAnimState.Action)
+                {
+                    //ANIMATION
+                    if ((_animState == PlayerAnimState.IdleTurned || _animState == PlayerAnimState.BeginMove || _animState == PlayerAnimState.EndMove) && _animationDirection == _targetDirection)
+                    {
+                        _animState = PlayerAnimState.BeginMove;
+                        _changeAnimation = true;
+
+                    }
+                    else if (_animState != PlayerAnimState.Jump)
+                    {
+                        _animState = PlayerAnimState.Turning;
+                        _changeAnimation = true;
+                    }
+
+                    _animationDirection = _targetDirection;
+                    _animStateAfterJump = PlayerAnimState.BeginMove;
+                }
+                else
+                {
+                    _animStateAfterJump = PlayerAnimState.BeginMove;
+                }
+                
+                
+            }
+            else
+            {
+                if (!_beginning)
+                {
+                    if (_animState == PlayerAnimState.Action)
+                    {
+                        _animStateAfterJump = PlayerAnimState.IdleTurned;
+                        //_animationDirection = _actionDirection;
+                    }
+                    else if (_animState == PlayerAnimState.Jump)
+                    {
+                        _animStateAfterJump = PlayerAnimState.IdleTurned;
+                    }
+                    else
+                    {
+                        _animState = PlayerAnimState.EndMove;
+                        _animStateAfterJump = PlayerAnimState.IdleTurned;
+                        _changeAnimation = true;
+                    }
+                }
+                else
+                {
+                    _beginning = false;
+                }
+                
+            }
+        }
+
     }
     
     public Direction GetDirection ()
     {
         return _playerDirection;
     }
-    
-    
+
+    public void DestroyPlayer()
+    {
+        if (!_isDying)
+        {
+            _animState = PlayerAnimState.Death;
+            _changeAnimation = true;
+            _isDying = true;
+        }
+    }
+
+    public void OnPlayerDestroyed()
+    {
+        GameObject.Destroy(gameObject);
+        //_level.RemoveEntity("player"); TO DO!
+    }
     
 }

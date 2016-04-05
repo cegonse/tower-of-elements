@@ -159,6 +159,10 @@ namespace IceGameEditor
             {
                 _main.OnRoamerEnemySelected();
             }
+            else if (b.Text.Contains("Palanca"))
+            {
+                _main.OnLeverEnemySelected();
+            }
         }
 
         private void buttonBlockLightColor_Click(object sender, EventArgs e)
@@ -350,6 +354,7 @@ namespace IceGameEditor
                 textBoxEnemyEndX.Text = _selectedEnemy.pf.x.ToString();
                 textBoxEnemyEndY.Text = _selectedEnemy.p0.y.ToString();
                 comboBoxEnemyDirection.SelectedIndex = _selectedEnemy.direction;
+                textBoxEnemySpeed.Text = _selectedEnemy.speed.ToString();
             }
         }
 

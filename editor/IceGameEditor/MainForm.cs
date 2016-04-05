@@ -26,7 +26,8 @@ public enum CurrentTool
     EnemyDelete,
     FlyerEnemy,
     WalkerEnemy,
-    RoamerEnemy
+    RoamerEnemy,
+    LeverEnemy
 }
 
 namespace IceGameEditor
@@ -69,6 +70,7 @@ namespace IceGameEditor
         Bitmap _walkerTex = null;
         Bitmap _flyerTex = null;
         Bitmap _roamerTex = null;
+        Bitmap _leverTex = null;
 
         EditorSettings _settings;
 
@@ -158,6 +160,10 @@ namespace IceGameEditor
                 RebuildAnimationList();
                 RebuildLevelList();
 
+                File.WriteAllText(Application.StartupPath + Path.DirectorySeparatorChar + "data" +
+                 Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "rcpath.txt",
+                 _settings.ResourcesPath);
+
                 LoadBlockTextures();
                 LoadAdditionalTextures();
             }
@@ -182,7 +188,7 @@ namespace IceGameEditor
 
                     if (!string.IsNullOrEmpty(fileList[i]))
                     {
-                        fileList[i] = fileList[i].Replace(path.Replace("Textures", ""), "");
+                        fileList[i] = fileList[i].Replace(path.Replace("Levels", ""), "");
                         string[] ffn = fileList[i].Split(Path.DirectorySeparatorChar);
 
                         for (int j = 1; j < ffn.Length; j++)
@@ -211,6 +217,13 @@ namespace IceGameEditor
             if (fileList != null)
             {
                 JSONObject jsonTexList = new JSONObject(JSONObject.Type.OBJECT);
+                JSONObject jsonOverwrite = null;
+                string overwritePath = _settings.ResourcesPath + Path.DirectorySeparatorChar + "overwrite_texture_list.txt";
+
+                if (File.Exists(overwritePath))
+                {
+                    jsonOverwrite = new JSONObject(File.ReadAllText(overwritePath));
+                }
 
                 for (int i = 0; i < fileList.Count; i++)
                 {
@@ -228,13 +241,17 @@ namespace IceGameEditor
 
                     if (!string.IsNullOrEmpty(fileList[i]))
                     {
-                        fileList[i] = fileList[i].Replace(path.Replace("Textures",""), "");
+                        fileList[i] = fileList[i].Replace(path.Replace("Textures" + Path.DirectorySeparatorChar,""), "");
+
                         string[] ffn = fileList[i].Split(Path.DirectorySeparatorChar);
 
                         for (int j = 0; j < ffn.Length; j++)
                         {
-                            fn += ffn[j];
-                            fn += Path.DirectorySeparatorChar;
+                            if (!string.IsNullOrEmpty(ffn[j]))
+                            {
+                                fn += ffn[j];
+                                fn += Path.DirectorySeparatorChar;
+                            }
                         }
 
                         // Paths are always separated by / inside the game files
@@ -243,6 +260,20 @@ namespace IceGameEditor
 
                         JSONObject jstex = new JSONObject(JSONObject.Type.OBJECT);
                         jstex.AddField("id", fn);
+
+                        // Check the overwrite list to see if
+                        // the sprite uses a different size.
+                        if (jsonOverwrite != null)
+                        {
+                            for (int j = 0; j < jsonOverwrite.list.Count; j++)
+                            {
+                                if (jsonOverwrite.list[j]["id"].str.Contains(fn))
+                                {
+                                    width = (int)jsonOverwrite.list[j]["size"].n;
+                                }
+                            }
+                        }
+
                         jstex.AddField("size", width);
 
                         jsonTexList.Add(jstex);
@@ -305,6 +336,7 @@ namespace IceGameEditor
                 _walkerTex = new Bitmap("data" + Path.DirectorySeparatorChar + "enemywalker.png");
                 _flyerTex = new Bitmap("data" + Path.DirectorySeparatorChar + "enemyflyer.png");
                 _roamerTex = new Bitmap("data" + Path.DirectorySeparatorChar + "enemyroamer.png");
+                _leverTex = new Bitmap("data" + Path.DirectorySeparatorChar + "lever.png");
             }
             catch
             {
@@ -321,6 +353,7 @@ namespace IceGameEditor
             _toolbox.AddEnemyTool("Volador", _flyerTex);
             _toolbox.AddEnemyTool("Caminador", _walkerTex);
             _toolbox.AddEnemyTool("Roamer", _roamerTex);
+            _toolbox.AddEnemyTool("Palanca", _leverTex);
             _toolbox.AddEnemyTool("Eliminar", removeTex);
             _toolbox.AddEnemyTool("Seleccionar", selectTex);
         }
@@ -348,7 +381,9 @@ namespace IceGameEditor
 
                 for (int i = 0; i < texList.Count; i++)
                 {
-                    string path = _settings.ResourcesPath + Path.DirectorySeparatorChar + texList[i]["id"].str + ".png";
+                    string path = _settings.ResourcesPath + Path.DirectorySeparatorChar + "Textures" + 
+                        Path.DirectorySeparatorChar + texList[i]["id"].str + ".png";
+
                     Bitmap bmp = null;
 
                     if (path.Contains("Blocks") || path.Contains("Enemies"))
@@ -490,6 +525,11 @@ namespace IceGameEditor
         {
             _designer.OnRoamerEnemySelected();
         }
+
+        public void OnLeverEnemySelected()
+        {
+            _designer.OnLeverEnemySelected();
+        }
         
         public void PlaceBlock(Vector2 p)
         {
@@ -524,10 +564,10 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Textures/Enemies/EnemyFlyer/EnemyFlyer_1";
+            d.texture = "Enemies/EnemyFlyer_1/EnemyFlyer_1";
             d.type = EnemyType.Flyer;
 
-            _activeLevel.SetEnemy(p, (EnemyData)d);
+            _activeLevel.SetEnemy(p, d);
         }
 
         public void PlaceWalkerEnemy(Vector2 p)
@@ -539,10 +579,10 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Textures/Enemies/EnemyWalker/EnemyWalker_1";
+            d.texture = "Enemies/EnemyWalker/EnemyWalker_1";
             d.type = EnemyType.Walker;
 
-            _activeLevel.SetEnemy(p, (EnemyData)d);
+            _activeLevel.SetEnemy(p, d);
         }
 
         public void PlaceRoamerEnemy(Vector2 p)
@@ -554,10 +594,25 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Textures/Enemies/EnemyRoamer/EnemyRoamer_1";
+            d.texture = "Enemies/EnemyRoamer/EnemyRoamer_1";
             d.type = EnemyType.Roamer;
 
-            _activeLevel.SetEnemy(p, (EnemyData)d);
+            _activeLevel.SetEnemy(p, d);
+        }
+
+        public void PlaceLeverEnemy(Vector2 p)
+        {
+            EnemyData d = new EnemyData();
+
+            d.hp = 1;
+            d.speed = 3f;
+            d.spawn = p;
+            d.p0 = p;
+            d.pf = p;
+            d.texture = "Blocks/Lever/Lever_1_Background_1";
+            d.type = EnemyType.Lever;
+
+            _activeLevel.SetEnemy(p, d);
         }
 
         public Bitmap GetFlyerEnemyTexture()
@@ -609,29 +664,37 @@ namespace IceGameEditor
 
         private void cargarNivelToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            openFileDialog.ShowDialog();
-            string lvPath = openFileDialog.FileName;
-            string lvData = File.ReadAllText(lvPath);
+            try
+            {
+                DialogResult dr = openFileDialog.ShowDialog();
 
-            _activeLevel = new Level();
-            _activeLevel.LoadLevel(lvData);
-            _levels.Add(_activeLevel);
-            _layerList.Clear();
-            UpdateLayerList();
+                if (dr == DialogResult.OK)
+                {
+                    string lvPath = openFileDialog.FileName;
+                    string lvData = File.ReadAllText(lvPath);
 
-            _designer = new Designer(this, _designers.Count);
-            _designers.Add(_designer);
+                    _activeLevel = new Level();
+                    _activeLevel.LoadLevel(lvData);
+                    _levels.Add(_activeLevel);
+                    _layerList.Clear();
+                    UpdateLayerList();
 
-            _designer.Show(dockPanel, DockState.Document);
-            _designer.SetTextures(_blocks);
-            _designer.SetSpawnTexture(_spawnTexture);
-            _designer.SetDoorTexture(_doorTexture);
+                    _designer = new Designer(this, _designers.Count);
+                    _designers.Add(_designer);
 
-            _designer.SetBlockTextures(_activeLevel.GetBlockList());
-            _designer.Text = _activeLevel.GetPublicName();
+                    _designer.Show(dockPanel, DockState.Document);
+                    _designer.SetTextures(_blocks);
+                    _designer.SetSpawnTexture(_spawnTexture);
+                    _designer.SetDoorTexture(_doorTexture);
 
-            _toolbox.SetActiveLevel(_activeLevel);
-            _toolbox.UpdateLevelData();
+                    _designer.SetBlockTextures(_activeLevel.GetBlockList());
+                    _designer.Text = _activeLevel.GetPublicName();
+
+                    _toolbox.SetActiveLevel(_activeLevel);
+                    _toolbox.UpdateLevelData();
+                }
+            }
+            catch { }
         }
 
         private void menuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)

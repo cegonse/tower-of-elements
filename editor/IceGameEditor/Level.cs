@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 public enum BlockType : int
 {
@@ -44,6 +45,7 @@ public struct PlayerData
 public enum EnemyType
 {
     Flyer = 0,
+    Lever,
     Walker,
     Roamer
 }
@@ -215,7 +217,7 @@ public class Level
             jsonEnemy.AddField("spawny", ene.Value.spawn.y);
             jsonEnemy.AddField("texture", ene.Value.texture);
 
-            if (ene.Value.type == EnemyType.Flyer)
+            if (ene.Value.type == EnemyType.Flyer || ene.Value.type == EnemyType.Walker)
             {
                 EnemyData fe = ene.Value;
 
@@ -235,6 +237,37 @@ public class Level
         }
 
         json.AddField("enemies", jsonEnemies);
+
+        // Bounds for the camera zooming
+        int minX = 0, minY = 0, maxX = 0, maxY = 0;
+        int tx, ty;
+
+        foreach (KeyValuePair<Vector2,BlockData> bl in _blocks)
+        {
+            tx = bl.Key.x;
+            ty = bl.Key.y;
+
+            if (tx < minX && ty < minY)
+            {
+                minX = tx;
+                minY = ty;
+            }
+
+            if (tx >= maxX && ty >= maxY)
+            {
+                maxX = tx;
+                maxY = ty;
+            }
+        }
+
+        JSONObject jsonBounds = new JSONObject(JSONObject.Type.OBJECT);
+
+        jsonBounds.AddField("minx", minX);
+        jsonBounds.AddField("miny", minY);
+        jsonBounds.AddField("maxx", maxX);
+        jsonBounds.AddField("maxy", maxY);
+
+        json.AddField("bounds", jsonBounds);
 
         return json.Print(true);
     }
@@ -408,18 +441,22 @@ public class Level
                     {
                         EnemyData fd = new EnemyData();
 
-                        fd.speed = jsonEnemies[i]["speed"].n;
-                        fd.hp = (int)jsonEnemies[i]["hp"].n;
-                        fd.texture = jsonEnemies[i]["texture"].str;
-                        fd.type = t;
+                        try
+                        {
+                            fd.speed = jsonEnemies[i]["speed"].n;
+                            fd.hp = (int)jsonEnemies[i]["hp"].n;
+                            fd.texture = jsonEnemies[i]["texture"].str;
+                            fd.type = t;
 
-                        fd.spawn.x = (int)jsonEnemies[i]["spawnx"].n;
-                        fd.spawn.y = (int)jsonEnemies[i]["spawny"].n;
+                            fd.spawn.x = (int)jsonEnemies[i]["spawnx"].n;
+                            fd.spawn.y = (int)jsonEnemies[i]["spawny"].n;
 
-                        fd.p0.x = (int)jsonEnemies[i]["x0"].n;
-                        fd.p0.y = (int)jsonEnemies[i]["y0"].n;
-                        fd.pf.x = (int)jsonEnemies[i]["xf"].n;
-                        fd.pf.y = (int)jsonEnemies[i]["yf"].n;
+                            fd.p0.x = (int)jsonEnemies[i]["x0"].n;
+                            fd.p0.y = (int)jsonEnemies[i]["y0"].n;
+                            fd.pf.x = (int)jsonEnemies[i]["xf"].n;
+                            fd.pf.y = (int)jsonEnemies[i]["yf"].n;
+                        }
+                        catch {}
 
                         _enemies.Add(fd.spawn, fd);
                     }
@@ -427,18 +464,22 @@ public class Level
                     {
                         EnemyData wd = new EnemyData();
 
-                        wd.speed = jsonEnemies[i]["speed"].n;
-                        wd.hp = (int)jsonEnemies[i]["hp"].n;
-                        wd.texture = jsonEnemies[i]["texture"].str;
-                        wd.type = t;
+                        try
+                        {
+                            wd.speed = jsonEnemies[i]["speed"].n;
+                            wd.hp = (int)jsonEnemies[i]["hp"].n;
+                            wd.texture = jsonEnemies[i]["texture"].str;
+                            wd.type = t;
 
-                        wd.spawn.x = (int)jsonEnemies[i]["spawnx"].n;
-                        wd.spawn.y = (int)jsonEnemies[i]["spawny"].n;
+                            wd.spawn.x = (int)jsonEnemies[i]["spawnx"].n;
+                            wd.spawn.y = (int)jsonEnemies[i]["spawny"].n;
 
-                        wd.p0.x = (int)jsonEnemies[i]["x0"].n;
-                        wd.p0.y = (int)jsonEnemies[i]["y0"].n;
-                        wd.pf.x = (int)jsonEnemies[i]["xf"].n;
-                        wd.pf.y = (int)jsonEnemies[i]["yf"].n;
+                            wd.p0.x = (int)jsonEnemies[i]["x0"].n;
+                            wd.p0.y = (int)jsonEnemies[i]["y0"].n;
+                            wd.pf.x = (int)jsonEnemies[i]["xf"].n;
+                            wd.pf.y = (int)jsonEnemies[i]["yf"].n;
+                        }
+                        catch { }
 
                         _enemies.Add(wd.spawn, wd);
                     }
@@ -446,15 +487,19 @@ public class Level
                     {
                         EnemyData wd = new EnemyData();
 
-                        wd.speed = jsonEnemies[i]["speed"].n;
-                        wd.hp = (int)jsonEnemies[i]["hp"].n;
-                        wd.texture = jsonEnemies[i]["texture"].str;
-                        wd.type = t;
+                        try
+                        {
+                            wd.speed = jsonEnemies[i]["speed"].n;
+                            wd.hp = (int)jsonEnemies[i]["hp"].n;
+                            wd.texture = jsonEnemies[i]["texture"].str;
+                            wd.type = t;
 
-                        wd.spawn.x = (int)jsonEnemies[i]["spawnx"].n;
-                        wd.spawn.y = (int)jsonEnemies[i]["spawny"].n;
+                            wd.spawn.x = (int)jsonEnemies[i]["spawnx"].n;
+                            wd.spawn.y = (int)jsonEnemies[i]["spawny"].n;
 
-                        wd.direction = (int)jsonEnemies[i]["direction"].n;
+                            wd.direction = (int)jsonEnemies[i]["direction"].n;
+                        }
+                        catch { }
 
                         _enemies.Add(wd.spawn, wd);
                     }

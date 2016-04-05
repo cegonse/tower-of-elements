@@ -65,7 +65,8 @@ public class EnemyWalker: EnemyBase {
         _leftRay2 = new Ray2D();
         _leftRay1.direction = Vector2.left;
         _leftRay2.direction = Vector2.left;
-        
+
+        //_target = _walkerData.p1;
     }
 
     void Update()
@@ -219,11 +220,16 @@ public class EnemyWalker: EnemyBase {
                         }
 
                     }
+                    else
+                    {
+                        Debug.Log("Pero que ase");
+                    }
 
                 }//Down if 2
                 else
                 {
                     _state = State.Falling;
+                   
                 }
             }//Down if 1
             else
@@ -236,11 +242,21 @@ public class EnemyWalker: EnemyBase {
 
     private void AdjustVelocity()
     {
-		// Check if we are close enough to the target
-		if (Vector2.Distance(_target, transform.position) < 0.5f)
+        
+        float distance = Vector2.Distance(_target, transform.position);
+        
+        // Check if we are close enough to the target
+        /*if (Vector2.Distance(_target, transform.position) < 0.5f)
 		{
             ChangeTargetDirection();
+            Debug.Log("ASDF");
+        }*/
+
+        if(Mathf.Abs(_target.x - transform.position.x) < 0.5f)
+        {
+            ChangeTargetDirection();
         }
+
     }
 
     private void ChangeTargetDirection()
@@ -258,6 +274,8 @@ public class EnemyWalker: EnemyBase {
             _targetIndex = 0;
             _enemyDirection = _directionToP0;
         }
+
+        Debug.Log(_targetIndex);
     }
     
     private void SetJumpingValues()
@@ -288,7 +306,7 @@ public class EnemyWalker: EnemyBase {
         {
             case State.Grounded:
                 _accSpeed = _minAccSpeed;
-                p = Vector2.SmoothDamp(transform.position, _target, ref _velocity, _speed / 4, _speed, Time.deltaTime);
+                p = Vector2.SmoothDamp(transform.position, _target, ref _velocity, _speed/2, _speed*2, Time.deltaTime);
                 Debug.Log("ground");
                 transform.position = new Vector3(p.x, transform.position.y, 0f);
                 break;
@@ -340,6 +358,9 @@ public class EnemyWalker: EnemyBase {
             _directionToP0 = Direction.Left;
             _directionToPf = Direction.Right;
         }
-	}
+
+        Debug.Log(_directionToP0);
+        _enemyDirection = _directionToP0;
+    }
 	
 }
