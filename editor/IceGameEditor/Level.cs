@@ -38,6 +38,7 @@ public struct PlayerData
     public int fire;
     public int wind;
     public int earth;
+    public int eye;
 
     public Light light;
 }
@@ -139,6 +140,7 @@ public class Level
         jsonPlayer.AddField("fire", _player.fire);
         jsonPlayer.AddField("earth", _player.earth);
         jsonPlayer.AddField("wind", _player.wind);
+        jsonPlayer.AddField("eye", _player.eye);
 
         JSONObject jsonPlayerLight = new JSONObject(JSONObject.Type.OBJECT);
 
@@ -217,7 +219,8 @@ public class Level
             jsonEnemy.AddField("spawny", ene.Value.spawn.y);
             jsonEnemy.AddField("texture", ene.Value.texture);
 
-            if (ene.Value.type == EnemyType.Flyer || ene.Value.type == EnemyType.Walker)
+            if (ene.Value.type == EnemyType.Flyer || ene.Value.type == EnemyType.Walker ||
+                ene.Value.type == EnemyType.Lever)
             {
                 EnemyData fe = ene.Value;
 
@@ -303,6 +306,12 @@ public class Level
                 int fire = (int)player["fire"].n;
                 int earth = (int)player["earth"].n;
                 int wind = (int)player["wind"].n;
+                int eye = 0;
+
+                if (player["eye"])
+                {
+                    eye = (int)player["eye"].n;
+                }
 
                 _player.x = x;
                 _player.y = y;
@@ -310,6 +319,7 @@ public class Level
                 _player.fire = fire;
                 _player.earth = earth;
                 _player.wind = wind;
+                _player.eye = eye;
 
                 JSONObject light = player["light"];
 
@@ -498,6 +508,29 @@ public class Level
                             wd.spawn.y = (int)jsonEnemies[i]["spawny"].n;
 
                             wd.direction = (int)jsonEnemies[i]["direction"].n;
+                        }
+                        catch { }
+
+                        _enemies.Add(wd.spawn, wd);
+                    }
+                    else if (t == EnemyType.Lever)
+                    {
+                        EnemyData wd = new EnemyData();
+
+                        try
+                        {
+                            wd.speed = jsonEnemies[i]["speed"].n;
+                            wd.hp = (int)jsonEnemies[i]["hp"].n;
+                            wd.texture = jsonEnemies[i]["texture"].str;
+                            wd.type = t;
+
+                            wd.spawn.x = (int)jsonEnemies[i]["spawnx"].n;
+                            wd.spawn.y = (int)jsonEnemies[i]["spawny"].n;
+
+                            wd.p0.x = (int)jsonEnemies[i]["x0"].n;
+                            wd.p0.y = (int)jsonEnemies[i]["y0"].n;
+                            wd.pf.x = (int)jsonEnemies[i]["xf"].n;
+                            wd.pf.y = (int)jsonEnemies[i]["yf"].n;
                         }
                         catch { }
 
