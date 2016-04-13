@@ -521,7 +521,19 @@ public class Level
                         {
                             wd.speed = jsonEnemies[i]["speed"].n;
                             wd.hp = (int)jsonEnemies[i]["hp"].n;
-                            wd.texture = jsonEnemies[i]["texture"].str;
+                            //wd.texture = jsonEnemies[i]["texture"].str;
+
+                            if (wd.speed == 0)
+                            {
+                                // horizontal
+                                wd.texture = "Resources/Textures/Blocks/Plataform";
+                            }
+                            else
+                            {
+                                // vertical
+                                wd.texture = "Resources/Textures/Blocks/Grille";
+                            }
+
                             wd.type = t;
 
                             wd.spawn.x = (int)jsonEnemies[i]["spawnx"].n;

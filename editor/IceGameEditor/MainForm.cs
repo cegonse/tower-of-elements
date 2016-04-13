@@ -167,7 +167,10 @@ namespace IceGameEditor
                 LoadBlockTextures();
                 LoadAdditionalTextures();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.StackTrace, ex.Message);
+            }
         }
 
         public void RebuildLevelList()
