@@ -31,7 +31,7 @@ public class Block : MonoBehaviour
 
     //Length
     private float _length = 1;
-
+    private bool _vertical = false;
     //Rays
 
     private Ray2D _downRay;
@@ -393,5 +393,14 @@ public class Block : MonoBehaviour
             _activeLevel.RemoveEntity(gameObject.name);
         }
     }
-	
+
+    public void SetVertical(bool v)
+    {
+        _vertical = v;
+    }
+
+    public bool IsVertical()
+    {
+        return _vertical;
+    }
 }
