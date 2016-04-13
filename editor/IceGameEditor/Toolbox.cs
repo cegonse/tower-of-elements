@@ -200,6 +200,7 @@ namespace IceGameEditor
             numericUpDownWindUses.Value = pl.wind;
             numericUpDownIceUses.Value = pl.ice;
             numericUpDownEarthUses.Value = pl.earth;
+            numericUpDownEyeUses.Value = pl.eye;
 
             Door d = l.GetDoor();
 
@@ -687,6 +688,18 @@ namespace IceGameEditor
         }
 
         private void Toolbox_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void numericUpDownEyeUses_ValueChanged(object sender, EventArgs e)
+        {
+            PlayerData p = _activeLevel.GetPlayer();
+            p.eye = (int)numericUpDownEyeUses.Value;
+            _activeLevel.SetPlayer(p);
+        }
+
+        private void textBoxEnemyPositionX_TextChanged(object sender, EventArgs e)
         {
 
         }

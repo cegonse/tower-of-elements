@@ -38,6 +38,7 @@ public struct PlayerData
     public int fire;
     public int wind;
     public int earth;
+    public int eye;
 
     public Light light;
 }
@@ -139,6 +140,7 @@ public class Level
         jsonPlayer.AddField("fire", _player.fire);
         jsonPlayer.AddField("earth", _player.earth);
         jsonPlayer.AddField("wind", _player.wind);
+        jsonPlayer.AddField("eye", _player.eye);
 
         JSONObject jsonPlayerLight = new JSONObject(JSONObject.Type.OBJECT);
 
@@ -304,6 +306,12 @@ public class Level
                 int fire = (int)player["fire"].n;
                 int earth = (int)player["earth"].n;
                 int wind = (int)player["wind"].n;
+                int eye = 0;
+
+                if (player["eye"])
+                {
+                    eye = (int)player["eye"].n;
+                }
 
                 _player.x = x;
                 _player.y = y;
@@ -311,6 +319,7 @@ public class Level
                 _player.fire = fire;
                 _player.earth = earth;
                 _player.wind = wind;
+                _player.eye = eye;
 
                 JSONObject light = player["light"];
 
