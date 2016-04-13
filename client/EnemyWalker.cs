@@ -103,7 +103,6 @@ public class EnemyWalker: EnemyBase {
                     //Check the player's Right
                     if (_enemyDirection == Direction.Right)
                     {
-                        Debug.Log(_targetIndex + "holaaaa");
 
                         _rightRay1.origin = transform.position + new Vector3(_raySidesCollisionOffset, 0f, 0f);
 
@@ -134,12 +133,10 @@ public class EnemyWalker: EnemyBase {
                                     {
                                         _state = State.Jumping;
                                         SetJumpingValues();
-                                        Debug.Log("Salto right");
                                     }
                                     else
                                     {
                                         _state = State.Normal;
-                                        Debug.Log("Colision arriba");
                                     }
                                 }
                                  else if(hit_right2.collider != null)
@@ -147,7 +144,6 @@ public class EnemyWalker: EnemyBase {
                                     _state = State.Grounded;
                                     _targetIndex = 1;
                                     ChangeTargetDirection();
-                                    Debug.Log("Colision bloque");
                                     
                                 }
 
@@ -159,9 +155,6 @@ public class EnemyWalker: EnemyBase {
                     //Check the player's Left
                     if (_enemyDirection == Direction.Left)
                     {
-                        Debug.Log(_targetIndex + "holaaaa");
-
-                        Debug.Log(_enemyDirection);
                         _leftRay1.origin = transform.position + new Vector3(-_raySidesCollisionOffset, 0f, 0f);
 
                         RaycastHit2D hit_left = Physics2D.Raycast(_leftRay1.origin, _leftRay1.direction, 0.01f);
@@ -174,7 +167,6 @@ public class EnemyWalker: EnemyBase {
                             //Check if it is a Block
                             if (goHitLeft.GetComponent<Block>() != null)
                             {
-                                Debug.Log("izquierda");
 
                                 //Check if there is a block over the block which player collided with
                                 _leftRay2.origin = transform.position + new Vector3(-_raySidesCollisionOffset, 1f, 0f);
@@ -193,12 +185,10 @@ public class EnemyWalker: EnemyBase {
                                     {
                                         _state = State.Jumping;
                                         SetJumpingValues();
-                                        Debug.Log("Salto left");
                                     }
                                     else
                                     {
                                         _state = State.Grounded;
-                                        Debug.Log("Colision arriba");
                                         
                                     if(_enemyDirection == _directionToPf)
                                         _enemyDirection = _directionToP0;
@@ -211,18 +201,12 @@ public class EnemyWalker: EnemyBase {
                                     _state = State.Grounded;
                                     _targetIndex = 0;
                                     ChangeTargetDirection();
-                                    Debug.Log("Colision bloque");
-
                                 }
 
 
                             }
                         }
 
-                    }
-                    else
-                    {
-                        Debug.Log("Pero que ase");
                     }
 
                 }//Down if 2
@@ -249,7 +233,6 @@ public class EnemyWalker: EnemyBase {
         /*if (Vector2.Distance(_target, transform.position) < 0.5f)
 		{
             ChangeTargetDirection();
-            Debug.Log("ASDF");
         }*/
 
         if(Mathf.Abs(_target.x - transform.position.x) < 0.5f)
@@ -274,8 +257,6 @@ public class EnemyWalker: EnemyBase {
             _targetIndex = 0;
             _enemyDirection = _directionToP0;
         }
-
-        Debug.Log(_targetIndex);
     }
     
     private void SetJumpingValues()
@@ -306,8 +287,16 @@ public class EnemyWalker: EnemyBase {
         {
             case State.Grounded:
                 _accSpeed = _minAccSpeed;
-                p = Vector2.SmoothDamp(transform.position, _target, ref _velocity, _speed/2, _speed*2, Time.deltaTime);
-                Debug.Log("ground");
+                //p = Vector2.SmoothDamp(transform.position, _target, ref _velocity, _speed/2, _speed*2, Time.deltaTime);
+
+                if (_enemyDirection == Direction.Right)
+                {
+                    p.x += Time.deltaTime * _speed;
+                }
+                else if(_enemyDirection == Direction.Left)
+                {
+                    p.x += Time.deltaTime *  -_speed;
+                }
                 transform.position = new Vector3(p.x, transform.position.y, 0f);
                 break;
             
@@ -327,7 +316,7 @@ public class EnemyWalker: EnemyBase {
                     //Ajustar posicion del jugador
                     p = _jumpPoint2; //Por algun motivo no se ejecuta bien
                 }
-                Debug.Log("jump");
+                
                 transform.position = new Vector3(p.x, p.y, 0f);
                 break;
             
@@ -337,7 +326,6 @@ public class EnemyWalker: EnemyBase {
                 _accSpeed += _incrSpeed;
                 _velocity.x = 0;
                 p.y += Time.deltaTime * _velocity.y *_accSpeed;
-                Debug.Log("fall");
                 transform.position = new Vector3(transform.position.x, p.y, 0f);
                 break;
         }
@@ -359,7 +347,6 @@ public class EnemyWalker: EnemyBase {
             _directionToPf = Direction.Right;
         }
 
-        Debug.Log(_directionToP0);
         _enemyDirection = _directionToP0;
     }
 	
