@@ -101,10 +101,6 @@ public class EnemyRoamer : EnemyBase {
         RaycastHit2D hit_left = Physics2D.Raycast(_leftRay.origin, _leftRay.direction, 0.1f);
         RaycastHit2D hit_leftDown = Physics2D.Raycast(_leftDownRay.origin, _leftDownRay.direction, 0.1f);
 
-        if (hit_down.collider != null)
-        {
-            Debug.Log(hit_down.collider.gameObject.name);
-        }
 
         //Check the blocks the enemy is colliding with
         //    5   4   3
@@ -115,93 +111,77 @@ public class EnemyRoamer : EnemyBase {
         {
             //transform.position = new Vector3(transform.position.x, hit_down.transform.position.y + 1,0);
             _arrayBlocks[0] = true;
-            //Debug.Log("Down hit");
         }
         else
         {
             _arrayBlocks[0] = false;
-            //Debug.Log("Down no-hit");
         }
         //Down-Right -> 1
         if (hit_downRight.collider != null && hit_downRight.collider.gameObject.GetComponent<Block>() != null)
         {
             
             _arrayBlocks[1] = true;
-            //Debug.Log("Down-Right hit");
         }
         else
         {
             _arrayBlocks[1] = false;
-            //Debug.Log("Down-Right no-hit");
         }
         //Right -> 2
         if (hit_right.collider != null && hit_right.collider.gameObject.GetComponent<Block>() != null)
         {
             //transform.position = new Vector3(hit_right.transform.position.x - 1, transform.position.y, 0);
             _arrayBlocks[2] = true;
-            //Debug.Log("Right hit");
         }
         else
         {
             _arrayBlocks[2] = false;
-            //Debug.Log("Right no-hit");
         }
         //Right-Up -> 3
         if (hit_rightUp.collider != null && hit_rightUp.collider.gameObject.GetComponent<Block>() != null)
         {
             _arrayBlocks[3] = true;
-            //Debug.Log("Right-Up hit");
         }
         else
         {
             _arrayBlocks[3] = false;
-            //Debug.Log("Right-Up no-hit");
         }
         //Up -> 4
         if (hit_up.collider != null && hit_up.collider.gameObject.GetComponent<Block>() != null)
         {
             //transform.position = new Vector3(transform.position.x, hit_up.transform.position.y - 1, 0);
             _arrayBlocks[4] = true;
-            //Debug.Log("Up hit");
         }
         else
         {
             _arrayBlocks[4] = false;
-            //Debug.Log("Up no-hit");
         }
         //Up-Left -> 5
         if (hit_upLeft.collider != null && hit_upLeft.collider.gameObject.GetComponent<Block>() != null)
         {
             _arrayBlocks[5] = true;
-            //Debug.Log("Up-Left hit");
         }
         else
         {
             _arrayBlocks[5] = false;
-            //Debug.Log("Up-Left no-hit");
         }
         //Left -> 6
         if (hit_left.collider != null && hit_left.collider.gameObject.GetComponent<Block>() != null)
         {
             //transform.position = new Vector3(hit_left.transform.position.x+1, transform.position.y, 0);
             _arrayBlocks[6] = true;
-            //Debug.Log("Left hit");
         }
         else
         {
             _arrayBlocks[6] = false;
-            //Debug.Log("Left no-hit");
         }
         //Left-Down -> 7
         if (hit_leftDown.collider != null && hit_leftDown.collider.gameObject.GetComponent<Block>() != null)
         {
             _arrayBlocks[7] = true;
-            //Debug.Log("Left-Down hit");
         }
         else
         {
             _arrayBlocks[7] = false;
-            //Debug.Log("Left-Down no-hit");
         }
 
 
@@ -237,7 +217,6 @@ public class EnemyRoamer : EnemyBase {
                             {
                                 case 0:
                                 case 7:
-                                    Debug.Log("Zero in position 0 or 7 -> Down");
                                     if (_direction != Direction.Down)
                                         _direccionAnterior = _direction;
                                     _direction = Direction.Down;
@@ -249,7 +228,6 @@ public class EnemyRoamer : EnemyBase {
 
                                 case 6:
                                 case 5:
-                                    Debug.Log("Zero in position 5 or 6 -> Left");
                                     if (_direction != Direction.Left)
                                         _direccionAnterior = _direction;
                                     _direction = Direction.Left;
@@ -262,7 +240,6 @@ public class EnemyRoamer : EnemyBase {
 
                                 case 4:
                                 case 3:
-                                    Debug.Log("Zero in position 3 or 4 -> Up");
                                     if(_direction != Direction.Up)
                                         _direccionAnterior = _direction;
                                     _direction = Direction.Up;
@@ -274,7 +251,6 @@ public class EnemyRoamer : EnemyBase {
 
                                 case 2:
                                 case 1:
-                                    Debug.Log("Zero in position 1 or 2 -> Right");
                                     if (_direction != Direction.Right)
                                         _direccionAnterior = _direction;
                                     _direction = Direction.Right;
@@ -285,8 +261,6 @@ public class EnemyRoamer : EnemyBase {
                                     break;
                             }
 
-                            Debug.Log("Direccion anterior = " + _direccionAnterior.ToString());
-                            Debug.Log("i anterior = " + i_anterior.ToString());
                             
                             switch (_direccionAnterior)
                             {
@@ -314,7 +288,6 @@ public class EnemyRoamer : EnemyBase {
                     else
                     {
                         inTheWall = false;
-                        Debug.Log("inTheWall = false on iteration: " + i.ToString());
                     }
                 }
 
@@ -328,17 +301,14 @@ public class EnemyRoamer : EnemyBase {
                 break;
         }
 
-        Debug.Log(ArrayBoolToString(_arrayBlocks));
 
         if (inTheWall)
         {
             _state = State.Grounded;
-            Debug.Log("Grounded");
         }
         else
         {
             _state = State.Falling;
-            Debug.Log("Falling");
         }
 
     }
