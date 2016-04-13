@@ -98,6 +98,7 @@ public class EnemyFlyer : EnemyBase
 	{
 		// Start moving towards P0
 		_flyerData = (FlyerEnemyData) data;
+        _position = transform.position;
 		_target = _flyerData.p0;
         transform.localScale = new Vector3(transform.localScale.x * -1, 1f, 1f);
         

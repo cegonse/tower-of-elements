@@ -19,6 +19,7 @@ public class Level
 	
 	private AudioClip _song;
 	private bool _illuminated = false;
+    private int _minX, _minY, _maxX, _maxY;
 	
 	public Level(LevelController levelController, string name)
 	{
@@ -323,6 +324,7 @@ public class Level
         b.SetLength(length);
         b.SetActiveLevel(this);
         b.SetTextureRoute(texture);
+        b.SetVertical(vertical);
 
         //****************
         //  Add textures
@@ -646,7 +648,7 @@ public class Level
             }
             else
             {
-                Debug.Log("WARNING!! Enemy without an assigned animation: " + anim[i]);
+                Debug.Log("WARNING!! Player without an assigned animation: " + anim[i]);
             }
         }
             

@@ -130,6 +130,7 @@ public class Player : MonoBehaviour {
 		_cameraVelocity = new Vector3();
 
         _animState = PlayerAnimState.IdleFront;
+
 	}
 	
 	// Update is called once per frame
@@ -178,12 +179,21 @@ public class Player : MonoBehaviour {
                 goHitDown = hit_down.collider.gameObject;
                     
                 //Check if there is a Block on player's Down
-                if (goHitDown.GetComponent<Block>() != null)
+                Block goHitDownBlock = goHitDown.GetComponent<Block>();
+                if (goHitDownBlock != null)
                 {
                     _state = State.Grounded;
                     //Adjust player position to the height of the block
                     Vector3 pDown = transform.position;
-                    pDown.y = goHitDown.transform.position.y + 1;
+                    if (goHitDownBlock.IsVertical())
+                    {
+                        pDown.y = goHitDown.transform.position.y + goHitDownBlock.GetLength();
+                    }
+                    else
+                    {
+                        pDown.y = goHitDown.transform.position.y + 1;
+                    }
+                    
                     transform.position = pDown;
 
                     //Check the player's Right
