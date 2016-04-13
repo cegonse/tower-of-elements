@@ -217,7 +217,8 @@ public class Level
             jsonEnemy.AddField("spawny", ene.Value.spawn.y);
             jsonEnemy.AddField("texture", ene.Value.texture);
 
-            if (ene.Value.type == EnemyType.Flyer || ene.Value.type == EnemyType.Walker)
+            if (ene.Value.type == EnemyType.Flyer || ene.Value.type == EnemyType.Walker ||
+                ene.Value.type == EnemyType.Lever)
             {
                 EnemyData fe = ene.Value;
 
@@ -498,6 +499,29 @@ public class Level
                             wd.spawn.y = (int)jsonEnemies[i]["spawny"].n;
 
                             wd.direction = (int)jsonEnemies[i]["direction"].n;
+                        }
+                        catch { }
+
+                        _enemies.Add(wd.spawn, wd);
+                    }
+                    else if (t == EnemyType.Lever)
+                    {
+                        EnemyData wd = new EnemyData();
+
+                        try
+                        {
+                            wd.speed = jsonEnemies[i]["speed"].n;
+                            wd.hp = (int)jsonEnemies[i]["hp"].n;
+                            wd.texture = jsonEnemies[i]["texture"].str;
+                            wd.type = t;
+
+                            wd.spawn.x = (int)jsonEnemies[i]["spawnx"].n;
+                            wd.spawn.y = (int)jsonEnemies[i]["spawny"].n;
+
+                            wd.p0.x = (int)jsonEnemies[i]["x0"].n;
+                            wd.p0.y = (int)jsonEnemies[i]["y0"].n;
+                            wd.pf.x = (int)jsonEnemies[i]["xf"].n;
+                            wd.pf.y = (int)jsonEnemies[i]["yf"].n;
                         }
                         catch { }
 

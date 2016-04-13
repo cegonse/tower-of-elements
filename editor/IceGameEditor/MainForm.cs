@@ -609,7 +609,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Blocks/Lever/Lever_1_Background_1";
+            d.texture = "Blocks/Ice/Ice_1";
             d.type = EnemyType.Lever;
 
             _activeLevel.SetEnemy(p, d);

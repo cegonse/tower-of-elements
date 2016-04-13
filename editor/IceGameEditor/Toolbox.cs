@@ -685,5 +685,10 @@ namespace IceGameEditor
                 textBoxHp.BackColor = Color.Red;
             }
         }
+
+        private void Toolbox_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
