@@ -713,7 +713,7 @@ public class Player : MonoBehaviour {
                     _changeAnimation = false;
                     _canMove = false;
                 }
-                if (sprite_animator.GetAnimationIndex() == 2)
+                if (sprite_animator.GetAnimationIndex() == 3)
                 {
                     MakeTheActionHappen();
                 }
@@ -807,7 +807,7 @@ public class Player : MonoBehaviour {
                 {
                     sprite_animator.SetActiveAnimation("TURNING");
                     _changeAnimation = false;
-                    _canMove = false;
+                    _canMove = true;
                 }
                 
                 if (sprite_animator.IsTheLastFrame())

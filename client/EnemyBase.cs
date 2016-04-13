@@ -4,9 +4,9 @@ using System.Collections.Generic;
 public enum EnemyType : int
 {
 	Flyer,
-    Lever,
     Walker,
-	Roamer
+	Roamer,
+    Lever
 }
 public enum EnemyState : int
 {
@@ -23,7 +23,7 @@ public class BaseEnemyData
 public class EnemyBase : MonoBehaviour
 {
 	private EnemyType _type;
-	private Level _level;
+	protected Level _level;
     private BaseEnemyData _data;
 
     //State

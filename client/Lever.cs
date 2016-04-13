@@ -11,9 +11,9 @@ public class Lever : EnemyBase {
 
     private GameObject _door;
     private Sprite _left, _right;
-    private Level _level;
 
     private Sprite _leftPos, _rightPos;
+    
 
     //Door attributes
     private Vector2 _target;
@@ -23,7 +23,6 @@ public class Lever : EnemyBase {
 
 	// Use this for initialization
 	void Start () {
-        
 
         if (_door)
         {
@@ -71,12 +70,16 @@ public class Lever : EnemyBase {
             _target = _leverDoorData.p1;
             _targetIndex = 1;
             _moving = true;
+            SpriteRenderer rend = gameObject.GetComponent<SpriteRenderer>();
+            rend.sprite = _rightPos;
         }
         else if (_targetIndex == 1)
         {
             _target = _leverDoorData.p0;
             _targetIndex = 0;
             _moving = true;
+            SpriteRenderer rend = gameObject.GetComponent<SpriteRenderer>();
+            rend.sprite = _leftPos;
         }
     }
 
@@ -86,5 +89,22 @@ public class Lever : EnemyBase {
         _target = _leverDoorData.p0;
         //transform.localScale = new Vector3(transform.localScale.x * -1, 1f, 1f);
 
+    }
+
+    public void SetSprites (string tex1, string tex2)
+    {
+        Texture2D tex = (Texture2D)_level.GetLevelController().GetGameController().
+            GetTextureController().GetTexture(tex1);
+        float texSize = _level.GetLevelController().GetGameController().
+                    GetTextureController().GetTextureSize(tex1);
+        _leftPos = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
+                new Vector2(0.5f, 0.5f), texSize);
+
+        tex = (Texture2D)_level.GetLevelController().GetGameController().
+            GetTextureController().GetTexture(tex2);
+        texSize = _level.GetLevelController().GetGameController().
+                    GetTextureController().GetTextureSize(tex2);
+        _rightPos = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
+                new Vector2(0.5f, 0.5f), texSize);
     }
 }
