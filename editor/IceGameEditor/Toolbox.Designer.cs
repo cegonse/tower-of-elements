@@ -110,6 +110,8 @@
             this.textBoxDoorX = new System.Windows.Forms.TextBox();
             this.label19 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.numericUpDownEyeUses = new System.Windows.Forms.NumericUpDown();
+            this.label35 = new System.Windows.Forms.Label();
             this.numericUpDownWindUses = new System.Windows.Forms.NumericUpDown();
             this.label18 = new System.Windows.Forms.Label();
             this.numericUpDownEarthUses = new System.Windows.Forms.NumericUpDown();
@@ -131,8 +133,6 @@
             this.textBoxLevelName = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.colorDialogBlockLight = new System.Windows.Forms.ColorDialog();
-            this.label35 = new System.Windows.Forms.Label();
-            this.numericUpDownEyeUses = new System.Windows.Forms.NumericUpDown();
             this.tabControl.SuspendLayout();
             this.tabPageBlocks.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -154,12 +154,12 @@
             this.tabPageLevel.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEyeUses)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWindUses)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEarthUses)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownIceUses)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownFireUses)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDifficulty)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEyeUses)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl
@@ -1191,6 +1191,23 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Jugador";
             // 
+            // numericUpDownEyeUses
+            // 
+            this.numericUpDownEyeUses.Location = new System.Drawing.Point(5, 313);
+            this.numericUpDownEyeUses.Name = "numericUpDownEyeUses";
+            this.numericUpDownEyeUses.Size = new System.Drawing.Size(370, 22);
+            this.numericUpDownEyeUses.TabIndex = 14;
+            this.numericUpDownEyeUses.ValueChanged += new System.EventHandler(this.numericUpDownEyeUses_ValueChanged);
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(5, 293);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(67, 17);
+            this.label35.TabIndex = 13;
+            this.label35.Text = "Usos ojo:";
+            // 
             // numericUpDownWindUses
             // 
             this.numericUpDownWindUses.Dock = System.Windows.Forms.DockStyle.Top;
@@ -1404,23 +1421,6 @@
             this.label10.TabIndex = 0;
             this.label10.Text = "Nombre:";
             // 
-            // label35
-            // 
-            this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(8, 293);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(67, 17);
-            this.label35.TabIndex = 13;
-            this.label35.Text = "Usos ojo:";
-            // 
-            // numericUpDownEyeUses
-            // 
-            this.numericUpDownEyeUses.Location = new System.Drawing.Point(5, 313);
-            this.numericUpDownEyeUses.Name = "numericUpDownEyeUses";
-            this.numericUpDownEyeUses.Size = new System.Drawing.Size(370, 22);
-            this.numericUpDownEyeUses.TabIndex = 14;
-            this.numericUpDownEyeUses.ValueChanged += new System.EventHandler(this.numericUpDownEyeUses_ValueChanged);
-            // 
             // Toolbox
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1462,12 +1462,12 @@
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEyeUses)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWindUses)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEarthUses)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownIceUses)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownFireUses)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDifficulty)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEyeUses)).EndInit();
             this.ResumeLayout(false);
 
         }

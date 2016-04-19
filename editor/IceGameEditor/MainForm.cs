@@ -597,7 +597,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Enemies/EnemyRoamer/EnemyRoamer_1";
+            d.texture = "Enemies/EnemyRoamer/Roamer_1_Frame_0";
             d.type = EnemyType.Roamer;
 
             _activeLevel.SetEnemy(p, d);
