@@ -509,9 +509,9 @@ public class Player : MonoBehaviour {
         {
             _action = type;
             
-            Debug.Log("He entrado en DoAction");
-            Debug.Log(_velocity.x);
-            Debug.Log(_velocity.x);
+            //Debug.Log("He entrado en DoAction");
+            //Debug.Log(_velocity.x);
+            //Debug.Log(_velocity.x);
 
             _actionHappen = false;
             _actionDirectionSaved = _actionDirection;

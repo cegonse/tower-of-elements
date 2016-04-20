@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class GameController
 {
-	public const bool IS_EDITOR_RUNTIME = false;
+	public const bool IS_EDITOR_RUNTIME = true;
 
 	public enum GameState
 	{
@@ -79,6 +79,7 @@ public class GameController
 		}
 	
         _levelController.OnUpdate();
+        _guiController.OnUpdate();
     }
 	
 	public void StartLevel(string lv)

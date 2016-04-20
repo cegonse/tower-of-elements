@@ -7,7 +7,9 @@ public class TextureController
 	private Dictionary<string, Texture> _textures;
     private Dictionary<string, float> _textureSizes;
 	private Dictionary<string, List<AnimationFrame> > _animations;
+	
 	private GameController _gameController;
+    private string _rcPath;
 	
 	public TextureController(GameController game)
 	{
@@ -16,13 +18,21 @@ public class TextureController
         _textureSizes = new Dictionary<string, float>();
 		_animations = new Dictionary<string, List<AnimationFrame> >();
 		
+        // Get the Resources folder path
+        if (GameController.IS_EDITOR_RUNTIME)
+        {
+            string rcFilePath = Path.GetFullPath(".") +
+                Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "rcpath.txt";
+
+            _rcPath = File.ReadAllText(rcFilePath);
+        }
+
 		// Texture loading
 		string textureList = "";
 		
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
-			string texListPath = Path.GetFullPath(".") + 
-				Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "texture_list.txt";
+			string texListPath = _rcPath + Path.DirectorySeparatorChar + "texture_list.txt";
 				
 			textureList = File.ReadAllText(texListPath);
 		}
@@ -49,8 +59,7 @@ public class TextureController
 		
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
-			string animListPath = Path.GetFullPath(".") + 
-				Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + "animation_list.txt";
+			string animListPath = _rcPath + Path.DirectorySeparatorChar + "animation_list.txt";
 				
 			animationList = File.ReadAllText(animListPath);
 		}
@@ -103,8 +112,7 @@ public class TextureController
 		
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
-			string texPath = Path.GetFullPath(".") + 
-				Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + name + ".png";
+            string texPath = _rcPath + Path.DirectorySeparatorChar + "Textures" + Path.DirectorySeparatorChar + name + ".png";
 				
 			byte[] texData = File.ReadAllBytes(texPath);
 			Texture2D tx = new Texture2D(256, 256);
@@ -134,17 +142,29 @@ public class TextureController
 		
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
-			string animPath = Path.GetFullPath(".") + 
-				Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar + name + ".txt";
-				
-			animData = File.ReadAllText(animPath);
+            string animPath = _rcPath + Path.DirectorySeparatorChar + "Textures" + Path.DirectorySeparatorChar + name + ".txt";
+
+            try
+            {
+                animData = File.ReadAllText(animPath);
+            }
+            catch (System.IO.IsolatedStorage.IsolatedStorageException e)
+            {
+                Debug.LogError("Exception handled trying to open animation " + name);
+                Debug.LogError(e.StackTrace);
+            }
 		}
 		else
 		{
 			animData = (Resources.Load("Textures/" + name) as TextAsset).text;
 		}
-		
-		JSONObject jsonAnim = new JSONObject(animData);
+
+        JSONObject jsonAnim = null;
+
+        if (!string.IsNullOrEmpty(animData))
+        {
+            jsonAnim = new JSONObject(animData);
+        }
 		
 		if (jsonAnim)
 		{

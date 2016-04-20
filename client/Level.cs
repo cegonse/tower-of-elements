@@ -70,6 +70,13 @@ public class Level
                 int doorx = (int)door["x"].n;
                 int doory = (int)door["y"].n;
                 string targetLevel = door["targetLevel"].str;
+
+                if (string.IsNullOrEmpty(targetLevel))
+                {
+                    Debug.LogError("Level " + _name + " doesn't have a target level!");
+                    Debug.LogError("Setting target level to self.");
+                    targetLevel = _name;
+                }
 				
 				GameObject go_door = CreateDoor(doorx, doory, targetLevel);
 				AddEntity(go_door, go_door.name);

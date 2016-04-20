@@ -106,7 +106,7 @@ public class LevelController
 		{
 			GameObject.Find("LevelName").GetComponent<UnityEngine.UI.Text>().text = level;
 		}
-			
+        
 		_activeLevel = _levels[level];
 		_activeLevel.LoadLevel();
 	}

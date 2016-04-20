@@ -11,6 +11,27 @@ public class GuiController {
         _gameController = gc;
 		_dialogs = new Dictionary<string, GameObject>();
     }
+
+    public void OnUpdate()
+    {
+        if (Application.platform != RuntimePlatform.Android)
+        {
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                this.MovePlayerRight();
+            }
+
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                this.MovePlayerLeft();
+            }
+
+            if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.A))
+            {
+                this.StopPlayer();
+            }
+        }
+    }
 	
 	public void RegisterDialog(string name, GameObject go)
 	{
