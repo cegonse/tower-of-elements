@@ -46,9 +46,9 @@ public struct PlayerData
 public enum EnemyType
 {
     Flyer = 0,
-    Lever,
     Walker,
-    Roamer
+    Roamer,
+    Lever
 }
 
 public class EnemyData
