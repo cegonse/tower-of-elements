@@ -11,6 +11,7 @@ public class WalkerEnemyData : BaseEnemyData
 public class EnemyWalker: EnemyBase {
 
    private WalkerEnemyData _walkerData;
+    private EnemyBase _enemy;
 
 	private Vector2 _target;
 	private int _targetIndex = 0;
@@ -71,10 +72,13 @@ public class EnemyWalker: EnemyBase {
 
     void Update()
     {
-        CheckPlayerCollisions();
-        MovingEnemy();
-        CheckMovingCollisions();
-        AdjustVelocity();
+        if( GetActiveLevel().GetLevelController().GetGameController().IsGamePaused() == false)
+        {
+            CheckPlayerCollisions();
+            MovingEnemy();
+            CheckMovingCollisions();
+            AdjustVelocity();
+        }
     }
 	
 	private void CheckMovingCollisions()

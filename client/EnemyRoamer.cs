@@ -16,6 +16,7 @@ public class EnemyRoamer : EnemyBase {
     private State _state =State.Falling;
     private bool[] _arrayBlocks = new bool[8];
     private int i_anterior = 0;
+    private EnemyBase _enemy;
 
     //Rays
     private Ray2D _downRay;
@@ -66,11 +67,14 @@ public class EnemyRoamer : EnemyBase {
 	
 	// Update is called once per frame
 	void Update () {
-        CheckPlayerCollisions();
-        CheckBlockCollisions();
-        AdjustDirectionAndState();
-        AdjustVelocity();
-        MovingEnemy();
+        if(GetActiveLevel().GetLevelController().GetGameController().IsGamePaused() == false)
+        {
+            CheckPlayerCollisions();
+            CheckBlockCollisions();
+            AdjustDirectionAndState();
+            AdjustVelocity();
+            MovingEnemy();
+        }
 	}
 
     private void CheckBlockCollisions()

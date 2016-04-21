@@ -68,8 +68,11 @@ public class EnemyBase : MonoBehaviour
 	
 	void Update ()
 	{
-        CheckPlayerCollisions();
-        MovingEnemy();
+        if(_level.GetLevelController().GetGameController().IsGamePaused() == false)
+        {
+            CheckPlayerCollisions();
+            MovingEnemy();
+        }
 	}
 
 
@@ -169,4 +172,9 @@ public class EnemyBase : MonoBehaviour
     public virtual void SetEnemyData (BaseEnemyData data)
 	{
 	}
+
+    public Level GetActiveLevel()
+    {
+        return _level;
+    }
 }

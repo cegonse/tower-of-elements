@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class GameController
 {
-	public const bool IS_EDITOR_RUNTIME = true;
+	public const bool IS_EDITOR_RUNTIME = false;
 
 	public enum GameState
 	{

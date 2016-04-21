@@ -5,6 +5,7 @@ public class GuiController {
 
     private GameController _gameController;
 	private Dictionary<string, GameObject> _dialogs;
+    private int[] _camBounds = new int[4];
 	
     public GuiController(GameController gc)
     {
@@ -115,6 +116,19 @@ public class GuiController {
     {
        string activeLevel = _gameController.GetLevelController().GetActiveLevel().GetName(); 
 	   _gameController.StartLevel(activeLevel);
+    }
+
+    public void MoveCamera()
+    {
+
+        _camBounds = _gameController.GetLevelController().GetActiveLevel().GetBounds();
+        float x = (Mathf.Abs(_camBounds[2]) - Mathf.Abs(_camBounds[0])) / 2;
+        float y = (Mathf.Abs(_camBounds[3]) - Mathf.Abs(_camBounds[1])) / 2;
+        Debug.Log(_camBounds[2]);
+        Debug.Log(_camBounds[0]);
+        _gameController.GetCamera().GetComponent<Camera>().orthographicSize = (Mathf.Abs(_camBounds[2]) + Mathf.Abs(_camBounds[0])) * 0.25f;
+        _gameController.GetCamera().transform.position = new Vector3(x, y, -10f);
+
     }
 	
 	public void OnDebugPreviousLevel()

@@ -20,6 +20,7 @@ public class Level
 	private AudioClip _song;
 	private bool _illuminated = false;
     private int _minX, _minY, _maxX, _maxY;
+    private int[] _camBounds = new int[4];
 	
 	public Level(LevelController levelController, string name)
 	{
@@ -264,6 +265,21 @@ public class Level
                     }
 				}
 			}
+
+            if (json["enemies"] != null)
+            {
+                JSONObject jsonBounds = json["bounds"];
+
+                if (jsonBounds)
+                {
+                    int minx = (int)jsonBounds["minx"].n;
+                    int miny = (int)jsonBounds["miny"].n;
+                    int maxx = (int)jsonBounds["maxx"].n;
+                    int maxy = (int)jsonBounds["maxy"].n;
+
+                    SetBounds(minx, miny, maxx, maxy);
+                }
+            }
         }
 
         /*
@@ -819,5 +835,19 @@ public class Level
     public LevelController GetLevelController()
     {
         return _levelController;
+    }
+
+    public void SetBounds(int minx, int miny, int maxx, int maxy)
+    {
+        _camBounds[0] = minx;
+        _camBounds[1] = miny;
+        _camBounds[2] = maxx;
+        _camBounds[3] = maxy;
+    }
+    
+    public int[] GetBounds()
+    {
+        return _camBounds;
+        
     }
 }

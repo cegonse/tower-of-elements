@@ -16,6 +16,7 @@ public class EnemyFlyer : EnemyBase
 	private Vector2 _position;
 	private Vector2 _target;
 	private int _targetIndex = 0;
+    private EnemyBase _enemy;
 
     new void Start()
     {
@@ -25,9 +26,12 @@ public class EnemyFlyer : EnemyBase
 
     void Update()
     {
-        CheckPlayerCollisions();
-        AdjustVelocity();
-        MovingEnemy();
+        if(GetActiveLevel().GetLevelController().GetGameController().IsGamePaused() == false)
+        {
+            CheckPlayerCollisions();
+            AdjustVelocity();
+            MovingEnemy();
+        }
     }
 
     private void AdjustVelocity()

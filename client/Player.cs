@@ -82,6 +82,7 @@ public class Player : MonoBehaviour {
     private Level _activeLevel;
     private GameController _gameController;
 
+
     //AnimState
     private PlayerAnimState _animState = PlayerAnimState.IdleFront;
     private bool _changeAnimation = true;
@@ -136,22 +137,25 @@ public class Player : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if (!_activeLevel.GetLevelController().GetGameController().IsGamePaused())
+        if (_gameController.IsGamePaused() == false)
         {
-            if (!_isDying)
+            if (!_activeLevel.GetLevelController().GetGameController().IsGamePaused())
             {
-                SetPreviousPlayerDirection();
+                if (!_isDying)
+                {
+                    SetPreviousPlayerDirection();
 
-                CheckMovingCollisions();
+                    CheckMovingCollisions();
 
-                AdjustVelocityByParams();
+                    AdjustVelocityByParams();
 
-                MovingPlayer();
+                    MovingPlayer();
+                }
+
+                AdjustCamera();
+
+                AnimatingPlayer();
             }
-
-            AdjustCamera();
-
-            AnimatingPlayer();
         }
 
     }

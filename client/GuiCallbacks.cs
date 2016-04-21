@@ -5,6 +5,8 @@ using UnityEngine.EventSystems;
 public class GuiCallbacks : MonoBehaviour
 {
     private GameController _gameController;
+    private bool _pause = false;
+    
 
     public void SetGameController(GameController gc)
     {
@@ -21,11 +23,17 @@ public class GuiCallbacks : MonoBehaviour
         switch (go.name)
         {
             case "Left":
-                _gameController.GetGuiController().MovePlayerLeft();
+                if (_pause == false)
+                {
+                    _gameController.GetGuiController().MovePlayerLeft();
+                }
                 break;
 				
             case "Right":
-                _gameController.GetGuiController().MovePlayerRight();
+                if (_pause == false)
+                {
+                    _gameController.GetGuiController().MovePlayerRight();
+                }
                 break;
 
         }
@@ -52,23 +60,54 @@ public class GuiCallbacks : MonoBehaviour
         switch (go.name)
         {
             case "Earth":
-                _gameController.GetGuiController().DoAction(PlayerActions.Earth);
+                if (_pause == false)
+                {
+                    _gameController.GetGuiController().DoAction(PlayerActions.Earth);
+                }
                 break;
 				
             case "Fire":
-                _gameController.GetGuiController().DoAction(PlayerActions.Fire);
+                if (_pause == false)
+                {
+                    _gameController.GetGuiController().DoAction(PlayerActions.Fire);
+                }
                 break;
 				
             case "Wind":
-                _gameController.GetGuiController().DoAction(PlayerActions.Wind);
+                if (_pause == false)
+                {
+                    _gameController.GetGuiController().DoAction(PlayerActions.Wind);
+                }
                 break;
 				
             case "Water":
-                _gameController.GetGuiController().DoAction(PlayerActions.Ice);
+                if (_pause == false)
+                {
+                    _gameController.GetGuiController().DoAction(PlayerActions.Ice);
+                }
                 break;
 				
             case "Reset":
-                _gameController.GetGuiController().ResetLevel();
+                if (_pause == false)
+                {
+                    _gameController.GetGuiController().ResetLevel();
+                }
+                break;
+
+            case "Eye":
+                 if (_pause == false)
+                 {
+                     //Time.timeScale = 0;
+                     _pause = true;
+                 }
+                 else
+                 {
+                     //Time.timeScale = 1;
+                     _pause = false;
+                 }
+
+                _gameController.SetGamePaused(_pause);
+                _gameController.GetGuiController().MoveCamera();
                 break;
         }
     }
