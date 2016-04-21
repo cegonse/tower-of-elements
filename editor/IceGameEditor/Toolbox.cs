@@ -353,9 +353,10 @@ namespace IceGameEditor
                 textBoxEnemyStartX.Text = _selectedEnemy.p0.x.ToString();
                 textBoxEnemyStartY.Text = _selectedEnemy.p0.y.ToString();
                 textBoxEnemyEndX.Text = _selectedEnemy.pf.x.ToString();
-                textBoxEnemyEndY.Text = _selectedEnemy.p0.y.ToString();
+                textBoxEnemyEndY.Text = _selectedEnemy.pf.y.ToString();
                 comboBoxEnemyDirection.SelectedIndex = _selectedEnemy.direction;
                 textBoxEnemySpeed.Text = _selectedEnemy.speed.ToString();
+                textBoxHp.Text = _selectedEnemy.hp.ToString();
             }
         }
 
