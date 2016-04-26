@@ -404,9 +404,9 @@ public class Level
                     //Get the texture
                     Texture2D tex = null;
                     tex = (Texture2D)_levelController.GetGameController().
-                                GetTextureController().GetTexture(main_tex_id + "_13");
+                        GetTextureController().GetTexture(main_tex_id + "_13" + (vertical ? "_vert" : ""));
                     float texSize = _levelController.GetGameController().
-                                GetTextureController().GetTextureSize(main_tex_id + "_13");
+                                GetTextureController().GetTextureSize(main_tex_id + "_13" + (vertical ? "_vert" : ""));
                     //Create child object and add it to 'go' object
                     GameObject go_child = new GameObject("child_0_" + go.name);
                     go_child.transform.parent = go.transform;
@@ -432,7 +432,7 @@ public class Level
 
                     //SpriteAnimator
                     SpriteAnimator sprite_animator = go_child.AddComponent<SpriteAnimator>();
-                    if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_13" + "_Anim") != null)
+                    if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_13" + (vertical ? "_vert" : "") + "_Anim") != null)
                     {
                         sprite_animator.AddAnimation("STANDING",_levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
                     }
@@ -443,9 +443,9 @@ public class Level
                         //Get the texture
                         tex = null;
                         tex = (Texture2D)_levelController.GetGameController().
-                                    GetTextureController().GetTexture(main_tex_id + "_14");
+                                    GetTextureController().GetTexture(main_tex_id + "_14" + (vertical ? "_vert" : ""));
                         texSize = _levelController.GetGameController().
-                                GetTextureController().GetTextureSize(main_tex_id + "_14");
+                                GetTextureController().GetTextureSize(main_tex_id + "_14" + (vertical ? "_vert" : ""));
                         //Create child object and add it to 'go' object
                         go_child = new GameObject("child_0_" + go.name);
                         go_child.transform.parent = go.transform;
@@ -470,7 +470,7 @@ public class Level
                         rend.sortingOrder = 100;
                         //Adding the SpriteAnimator component
                         sprite_animator = go_child.AddComponent<SpriteAnimator>();
-                        if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_14" + "_Anim") != null)
+                        if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_14" + (vertical ? "_vert" : "") + "_Anim") != null)
                         {
                             sprite_animator.AddAnimation("STANDING",_levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
                         }
@@ -482,9 +482,9 @@ public class Level
                     //Get the texture
                     tex = null;
                     tex = (Texture2D)_levelController.GetGameController().
-                                GetTextureController().GetTexture(main_tex_id + "_15");
+                                GetTextureController().GetTexture(main_tex_id + "_15" + (vertical ? "_vert" : ""));
                     texSize = _levelController.GetGameController().
-                                GetTextureController().GetTextureSize(main_tex_id + "_15");
+                                GetTextureController().GetTextureSize(main_tex_id + "_15" + (vertical ? "_vert" : ""));
                     //Create child object and add it to 'go' object
                     go_child = new GameObject("child_0_" + go.name);
                     go_child.transform.parent = go.transform;
@@ -509,7 +509,7 @@ public class Level
                     rend.sortingOrder = 100;
                     //Adding the SpriteAnimator component
                     sprite_animator = go_child.AddComponent<SpriteAnimator>();
-                    if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_15" + "_Anim") != null)
+                    if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_15" + (vertical ? "_vert" : "") + "_Anim") != null)
                     {
                         sprite_animator.AddAnimation("STANDING", _levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
                     }
