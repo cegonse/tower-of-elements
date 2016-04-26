@@ -214,7 +214,7 @@ public class Level
 
             if (ene.Value.type == EnemyType.Lever)
             {
-                if (ene.Value.speed == 0)
+                if (ene.Value.hp == 0)
                 {
                     // horizontal
                     ene.Value.texture = "Blocks/Plataform/Plataform_1";
@@ -536,7 +536,7 @@ public class Level
                             wd.speed = jsonEnemies[i]["speed"].n;
                             wd.hp = (int)jsonEnemies[i]["hp"].n;
 
-                            if (wd.speed == 0)
+                            if (wd.hp == 0)
                             {
                                 // horizontal
                                 wd.texture = "Blocks/Plataform/Plataform_1";
