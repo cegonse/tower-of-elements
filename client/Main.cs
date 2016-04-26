@@ -47,16 +47,16 @@ public class Main : MonoBehaviour
 
         for (int i = 0; i < imagesInCanvas.Length; i++)
         {
-			Texture2D tex = null;
+			Texture2D tex = Resources.Load("Textures/" + imagesInCanvas[i].gameObject.name) as Texture2D;;
 		
-			if (imagesInCanvas[i].gameObject.name.Contains("Button"))
+			/*if (imagesInCanvas[i].gameObject.name.Contains("Button"))
 			{
 				tex = Resources.Load("Textures/ice_block") as Texture2D;
 			}
 			else
 			{
 				tex = Resources.Load("Textures/"+imagesInCanvas[i].gameObject.name) as Texture2D;
-			}
+			}*/
 			
 			Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
 			new Vector2(0.5f, 0.5f), 256f);

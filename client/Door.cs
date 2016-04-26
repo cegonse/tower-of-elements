@@ -92,12 +92,13 @@ public class Door : MonoBehaviour
 		_destinationLevel = lv;
 	}
 	
-	public void SetActiveLevel(Level lv){
+	public void SetActiveLevel(Level lv)
+	{
 		_activeLevel = lv;
 	}
+	
 	public string GetDestinationLevel()
 	{
 		return _destinationLevel;
 	}
-	
 }

@@ -21,6 +21,7 @@ public class Level
 	private bool _illuminated = false;
     private int _minX, _minY, _maxX, _maxY;
     private int[] _camBounds = new int[4];
+	private string _targetLevel;
 	
 	public Level(LevelController levelController, string name)
 	{
@@ -70,16 +71,16 @@ public class Level
 				// Create door entity and assign data
                 int doorx = (int)door["x"].n;
                 int doory = (int)door["y"].n;
-                string targetLevel = door["targetLevel"].str;
+                _targetLevel = door["targetLevel"].str;
 
-                if (string.IsNullOrEmpty(targetLevel))
+                if (string.IsNullOrEmpty(_targetLevel))
                 {
                     Debug.LogError("Level " + _name + " doesn't have a target level!");
                     Debug.LogError("Setting target level to self.");
-                    targetLevel = _name;
+                    _targetLevel = _name;
                 }
 				
-				GameObject go_door = CreateDoor(doorx, doory, targetLevel);
+				GameObject go_door = CreateDoor(doorx, doory, _targetLevel);
 				AddEntity(go_door, go_door.name);
             }
 
@@ -859,6 +860,10 @@ public class Level
     public int[] GetBounds()
     {
         return _camBounds;
-        
     }
+	
+	public string GetTargetLevel()
+	{
+		return _targetLevel;
+	}
 }

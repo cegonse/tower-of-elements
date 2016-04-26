@@ -6,7 +6,9 @@ public class GuiCallbacks : MonoBehaviour
 {
     private GameController _gameController;
     private bool _pause = false;
-    
+    private bool _isOnMenu = false;
+	private bool _wantsToReset = false;
+	private bool _wantsToMenu = false;
 
     public void SetGameController(GameController gc)
     {
@@ -85,13 +87,6 @@ public class GuiCallbacks : MonoBehaviour
                     _gameController.GetGuiController().DoAction(PlayerActions.Ice);
                 }
                 break;
-				
-            case "Reset":
-                if (_pause == false)
-                {
-                    _gameController.GetGuiController().ResetLevel();
-                }
-                break;
 
             case "Eye":
                  if (_pause == false)
@@ -111,44 +106,129 @@ public class GuiCallbacks : MonoBehaviour
 
             case "Settings":
                 {
-                    GuiController gc = _gameController.GetGuiController();
-                    GameObject pauseMenu = gc.GetDialog("PauseMenuUI");
-
-                    if (pauseMenu != null)
-                    {
-                        if (!pauseMenu.activeSelf)
-                        {
-                            _gameController.SetGamePaused(true);
-                            TransformTweener tt = pauseMenu.GetComponent<TransformTweener>();
-                            pauseMenu.SetActive(true);
-                            tt.Position0 = new Vector3(0, 0, 0);
-                            tt.PositionF = new Vector3(0, 0, 0);
-
-                            tt.Rotation0 = 0f;
-                            tt.RotationF = 0f;
-
-                            tt.Scale0 = new Vector3(0, 0, 0);
-                            tt.ScaleF = new Vector3(1, 1, 1);
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError("PauseMenuUI is null!");
-                    }
+                    ShowMenu();
                 }
                 break;
 
-            case "Resume":
+            case "ResumeButton":
                 {
-                    GuiController gc = _gameController.GetGuiController();
-                    GameObject pauseMenu = gc.GetDialog("PauseMenuUI");
-                    _gameController.SetGamePaused(true);
-                    GuiTransformTweener gui_tt = pauseMenu.GetComponent<GuiTransformTweener>();
+                    HideMenu();
                 }
                 break;
-
+				
+			case "ResetButton":
+                {
+					_wantsToReset = true;
+                    HideMenu();
+                }
+                break;
+				
+			case "MenuButton":
+                {
+                    _wantsToMenu = true;
+					HideMenu();
+                }
+                break;
+				
+			case "SkipLevel":
+				{
+					string lv = _gameController.GetLevelController().GetActiveLevel().GetTargetLevel();
+					_gameController.GetLevelController().GetActiveLevel().ClearLevel();
+					_gameController.GetLevelController().SetActiveLevel(lv);
+				}
+				break;
         }
     }
+	
+	private void HideMenu()
+	{
+		GuiController gc = _gameController.GetGuiController();
+		GameObject pauseMenu = gc.GetDialog("PauseMenuUI");
+		
+		if (pauseMenu != null && _isOnMenu)
+		{
+			if (pauseMenu.activeSelf)
+			{
+				_gameController.SetGamePaused(false);
+				TransformTweener tt = pauseMenu.GetComponent<TransformTweener>();
+				
+				tt.Position0 = new Vector3(0, 0, 0);
+				tt.PositionF = new Vector3(0, 0, 0);
+
+				tt.Rotation0 = 0f;
+				tt.RotationF = 0f;
+
+				tt.Scale0 = new Vector3(1, 1, 1);
+				tt.ScaleF = new Vector3(0, 0, 0);
+				
+				tt.DoTween(this.gameObject);
+			}
+		}
+		else
+		{
+			Debug.LogError("PauseMenuUI is null!");
+		}
+	}
+	
+	private void ShowMenu()
+	{
+		GuiController gc = _gameController.GetGuiController();
+		GameObject pauseMenu = gc.GetDialog("PauseMenuUI");
+
+		if (pauseMenu != null && !_isOnMenu)
+		{
+			if (!pauseMenu.activeSelf)
+			{
+				_gameController.SetGamePaused(true);
+				TransformTweener tt = pauseMenu.GetComponent<TransformTweener>();
+				pauseMenu.SetActive(true);
+				
+				tt.Position0 = new Vector3(0, 0, 0);
+				tt.PositionF = new Vector3(0, 0, 0);
+
+				tt.Rotation0 = 0f;
+				tt.RotationF = 0f;
+
+				tt.Scale0 = new Vector3(0, 0, 0);
+				tt.ScaleF = new Vector3(1, 1, 1);
+				
+				tt.DoTween(this.gameObject);
+			}
+		}
+		else
+		{
+			Debug.LogError("PauseMenuUI is null!");
+		}
+	}
+	
+	public void OnTweenFinished(string control)
+	{
+		if (control.Contains("PauseMenuUI"))
+		{
+			if (_isOnMenu)
+			{
+				GuiController gc = _gameController.GetGuiController();
+				GameObject pauseMenu = gc.GetDialog("PauseMenuUI");
+				pauseMenu.SetActive(false);
+			}
+			
+			_isOnMenu = !_isOnMenu;
+			
+			// Handle reset event
+			if (_wantsToReset)
+			{
+				_gameController.GetGuiController().ResetLevel();
+				_wantsToReset = false;
+			}
+			
+			// Handle go back to menu event
+			if (_wantsToMenu)
+			{
+				// To-Do: Save state and go back to the menu scene
+				Application.Quit();
+			}
+		}
+	}
 	
 	public void DebugMenuPreviousLevel()
 	{

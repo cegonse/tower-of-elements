@@ -27,6 +27,7 @@ public class TransformTweener : MonoBehaviour
 	public Vector3 RotationAxis = Vector3.up;
 	public float TweenTime = 1f;
 	public bool Loop = true;
+	public bool StartOnLoad = false;
 	public TweenType Type = TweenType.Linear;
 	
 	// Private members
@@ -42,7 +43,9 @@ public class TransformTweener : MonoBehaviour
 	private Vector3 _dstScale;
 	private float _dstRotation = 0f;
 	
-	public void DoTween()
+	private GameObject _caller = null;
+	
+	public void DoTween(GameObject caller = null)
 	{
 		if (_state == State.Idle)
 		{
@@ -57,6 +60,7 @@ public class TransformTweener : MonoBehaviour
 			_startTime = Time.time;
 			_timer = 0f;
 			
+			_caller = caller;
 			_state = State.Tweening;
 		}
 	}
@@ -71,7 +75,10 @@ public class TransformTweener : MonoBehaviour
 	
 	void Start()
 	{
-		DoTween();
+		if (StartOnLoad)
+		{
+			DoTween();
+		}
 	}
 	
 	void Update()
@@ -123,6 +130,12 @@ public class TransformTweener : MonoBehaviour
 				}
 				else
 				{
+					if (_caller != null)
+					{
+						_caller.SendMessage("OnTweenFinished", gameObject.name);
+						_caller = null;
+					}
+					
 					Stop();
 				}
 			}
