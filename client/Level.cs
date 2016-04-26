@@ -233,8 +233,10 @@ public class Level
 						dd.p1 = new Vector2(pfx, pfy);
 						dd.speed = speed;
 						dd.hp = hp;
-						
-						GameObject go_en = CreateEnemy(EnemyType.Walker, spawnx, spawny, texture, (BaseEnemyData)dd);
+                        BaseEnemyData bb = (BaseEnemyData)dd;
+                        bb.speed = dd.speed;
+                        bb.hp = dd.hp;
+						GameObject go_en = CreateEnemy(EnemyType.Walker, spawnx, spawny, texture, bb);
 						AddEntity(go_en, "walker_enemy" + "_" + spawnx.ToString() + "_" + spawny.ToString());
 					}
 					else if (type == EnemyType.Roamer)
@@ -243,8 +245,10 @@ public class Level
 					
 						int direction = (int)jsonEnemies[i]["direction"].n;
 						dd.direction = (Direction)direction;
-						
-						GameObject go_en = CreateEnemy(EnemyType.Roamer, spawnx, spawny, texture, (BaseEnemyData)dd);
+                        dd.speed = speed;
+                        dd.hp = hp;
+
+                        GameObject go_en = CreateEnemy(EnemyType.Roamer, spawnx, spawny, texture, (BaseEnemyData)dd);
 						AddEntity(go_en, "roamer_enemy" + "_" + spawnx.ToString() + "_" + spawny.ToString());
 					}
                     else if (type == EnemyType.Lever)
@@ -259,8 +263,10 @@ public class Level
 
                         dd.p0 = new Vector2(p0x, p0y);
                         dd.p1 = new Vector2(pfx, pfy);
+                        dd.speed = speed;
+                        dd.hp = hp;
 
-                        GameObject go_en = CreateEnemy(EnemyType.Lever, spawnx, spawny, texture, (BaseEnemyData)dd);
+                        GameObject go_en = CreateEnemy(EnemyType.Lever, spawnx, spawny, texture, (BaseEnemyData) dd);
                         AddEntity(go_en, "lever_door" + "_" + dd.p0.x.ToString() + "_" + dd.p0.y.ToString());
                     }
 				}
@@ -717,6 +723,7 @@ public class Level
             case EnemyType.Lever:
                 Lever lv = go.AddComponent<Lever>();
                 lv.SetLevel(this);
+                Debug.Log(data.speed);
                 GameObject bl = CreateBlock(BlockType.Crate, x, y, name, (data.speed > 0 ? data.speed : 1), (data.hp > 0 ? true : false));
                 AddEntity(bl, bl.name);
                 lv.SetDoor(bl);

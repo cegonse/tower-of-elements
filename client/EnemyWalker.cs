@@ -340,7 +340,7 @@ public class EnemyWalker: EnemyBase {
 	public override void SetEnemyData (BaseEnemyData data)
 	{
 		_walkerData = (WalkerEnemyData) data;
-		_target = _walkerData.p0;
+        _target = _walkerData.p0;
         if(transform.position.x < _target.x)
         {
             _directionToP0 = Direction.Right;
