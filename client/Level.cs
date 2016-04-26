@@ -285,6 +285,10 @@ public class Level
 
                     SetBounds(minx, miny, maxx, maxy);
                 }
+                else
+                {
+                    Debug.LogError("Level " + _name + " doesn't have bounds. Defaulting to zero.");
+                }
             }
         }
 

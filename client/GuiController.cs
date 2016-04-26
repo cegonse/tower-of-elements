@@ -122,12 +122,21 @@ public class GuiController {
     {
 
         _camBounds = _gameController.GetLevelController().GetActiveLevel().GetBounds();
-        float x = (Mathf.Abs(_camBounds[2]) - Mathf.Abs(_camBounds[0])) / 2;
-        float y = (Mathf.Abs(_camBounds[3]) - Mathf.Abs(_camBounds[1])) / 2;
-        Debug.Log(_camBounds[2]);
-        Debug.Log(_camBounds[0]);
-        _gameController.GetCamera().GetComponent<Camera>().orthographicSize = (Mathf.Abs(_camBounds[2]) + Mathf.Abs(_camBounds[0])) * 0.25f;
-        _gameController.GetCamera().transform.position = new Vector3(x, y, -10f);
+        float x = (Mathf.Abs(_camBounds[2]) - Mathf.Abs(_camBounds[0]));
+        float y = (Mathf.Abs(_camBounds[3]) - Mathf.Abs(_camBounds[1]));
+        float width = (Mathf.Abs(_camBounds[2]) + Mathf.Abs(_camBounds[0]));
+        float height = (Mathf.Abs(_camBounds[3]) + Mathf.Abs(_camBounds[1]));
+        if (width > height)
+        {
+            _gameController.GetCamera().GetComponent<Camera>().orthographicSize = (((float)Screen.height / (float)Screen.width) * width) / 2;
+        }
+        else
+        {
+            _gameController.GetCamera().GetComponent<Camera>().orthographicSize = height / 2;
+        }
+        //_gameController.GetCamera().GetComponent<Camera>().orthographicSize = (Mathf.Abs(_camBounds[2]) + Mathf.Abs(_camBounds[0])) * 0.25f;
+        //_gameController.GetCamera().GetComponent<Camera>().orthographicSize = Mathf.Abs(_camBounds[2]) + Mathf.Abs(_camBounds[0]);
+        _gameController.GetCamera().transform.position = new Vector3(x, y+1, -10f);
 
     }
 	

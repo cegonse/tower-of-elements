@@ -125,8 +125,9 @@ public class EnemyWalker: EnemyBase {
                                 _rightRay2.origin = transform.position + new Vector3(_raySidesCollisionOffset, 1f, 0f);
 
                                 RaycastHit2D hit_right2 = Physics2D.Raycast(_rightRay2.origin, _rightRay2.direction, 0.01f);
+                                GameObject hitPlayer = hit_right2.collider.gameObject;
 
-                                if(hit_right2.collider == null)
+                                if (hit_right2.collider == null || hitPlayer.GetComponent<Player>() == true)
                                 {
                                     //Check if ther is a block over the player
                                     _upRay.origin = transform.position + new Vector3(0f, 1f, 0f);
@@ -176,8 +177,9 @@ public class EnemyWalker: EnemyBase {
                                 _leftRay2.origin = transform.position + new Vector3(-_raySidesCollisionOffset, 1f, 0f);
 
                                 RaycastHit2D hit_left2 = Physics2D.Raycast(_leftRay2.origin, _leftRay2.direction, 0.01f);
+                                GameObject hitPlayerLeft = hit_left2.collider.gameObject;
 
-                                if(hit_left2.collider == null)
+                                if (hit_left2.collider == null || hitPlayerLeft.GetComponent<Player>() == true)
                                 {
 
                                     //Check if ther is a block over the player
