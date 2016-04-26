@@ -612,7 +612,7 @@ namespace IceGameEditor
             d.spawn = p;
             d.p0 = p;
             d.pf = p;
-            d.texture = "Blocks/Ice/Ice_1";
+            d.texture = "Blocks/Plataform/Plataform_1";
             d.type = EnemyType.Lever;
 
             _activeLevel.SetEnemy(p, d);
@@ -631,6 +631,11 @@ namespace IceGameEditor
         public Bitmap GetRoamerEnemyTexture()
         {
             return _roamerTex;
+        }
+
+        public Bitmap GetLeverEnemyTexture()
+        {
+            return _leverTex;
         }
 
         public Level GetActiveLevel()

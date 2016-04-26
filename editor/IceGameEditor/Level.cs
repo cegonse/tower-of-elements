@@ -212,6 +212,20 @@ public class Level
         {
             JSONObject jsonEnemy = new JSONObject(JSONObject.Type.OBJECT);
 
+            if (ene.Value.type == EnemyType.Lever)
+            {
+                if (ene.Value.speed == 0)
+                {
+                    // horizontal
+                    ene.Value.texture = "Blocks/Plataform/Plataform_1";
+                }
+                else
+                {
+                    // vertical
+                    ene.Value.texture = "Blocks/Grille/Grille_1";
+                }
+            }
+
             jsonEnemy.AddField("speed", ene.Value.speed);
             jsonEnemy.AddField("hp", ene.Value.hp);
             jsonEnemy.AddField("type", (int)ene.Value.type);
@@ -521,17 +535,16 @@ public class Level
                         {
                             wd.speed = jsonEnemies[i]["speed"].n;
                             wd.hp = (int)jsonEnemies[i]["hp"].n;
-                            //wd.texture = jsonEnemies[i]["texture"].str;
 
                             if (wd.speed == 0)
                             {
                                 // horizontal
-                                wd.texture = "Resources/Textures/Blocks/Plataform";
+                                wd.texture = "Blocks/Plataform/Plataform_1";
                             }
                             else
                             {
                                 // vertical
-                                wd.texture = "Resources/Textures/Blocks/Grille";
+                                wd.texture = "Blocks/Grille/Grille_1";
                             }
 
                             wd.type = t;

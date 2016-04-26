@@ -257,7 +257,7 @@ namespace IceGameEditor
 
                     if (!string.IsNullOrEmpty(tex.Value.texture))
                     {
-                        if (tex.Value.type == EnemyType.Flyer || tex.Value.type == EnemyType.Lever)
+                        if (tex.Value.type == EnemyType.Flyer)
                         {
                             // Draw the path line  
                             Point p0 = new Point((_xSize / 2 + tex.Value.p0.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Value.p0.y) * 64 + panel.AutoScrollPosition.Y + 32);
@@ -265,9 +265,25 @@ namespace IceGameEditor
 
                             g.DrawLine(_yellowPen, p0, pf);
                         }
+                        else if (tex.Value.type == EnemyType.Lever)
+                        {
+                            // Draw the path line  
+                            Point p0 = new Point((_xSize / 2 + tex.Value.p0.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Value.p0.y) * 64 + panel.AutoScrollPosition.Y + 32);
+                            Point pf = new Point((_xSize / 2 + tex.Value.pf.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Value.pf.y) * 64 + panel.AutoScrollPosition.Y + 32);
+
+                            g.DrawLine(_pinkPen, p0, pf);
+                        }
 
                         rect = new Rectangle((_xSize / 2 + tex.Key.x) * 64 + panel.AutoScrollPosition.X, (_ySize / 2 - tex.Key.y) * 64 + panel.AutoScrollPosition.Y, 64, 64);
-                        g.DrawImage(_blockTextures[tex.Value.texture], rect);
+
+                        if (tex.Value.type == EnemyType.Lever)
+                        {
+                            g.DrawImage(_main.GetLeverEnemyTexture(), rect);
+                        }
+                        else
+                        {
+                            g.DrawImage(_blockTextures[tex.Value.texture], rect);
+                        }
 
                         if (_tool == CurrentTool.EnemySelect)
                         {
