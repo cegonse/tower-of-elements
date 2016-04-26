@@ -56,7 +56,6 @@ public class GuiCallbacks : MonoBehaviour
     public void Click(UnityEngine.UI.Image img)
     {
         GameObject go = img.gameObject;
-
         switch (go.name)
         {
             case "Earth":
@@ -109,6 +108,45 @@ public class GuiCallbacks : MonoBehaviour
                 _gameController.SetGamePaused(_pause);
                 _gameController.GetGuiController().MoveCamera();
                 break;
+
+            case "Settings":
+                {
+                    GuiController gc = _gameController.GetGuiController();
+                    GameObject pauseMenu = gc.GetDialog("PauseMenuUI");
+
+                    if (pauseMenu != null)
+                    {
+                        if (!pauseMenu.activeSelf)
+                        {
+                            _gameController.SetGamePaused(true);
+                            TransformTweener tt = pauseMenu.GetComponent<TransformTweener>();
+                            pauseMenu.SetActive(true);
+                            tt.Position0 = new Vector3(0, 0, 0);
+                            tt.PositionF = new Vector3(0, 0, 0);
+
+                            tt.Rotation0 = 0f;
+                            tt.RotationF = 0f;
+
+                            tt.Scale0 = new Vector3(0, 0, 0);
+                            tt.ScaleF = new Vector3(1, 1, 1);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("PauseMenuUI is null!");
+                    }
+                }
+                break;
+
+            case "Resume":
+                {
+                    GuiController gc = _gameController.GetGuiController();
+                    GameObject pauseMenu = gc.GetDialog("PauseMenuUI");
+                    _gameController.SetGamePaused(true);
+                    GuiTransformTweener gui_tt = pauseMenu.GetComponent<GuiTransformTweener>();
+                }
+                break;
+
         }
     }
 	

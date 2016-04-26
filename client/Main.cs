@@ -67,6 +67,9 @@ public class Main : MonoBehaviour
 		_gameController.GetGuiController().RegisterDialog("InGameUI", GameObject.Find("InGameUI"));
 		_gameController.GetGuiController().RegisterDialog("DebugUI", GameObject.Find("DebugUI"));
 		_gameController.GetGuiController().RegisterDialog("DebugMenuUI", GameObject.Find("DebugMenuUI"));
+        GameObject pauseMenuUi = GameObject.Find("PauseMenuUI");
+        _gameController.GetGuiController().RegisterDialog("PauseMenuUI", pauseMenuUi);
+        pauseMenuUi.SetActive(false);
     }
 
     /*

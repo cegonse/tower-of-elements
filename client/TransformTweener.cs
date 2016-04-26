@@ -86,7 +86,7 @@ public class TransformTweener : MonoBehaviour
 				_timer = Mathf.SmoothStep(0f, 1f, _timer);
 			}
 			
-			transform.position = Vector3.Lerp(_srcPosition, _dstPosition, _timer);
+			transform.localPosition = Vector3.Lerp(_srcPosition, _dstPosition, _timer);
 			transform.localScale = Vector3.Lerp(_srcScale, _dstScale, _timer);
 				
 			float ang = Mathf.Lerp(_srcRotation, _dstRotation, _timer);

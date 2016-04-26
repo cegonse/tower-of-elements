@@ -57,6 +57,19 @@ public class GuiController {
 			_dialogs[name].SetActive(false);
 		}
 	}
+
+    public GameObject GetDialog(string name)
+    {
+        if (_dialogs.ContainsKey(name))
+        {
+            return _dialogs[name];
+        }
+        else
+        {
+            Debug.LogError("No existe el dialogo con nombre: " + name);
+            return null;
+        }
+    }
 	
     //Metodos de gui
     public void MovePlayerRight()
