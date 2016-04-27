@@ -9,6 +9,7 @@ public class GuiCallbacks : MonoBehaviour
     private bool _isOnMenu = false;
 	private bool _wantsToReset = false;
 	private bool _wantsToMenu = false;
+    private bool _isCameraMoving = false;
 
     public void SetGameController(GameController gc)
     {
@@ -91,17 +92,20 @@ public class GuiCallbacks : MonoBehaviour
             case "Eye":
                  if (_pause == false)
                  {
-                     //Time.timeScale = 0;
-                     _pause = true;
+                    //Time.timeScale = 0;
+                    _isCameraMoving = true;
+                    _pause = true;
                  }
                  else
                  {
-                     //Time.timeScale = 1;
-                     _pause = false;
+                    //Time.timeScale = 1;
+                    _isCameraMoving = false;
+                    //_gameController.GetCamera().GetComponent<Camera>().orthographicSize = 3.5f;
+                    _pause = false;
                  }
 
                 _gameController.SetGamePaused(_pause);
-                _gameController.GetGuiController().MoveCamera();
+                _gameController.GetGuiController().MoveCamera(_isCameraMoving);
                 break;
 
             case "Settings":

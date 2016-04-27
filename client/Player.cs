@@ -76,7 +76,7 @@ public class Player : MonoBehaviour {
 	
 	// Camera position
 	private Vector3 _cameraOffset;
-	private float _cameraDampingTime = 0.1f;
+	private float _cameraDampingTime = 0.2f;
 	private Vector3 _cameraVelocity;
     
     private Level _activeLevel;
