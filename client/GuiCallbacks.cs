@@ -100,12 +100,12 @@ public class GuiCallbacks : MonoBehaviour
                  {
                     //Time.timeScale = 1;
                     _isCameraMoving = false;
-                    //_gameController.GetCamera().GetComponent<Camera>().orthographicSize = 3.5f;
+                    _gameController.GetCamera().GetComponent<Camera>().orthographicSize = 3.5f;
                     _pause = false;
                  }
 
                 _gameController.SetGamePaused(_pause);
-                _gameController.GetGuiController().MoveCamera(_isCameraMoving);
+                _gameController.GetGuiController().MoveCamera(_pause);
                 break;
 
             case "Settings":
