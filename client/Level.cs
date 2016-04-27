@@ -268,7 +268,8 @@ public class Level
                         dd.hp = hp;
 
                         GameObject go_en = CreateEnemy(EnemyType.Lever, spawnx, spawny, texture, (BaseEnemyData) dd);
-                        AddEntity(go_en, "lever_door" + "_" + dd.p0.x.ToString() + "_" + dd.p0.y.ToString());
+                        //AddEntity(go_en, "lever_door" + "_" + dd.p0.x.ToString() + "_" + dd.p0.y.ToString());
+                        AddEntity(go_en, "lever_door" + "_" + spawnx.ToString() + "_" + spawny.ToString());
                     }
 				}
 			}
@@ -728,9 +729,9 @@ public class Level
             case EnemyType.Lever:
                 Lever lv = go.AddComponent<Lever>();
                 lv.SetLevel(this);
-                Debug.Log(data.speed);
+                //Debug.Log(data.speed);
                 GameObject bl = CreateBlock(BlockType.Crate, x, y, name, (data.speed > 0 ? data.speed : 1), (data.hp > 0 ? true : false));
-                AddEntity(bl, bl.name);
+                AddEntity(bl, "blockEntity_" + x + "_" + y + "_crate");
                 lv.SetDoor(bl);
                 lv.SetEnemyData(data);
                 break;
