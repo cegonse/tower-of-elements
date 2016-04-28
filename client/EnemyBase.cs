@@ -145,7 +145,6 @@ public class EnemyBase : MonoBehaviour
             if (player)
             {
                 player.DestroyPlayer();
-                Debug.Log("Se llama a DestroyPlayer");
             }
         }
     }

@@ -512,10 +512,6 @@ public class Player : MonoBehaviour {
         if (!_isDying && _animState != PlayerAnimState.Action)
         {
             _action = type;
-            
-            //Debug.Log("He entrado en DoAction");
-            //Debug.Log(_velocity.x);
-            //Debug.Log(_velocity.x);
 
             _actionHappen = false;
             _actionDirectionSaved = _actionDirection;

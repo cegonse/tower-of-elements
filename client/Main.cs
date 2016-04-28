@@ -57,6 +57,10 @@ public class Main : MonoBehaviour
 			{
 				tex = Resources.Load("Textures/"+imagesInCanvas[i].gameObject.name) as Texture2D;
 			}*/
+            if (tex == null)
+            {
+                Debug.LogError("No se encuentra la textura con nombre: " + imagesInCanvas[i].gameObject.name);
+            }
 			
 			Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
 			new Vector2(0.5f, 0.5f), 256f);
@@ -65,7 +69,7 @@ public class Main : MonoBehaviour
 		
 		// Register UI dialogs
 		_gameController.GetGuiController().RegisterDialog("InGameUI", GameObject.Find("InGameUI"));
-		_gameController.GetGuiController().RegisterDialog("DebugUI", GameObject.Find("DebugUI"));
+		_gameController.GetGuiController().RegisterDialog("UI", GameObject.Find("DebugUI"));
 		_gameController.GetGuiController().RegisterDialog("DebugMenuUI", GameObject.Find("DebugMenuUI"));
         GameObject pauseMenuUi = GameObject.Find("PauseMenuUI");
         _gameController.GetGuiController().RegisterDialog("PauseMenuUI", pauseMenuUi);
@@ -117,16 +121,13 @@ public class Main : MonoBehaviour
     public void PointerDown(UnityEngine.UI.Image img)
     {
         GameObject go = img.gameObject;
-        Debug.Log("PointerDown!");
         switch (go.name)
         {
             case "Left" :
                 _gameController.GetGuiController().MovePlayerLeft();
-                Debug.Log("Left done!");
                 break;
             case "Right" :
                 _gameController.GetGuiController().MovePlayerRight();
-                Debug.Log("Right done!");
                 break;
 
         }

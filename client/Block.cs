@@ -32,6 +32,7 @@ public class Block : MonoBehaviour
     //Length
     private float _length = 1;
     private bool _vertical = false;
+    private bool _isPlatform = false;
     //Rays
 
     private Ray2D _downRay;
@@ -78,32 +79,45 @@ public class Block : MonoBehaviour
         //*************************************************
         bool _isThereBlockUnder = false;
         GameObject goHitDown = null;
+        GameObject blockDown = null;
 
         _downRay.origin = transform.position + new Vector3(-0.45f, -0.51f, 0f);
-        RaycastHit2D hit_down = Physics2D.Raycast(_downRay.origin, _downRay.direction, _length-0.1f);
-
-        if (hit_down.collider != null)
+        RaycastHit2D[] hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, _length-0.1f);
+        for (int down_i = 0; down_i < hit_down.Length; down_i++)
         {
-            goHitDown = hit_down.collider.gameObject;
-            if (goHitDown.GetComponent<Block>() != null)
+            if (hit_down[down_i].collider != null)
             {
-                _isThereBlockUnder = true;
+                goHitDown = hit_down[down_i].collider.gameObject;
+                if (goHitDown.GetComponent<Block>() != null)
+                {
+                    _isThereBlockUnder = true;
+                    blockDown = goHitDown;
+                }
             }
         }
+
         if (!_isThereBlockUnder)
         {
             for (int i = 0; i < _theOtherDownRays.Length; i++)
             {
                 _theOtherDownRays[i].origin = transform.position + new Vector3(i, -0.51f, 0f);
-                hit_down = Physics2D.Raycast(_theOtherDownRays[i].origin, _theOtherDownRays[i].direction, 0.1f);
-                if (hit_down.collider != null)
-                {
+                hit_down = Physics2D.RaycastAll(_theOtherDownRays[i].origin, _theOtherDownRays[i].direction, 0.1f);
 
-                    goHitDown = hit_down.collider.gameObject;
-                    if (goHitDown.GetComponent<Block>() != null)
+                for (int down_others_i = 0; down_others_i < hit_down.Length; down_others_i++)
+                {
+                    if (hit_down[down_others_i].collider != null)
                     {
-                        _isThereBlockUnder = true;
-                        break;
+                        goHitDown = hit_down[down_others_i].collider.gameObject;
+                        Block blockComponent = goHitDown.GetComponent<Block>();
+                        if (blockComponent != null)
+                        {
+                            _isThereBlockUnder = true;
+                            blockDown = goHitDown;
+                            if (blockComponent.IsPlatform())
+                            {
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -118,7 +132,7 @@ public class Block : MonoBehaviour
                     
             //Ajustar posicion del bloque
             Vector3 pDown = transform.position;
-            pDown.y = goHitDown.transform.position.y + 1;
+            pDown.y = blockDown.transform.position.y + 1;
             transform.position = pDown;
                    
             //Left-Right
@@ -245,7 +259,6 @@ public class Block : MonoBehaviour
 	public void SetMovable(bool value)
 	{
 		_isMovable = value;
-		Debug.Log("Called SetMovable");
 	}
 
     public void SetLength(float l)
@@ -341,7 +354,6 @@ public class Block : MonoBehaviour
 
             //Get the main identificator on the string --> i.e. "Ice","RBasaltA", "Crate"
             string tex_route = _textureRoute.Split('_')[0];
-            Debug.Log(tex_route + "_14");
             //Create right corner
 
             //Get the texture
@@ -402,5 +414,15 @@ public class Block : MonoBehaviour
     public bool IsVertical()
     {
         return _vertical;
+    }
+
+    public void SetPlatform(bool v)
+    {
+        _isPlatform = v;
+    }
+
+    public bool IsPlatform()
+    {
+        return _isPlatform;
     }
 }
