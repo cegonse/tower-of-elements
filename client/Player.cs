@@ -512,6 +512,10 @@ public class Player : MonoBehaviour {
         if (!_isDying && _animState != PlayerAnimState.Action)
         {
             _action = type;
+            
+            //Debug.Log("He entrado en DoAction");
+            //Debug.Log(_velocity.x);
+            //Debug.Log(_velocity.x);
 
             _actionHappen = false;
             _actionDirectionSaved = _actionDirection;
@@ -911,7 +915,7 @@ public class Player : MonoBehaviour {
     public void OnPlayerDestroyed()
     {
         GameObject.Destroy(gameObject);
-        //_level.RemoveEntity("player"); TO DO!
+        GameObject.Find("GuiCallbacks").GetComponent<GuiCallbacks>().OnPlayerDied();
     }
     
 }

@@ -160,17 +160,15 @@ public class GuiController {
             float height = (Mathf.Abs(_camBounds[3]) + Mathf.Abs(_camBounds[1]));
             if (width > height)
             {
-                if(width % 2f == 0)
+                if(width % 2 == 0)
                 {
                     _cameraLerp = (((float)Screen.height / (float)Screen.width) * width) / 2f;
                     _cameraToGo = new Vector3(x, y, -10f);
-                    Debug.Log("par");
                 }
                 else
                 {
                     _cameraLerp = (((float)Screen.height / (float)Screen.width) * width) / 2f;
                     _cameraToGo = new Vector3(x - 0.5f, y, -10f);
-                    Debug.Log("impar");
                 }
             }
             else

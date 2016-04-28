@@ -39,7 +39,7 @@ public class Lever : EnemyBase {
     {
         if (_moving)
         {
-            if (Vector2.Distance(new Vector2(_door.transform.position.x, _door.transform.position.y), _target) > 0.1)
+            if (Vector2.Distance(new Vector2(_door.transform.position.x, _door.transform.position.y), _target) > 0.01)
             {
                 Vector3 p = _door.transform.position;
                 p = Vector2.SmoothDamp(_door.transform.position, _target, ref _velocity, _speed / 4, _speed, Time.deltaTime);

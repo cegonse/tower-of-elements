@@ -7,6 +7,7 @@ public class GuiCallbacks : MonoBehaviour
     private GameController _gameController;
     private bool _pause = false;
     private bool _isOnMenu = false;
+    private bool _isOnDeathMenu = false;
 	private bool _wantsToReset = false;
 	private bool _wantsToMenu = false;
     private bool _isCameraMoving = false;
@@ -141,9 +142,53 @@ public class GuiCallbacks : MonoBehaviour
 					_gameController.GetLevelController().SetActiveLevel(lv);
 				}
 				break;
+
+            case "DeathMenuButton":
+                {
+                    _wantsToMenu = true;
+                    HideDeathMenu();
+                }
+                break;
+
+            case "DeathResetButton":
+                {
+                    _wantsToReset = true;
+                    HideDeathMenu();
+                }
+                break;
         }
     }
-	
+
+    private void HideDeathMenu()
+    {
+        GuiController gc = _gameController.GetGuiController();
+        GameObject deathMenu = gc.GetDialog("DeathMenuUI");
+
+        if (deathMenu != null && _isOnDeathMenu)
+        {
+            if (deathMenu.activeSelf)
+            {
+                _gameController.SetGamePaused(false);
+                TransformTweener tt = deathMenu.GetComponent<TransformTweener>();
+
+                tt.Position0 = new Vector3(0, 0, 0);
+                tt.PositionF = new Vector3(0, 0, 0);
+
+                tt.Rotation0 = 0f;
+                tt.RotationF = 0f;
+
+                tt.Scale0 = new Vector3(1, 1, 1);
+                tt.ScaleF = new Vector3(0, 0, 0);
+
+                tt.DoTween(this.gameObject);
+            }
+        }
+        else
+        {
+            Debug.LogError("DeathMenuUI is null!");
+        }
+    }
+
 	private void HideMenu()
 	{
 		GuiController gc = _gameController.GetGuiController();
@@ -204,6 +249,37 @@ public class GuiCallbacks : MonoBehaviour
 			Debug.LogError("PauseMenuUI is null!");
 		}
 	}
+
+    public void OnPlayerDied()
+    {
+        GuiController gc = _gameController.GetGuiController();
+        GameObject deathMenu = gc.GetDialog("DeathMenuUI");
+
+        if (deathMenu != null && !_isOnDeathMenu)
+        {
+            if (!deathMenu.activeSelf)
+            {
+                _gameController.SetGamePaused(true);
+                TransformTweener tt = deathMenu.GetComponent<TransformTweener>();
+                deathMenu.SetActive(true);
+
+                tt.Position0 = new Vector3(0, 0, 0);
+                tt.PositionF = new Vector3(0, 0, 0);
+
+                tt.Rotation0 = 0f;
+                tt.RotationF = 0f;
+
+                tt.Scale0 = new Vector3(0, 0, 0);
+                tt.ScaleF = new Vector3(1, 1, 1);
+
+                tt.DoTween(this.gameObject);
+            }
+        }
+        else
+        {
+            Debug.LogError("DeathMenuUI is null!");
+        }
+    }
 	
 	public void OnTweenFinished(string control)
 	{
@@ -228,11 +304,40 @@ public class GuiCallbacks : MonoBehaviour
 			// Handle go back to menu event
 			if (_wantsToMenu)
 			{
-				// To-Do: Save state and go back to the menu scene
-				Application.Quit();
+                OnBackToMenu();
 			}
 		}
+        else if (control.Contains("DeathMenuUI"))
+        {
+            if (_isOnDeathMenu)
+            {
+                GuiController gc = _gameController.GetGuiController();
+                GameObject deathMenu = gc.GetDialog("DeathMenuUI");
+                deathMenu.SetActive(false);
+            }
+
+            _isOnDeathMenu = !_isOnDeathMenu;
+
+            // Handle reset event
+            if (_wantsToReset)
+            {
+                _gameController.GetGuiController().ResetLevel();
+                _wantsToReset = false;
+            }
+
+            // Handle go back to menu event
+            if (_wantsToMenu)
+            {
+                OnBackToMenu();
+            }
+        }
 	}
+
+    private void OnBackToMenu()
+    {
+        // To-Do: Save state and go back to the menu scene
+        Application.Quit();
+    }
 	
 	public void DebugMenuPreviousLevel()
 	{
