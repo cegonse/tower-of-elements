@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
@@ -75,7 +75,6 @@ public class Player : MonoBehaviour {
     private float _jumpTimeActive = 0f;
 	
 	// Camera position
-	private Vector3 _cameraOffset;
 	private float _cameraDampingTime = 0.1f;
 	private Vector3 _cameraVelocity;
     
@@ -95,7 +94,6 @@ public class Player : MonoBehaviour {
     private Direction _animationDirection = Direction.None;
     private PlayerAnimState _animStateAfterJump = PlayerAnimState.BeginMove;
 
-    private bool _beginning = true;
     
     public void SetActiveLevel(Level lv)
     {
@@ -127,7 +125,6 @@ public class Player : MonoBehaviour {
         _upRay = new Ray2D();
         _upRay.direction = Vector2.up;
 
-		_cameraOffset = new Vector3(0,0,-1); 
 		_cameraVelocity = new Vector3();
 
         _animState = PlayerAnimState.IdleFront;
@@ -421,10 +418,9 @@ public class Player : MonoBehaviour {
     public void AdjustCamera()
     {
         Vector3 camPos = _gameController.GetCamera().transform.position;
-        camPos = Vector3.SmoothDamp(camPos, transform.position, ref _cameraVelocity, _cameraDampingTime);
+        camPos = Vector3.SmoothDamp(camPos, transform.position+new Vector3(0f,0f,-1f), ref _cameraVelocity, _cameraDampingTime);
 
         _gameController.GetCamera().transform.position = camPos;
-        _gameController.GetCamera().transform.position += _cameraOffset;
     }
     
     //Adjust the jumping values in funtion of the desired player's direction (_targetDirection)
@@ -512,10 +508,6 @@ public class Player : MonoBehaviour {
         if (!_isDying && _animState != PlayerAnimState.Action)
         {
             _action = type;
-            
-            //Debug.Log("He entrado en DoAction");
-            //Debug.Log(_velocity.x);
-            //Debug.Log(_velocity.x);
 
             _actionHappen = false;
             _actionDirectionSaved = _actionDirection;
@@ -869,8 +861,6 @@ public class Player : MonoBehaviour {
             }
             else
             {
-                if (!_beginning)
-                {
                     if (_animState == PlayerAnimState.Action)
                     {
                         _animStateAfterJump = PlayerAnimState.IdleTurned;
@@ -886,11 +876,6 @@ public class Player : MonoBehaviour {
                         _animStateAfterJump = PlayerAnimState.IdleTurned;
                         _changeAnimation = true;
                     }
-                }
-                else
-                {
-                    _beginning = false;
-                }
                 
             }
         }
