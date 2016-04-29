@@ -77,47 +77,45 @@ public class Block : MonoBehaviour
         //*************************************************
         //Check if there is a block under the current block
         //*************************************************
-        bool _isThereBlockUnder = false;
+        bool isThereBlockUnder = false;
+        bool isTherePlatformDown = false;
+        float ymax = -Mathf.Infinity;
         GameObject goHitDown = null;
         GameObject blockDown = null;
+        RaycastHit2D[] hit_down;
 
-        _downRay.origin = transform.position + new Vector3(-0.45f, -0.51f, 0f);
-        RaycastHit2D[] hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, _length-0.1f);
-        for (int down_i = 0; down_i < hit_down.Length; down_i++)
-        {
-            if (hit_down[down_i].collider != null)
-            {
-                goHitDown = hit_down[down_i].collider.gameObject;
-                if (goHitDown.GetComponent<Block>() != null)
-                {
-                    _isThereBlockUnder = true;
-                    blockDown = goHitDown;
-                }
-            }
-        }
-
-        if (!_isThereBlockUnder)
+        if (!isThereBlockUnder)
         {
             for (int i = 0; i < _theOtherDownRays.Length; i++)
             {
                 _theOtherDownRays[i].origin = transform.position + new Vector3(i, -0.51f, 0f);
                 hit_down = Physics2D.RaycastAll(_theOtherDownRays[i].origin, _theOtherDownRays[i].direction, 0.1f);
 
-                for (int down_others_i = 0; down_others_i < hit_down.Length; down_others_i++)
+                for (int down_others_i = 0; !isTherePlatformDown && down_others_i < hit_down.Length; down_others_i++)
                 {
                     if (hit_down[down_others_i].collider != null)
                     {
+                        
                         goHitDown = hit_down[down_others_i].collider.gameObject;
-                        Block blockComponent = goHitDown.GetComponent<Block>();
-                        if (blockComponent != null)
+                        
+                        if (ymax <= goHitDown.transform.position.y)
                         {
-                            _isThereBlockUnder = true;
-                            blockDown = goHitDown;
-                            if (blockComponent.IsPlatform())
+                            ymax = goHitDown.transform.position.y;
+
+                            Block blockComponent = goHitDown.GetComponent<Block>();
+                            if (blockComponent != null)
                             {
-                                break;
+                                isThereBlockUnder = true;
+                                blockDown = goHitDown;
+                                if (blockComponent.IsPlatform())
+                                {
+                                    isTherePlatformDown = true;
+                                    break;
+                                }
                             }
                         }
+                        
+                        
                     }
                 }
             }
@@ -126,7 +124,7 @@ public class Block : MonoBehaviour
         //*************************************************
         //  Go ahead if there is a block under this block
         //*************************************************
-        if (_isThereBlockUnder)
+        if (isThereBlockUnder)
         {
             _state = State.Grounded;
                     
