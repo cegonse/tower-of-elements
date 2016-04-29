@@ -257,6 +257,7 @@ public class Level
 
         // Bounds for the camera zooming
         int minX = 0, minY = 0, maxX = 0, maxY = 0;
+        
         int tx, ty;
 
         foreach (KeyValuePair<Vector2,BlockData> bl in _blocks)
@@ -264,15 +265,23 @@ public class Level
             tx = bl.Key.x;
             ty = bl.Key.y;
 
-            if (tx < minX && ty < minY)
+            if (tx < minX)
             {
                 minX = tx;
+            }
+
+            if (ty < minY)
+            {
                 minY = ty;
             }
 
-            if (tx >= maxX && ty >= maxY)
+            if (tx >= maxX)
             {
                 maxX = tx;
+            }
+
+            if (ty >= maxY)
+            {
                 maxY = ty;
             }
         }
