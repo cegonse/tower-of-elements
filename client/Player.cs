@@ -487,16 +487,12 @@ public class Player : MonoBehaviour {
         {
             case PlayerActions.Earth:
                 return _earth;
-                break;
             case PlayerActions.Fire:
                 return _fire;
-                break;
             case PlayerActions.Ice:
                 return _ice;
-                break;
             case PlayerActions.Wind:
                 return _wind;
-                break;
             default:
                 return -1;
 
