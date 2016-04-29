@@ -84,6 +84,7 @@ public class Player : MonoBehaviour {
 
     //AnimState
     private PlayerAnimState _animState = PlayerAnimState.IdleFront;
+    private bool _begining = true;
     private bool _changeAnimation = true;
     private bool _canMove = false;
     private bool _isDying = false;
@@ -856,11 +857,13 @@ public class Player : MonoBehaviour {
                 {
                     _animStateAfterJump = PlayerAnimState.BeginMove;
                 }
-                
-                
+
+                _begining = false;
             }
             else
             {
+                if (!_begining)
+                {
                     if (_animState == PlayerAnimState.Action)
                     {
                         _animStateAfterJump = PlayerAnimState.IdleTurned;
@@ -876,6 +879,8 @@ public class Player : MonoBehaviour {
                         _animStateAfterJump = PlayerAnimState.IdleTurned;
                         _changeAnimation = true;
                     }
+                }
+                    
                 
             }
         }
