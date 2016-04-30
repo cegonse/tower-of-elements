@@ -36,7 +36,6 @@ public class Block : MonoBehaviour
     //Rays
 
     private Ray2D _downRay;
-    private Ray2D[] _theOtherDownRays;
     private Ray2D _rightRay;
     private Ray2D _leftRay;
 	
@@ -77,54 +76,37 @@ public class Block : MonoBehaviour
         //*************************************************
         //Check if there is a block under the current block
         //*************************************************
-        bool isThereBlockUnder = false;
-        bool isTherePlatformDown = false;
+
         float ymax = -Mathf.Infinity;
         GameObject goHitDown = null;
         GameObject blockDown = null;
         RaycastHit2D[] hit_down;
 
-        if (!isThereBlockUnder)
+        _downRay.origin = transform.position + new Vector3(0, -0.51f, 0);
+        hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, _length - 1f);
+        //Go through all the colliders of the raycast
+        for (int i_down = 0; i_down < hit_down.Length; i_down++)
         {
-            for (int i = 0; i < _theOtherDownRays.Length; i++)
+            goHitDown = hit_down[i_down].collider.gameObject;
+
+            Block blockComponent = goHitDown.GetComponent<Block>();
+            //Check if it is a block and if it is over the other blocks.
+            //If it is over the other blocks means that it is the block
+            // that we must save to adjust our position.y
+            if (blockComponent != null && ymax <= goHitDown.transform.position.y)
             {
-                _theOtherDownRays[i].origin = transform.position + new Vector3(i, -0.51f, 0f);
-                hit_down = Physics2D.RaycastAll(_theOtherDownRays[i].origin, _theOtherDownRays[i].direction, 0.1f);
-
-                for (int down_others_i = 0; !isTherePlatformDown && down_others_i < hit_down.Length; down_others_i++)
-                {
-                    if (hit_down[down_others_i].collider != null)
-                    {
-                        
-                        goHitDown = hit_down[down_others_i].collider.gameObject;
-                        
-                        if (ymax <= goHitDown.transform.position.y)
-                        {
-                            ymax = goHitDown.transform.position.y;
-
-                            Block blockComponent = goHitDown.GetComponent<Block>();
-                            if (blockComponent != null)
-                            {
-                                isThereBlockUnder = true;
-                                blockDown = goHitDown;
-                                if (blockComponent.IsPlatform())
-                                {
-                                    isTherePlatformDown = true;
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        
-                    }
-                }
+                //Save the maximum Y
+                ymax = goHitDown.transform.position.y;
+                //Save the block is down
+                blockDown = goHitDown;
             }
+
         }
 
         //*************************************************
         //  Go ahead if there is a block under this block
         //*************************************************
-        if (isThereBlockUnder)
+        if (blockDown != null)
         {
             _state = State.Grounded;
                     
@@ -262,14 +244,6 @@ public class Block : MonoBehaviour
     public void SetLength(float l)
     {
         _length = l;
-
-        //Initialize theOtherDownRays -(optimize?)-
-        _theOtherDownRays = new Ray2D[(int)l];
-        for (int i=0; i < _theOtherDownRays.Length; i++)
-        {
-            _theOtherDownRays[i] = new Ray2D();
-            _theOtherDownRays[i].direction = Vector2.down;
-        }
         
     }
 
