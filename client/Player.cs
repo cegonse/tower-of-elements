@@ -543,11 +543,26 @@ public class Player : MonoBehaviour {
 
                             if (true) //_wind > 0)
                             {
-                                if (_actionDirectionSaved == Direction.Right || _actionDirectionSaved == Direction.Left)
-                                {
-                                    RaycastHit2D hit = Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f);
+                                RaycastHit2D[] hit = Physics2D.RaycastAll(transform.position, _actionRay.direction, 0.6f);
 
-                                    //Check if there is something on the player's Left or Right
+                                //Check if there is something on the player's Left or Right
+                                GameObject aux = null;
+                                for (int i_hit = 0; i_hit < hit.Length; i_hit++)
+                                {
+                                    aux = hit[i_hit].collider.gameObject;
+
+                                    Block goHitBlock = aux.GetComponent<Block>();
+                                    if (goHitBlock != null && goHitBlock.IsMovable())
+                                    {
+                                        Debug.Log("entra en block");
+                                        break;
+                                    }
+                                }
+
+                                _actionObjectAux = aux;
+                                _actionHappen = true;
+                                Debug.Log(_actionObjectAux.name);
+                                /*
                                     if (hit.collider != null)
                                     {
                                         _actionObjectAux = hit.collider.gameObject;
@@ -569,7 +584,7 @@ public class Player : MonoBehaviour {
                                     {
                                         _actionObjectAux = null;
                                     }
-                                }
+                                */
                             }
 
                             break;
