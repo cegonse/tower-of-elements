@@ -94,6 +94,7 @@ public class Player : MonoBehaviour {
     private GameObject _actionObjectAux;
     private Direction _animationDirection = Direction.None;
     private PlayerAnimState _animStateAfterJump = PlayerAnimState.BeginMove;
+    private bool _isOnDoor = false;
 
     
     public void SetActiveLevel(Level lv)
@@ -139,7 +140,7 @@ public class Player : MonoBehaviour {
         {
             if (!_activeLevel.GetLevelController().GetGameController().IsGamePaused())
             {
-                if (!_isDying)
+                if (!_isDying && !_isOnDoor)
                 {
                     SetPreviousPlayerDirection();
 
@@ -554,14 +555,14 @@ public class Player : MonoBehaviour {
                                     Block goHitBlock = aux.GetComponent<Block>();
                                     if (goHitBlock != null && goHitBlock.IsMovable())
                                     {
-                                        Debug.Log("entra en block");
+                                        //Debug.Log("entra en block");
                                         break;
                                     }
                                 }
 
                                 _actionObjectAux = aux;
                                 _actionHappen = true;
-                                Debug.Log(_actionObjectAux.name);
+                                //Debug.Log(_actionObjectAux.name);
                                 /*
                                     if (hit.collider != null)
                                     {
@@ -896,6 +897,17 @@ public class Player : MonoBehaviour {
             }
         }
 
+    }
+
+    public void OnAlphaTweenFinished()
+    {
+        GameObject.Find("GuiCallbacks").GetComponent<GuiCallbacks>().OnPlayerHitDoor();
+    }
+
+    public void OnLevelFinished()
+    {
+        _isOnDoor = true;
+        transform.GetChild(0).GetComponent<SpriteAlphaTweener>().DoTween(gameObject);
     }
     
     public Direction GetDirection ()

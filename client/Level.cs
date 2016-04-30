@@ -686,7 +686,13 @@ public class Level
                 Debug.Log("WARNING!! Player without an assigned animation: " + anim[i]);
             }
         }
-            
+
+        // Add the alpha tweener for the finishing animation
+        SpriteAlphaTweener alphaTweener = child.AddComponent<SpriteAlphaTweener>();
+
+        alphaTweener.StartAlpha = 1f;
+        alphaTweener.EndAlpha = 0f;
+        alphaTweener.TweenTime = 1f;
 
         return go;
     }

@@ -41,7 +41,9 @@ public class SpriteAlphaTweener : MonoBehaviour
 
         if (_rend == null)
         {
+#if UNITY_EDITOR
             Debug.LogError("GameObject doesn't have a SpriteRenderer attached!");
+#endif
         }
 
         if (StartOnLoad)

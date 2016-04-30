@@ -11,6 +11,8 @@ public class GuiCallbacks : MonoBehaviour
 	private bool _wantsToReset = false;
 	private bool _wantsToMenu = false;
     private bool _isCameraMoving = false;
+    private bool _isOnWinMenu = false;
+    private bool _wantsToContinue = false;
 
     public void SetGameController(GameController gc)
     {
@@ -137,9 +139,7 @@ public class GuiCallbacks : MonoBehaviour
 				
 			case "SkipLevel":
 				{
-					string lv = _gameController.GetLevelController().GetActiveLevel().GetTargetLevel();
-					_gameController.GetLevelController().GetActiveLevel().ClearLevel();
-					_gameController.GetLevelController().SetActiveLevel(lv);
+                    OnContinueNextLevel();
 				}
 				break;
 
@@ -154,6 +154,27 @@ public class GuiCallbacks : MonoBehaviour
                 {
                     _wantsToReset = true;
                     HideDeathMenu();
+                }
+                break;
+
+            case "WinMenuButton":
+                {
+                    _wantsToMenu = true;
+                    HideWinMenu();
+                }
+                break;
+
+            case "WinResetButton":
+                {
+                    _wantsToReset = true;
+                    HideWinMenu();
+                }
+                break;
+
+            case "WinNextButton":
+                {
+                    _wantsToContinue = true;
+                    HideWinMenu();
                 }
                 break;
         }
@@ -250,6 +271,67 @@ public class GuiCallbacks : MonoBehaviour
 		}
 	}
 
+    public void OnPlayerHitDoor()
+    {
+        GuiController gc = _gameController.GetGuiController();
+        GameObject winMenu = gc.GetDialog("WinMenuUI");
+
+        if (winMenu != null && !_isOnWinMenu)
+        {
+            if (!winMenu.activeSelf)
+            {
+                _gameController.SetGamePaused(true);
+                TransformTweener tt = winMenu.GetComponent<TransformTweener>();
+                winMenu.SetActive(true);
+
+                tt.Position0 = new Vector3(0, 0, 0);
+                tt.PositionF = new Vector3(0, 0, 0);
+
+                tt.Rotation0 = 0f;
+                tt.RotationF = 0f;
+
+                tt.Scale0 = new Vector3(0, 0, 0);
+                tt.ScaleF = new Vector3(1, 1, 1);
+
+                tt.DoTween(this.gameObject);
+            }
+        }
+        else
+        {
+            Debug.LogError("WinMenuUI is null!");
+        }
+    }
+
+    private void HideWinMenu()
+    {
+        GuiController gc = _gameController.GetGuiController();
+        GameObject winMenu = gc.GetDialog("WinMenuUI");
+
+        if (winMenu != null && _isOnWinMenu)
+        {
+            if (winMenu.activeSelf)
+            {
+                _gameController.SetGamePaused(false);
+                TransformTweener tt = winMenu.GetComponent<TransformTweener>();
+
+                tt.Position0 = new Vector3(0, 0, 0);
+                tt.PositionF = new Vector3(0, 0, 0);
+
+                tt.Rotation0 = 0f;
+                tt.RotationF = 0f;
+
+                tt.Scale0 = new Vector3(1, 1, 1);
+                tt.ScaleF = new Vector3(0, 0, 0);
+
+                tt.DoTween(this.gameObject);
+            }
+        }
+        else
+        {
+            Debug.LogError("WinMenuUI is null!");
+        }
+    }
+
     public void OnPlayerDied()
     {
         GuiController gc = _gameController.GetGuiController();
@@ -331,7 +413,45 @@ public class GuiCallbacks : MonoBehaviour
                 OnBackToMenu();
             }
         }
+        else if (control.Contains("WinMenuUI"))
+        {
+            if (_isOnWinMenu)
+            {
+                GuiController gc = _gameController.GetGuiController();
+                GameObject winMenu = gc.GetDialog("WinMenuUI");
+                winMenu.SetActive(false);
+            }
+
+            _isOnWinMenu = !_isOnWinMenu;
+
+            // Handle reset event
+            if (_wantsToReset)
+            {
+                _gameController.GetGuiController().ResetLevel();
+                _wantsToReset = false;
+            }
+
+            // Handle go back to menu event
+            if (_wantsToMenu)
+            {
+                OnBackToMenu();
+            }
+
+            // Handle continue event
+            if (_wantsToContinue)
+            {
+                OnContinueNextLevel();
+                _wantsToContinue = false;
+            }
+        }
 	}
+
+    private void OnContinueNextLevel()
+    {
+        string lv = _gameController.GetLevelController().GetActiveLevel().GetTargetLevel();
+        _gameController.GetLevelController().GetActiveLevel().ClearLevel();
+        _gameController.GetLevelController().SetActiveLevel(lv);
+    }
 
     private void OnBackToMenu()
     {

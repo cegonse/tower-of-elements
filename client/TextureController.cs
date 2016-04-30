@@ -77,8 +77,10 @@ public class TextureController
 			for (int i = 0; i < jAnim.Count; i++)
 			{
 				LoadAnimation(jAnim[i].str);
+#if UNITY_EDITOR
                 Debug.Log("Animation loaded: " + jAnim[i].str);
-			}
+#endif
+            }
 		}
 	}
 	
