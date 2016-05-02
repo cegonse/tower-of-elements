@@ -47,7 +47,11 @@ public class Main : MonoBehaviour
 
         for (int i = 0; i < imagesInCanvas.Length; i++)
         {
-			Texture2D tex = Resources.Load("Textures/" + imagesInCanvas[i].gameObject.name) as Texture2D;;
+			Texture2D tex = Resources.Load("Textures/" + imagesInCanvas[i].gameObject.name) as Texture2D;
+            if (tex == null)
+            {
+                Debug.LogError("Missing texture on GUI!!!");
+            }
 			Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
 			new Vector2(0.5f, 0.5f), 256f);
 			imagesInCanvas[i].sprite = spr;

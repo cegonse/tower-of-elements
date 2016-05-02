@@ -18,10 +18,15 @@ public class EnemyFlyer : EnemyBase
 	private int _targetIndex = 0;
     private EnemyBase _enemy;
 
+    private bool _beggining = true;
+
+
     new void Start()
     {
         //Let the base.Start() method for a properly initialization
         base.Start();
+
+        
     }
 
     void Update()
@@ -74,6 +79,21 @@ public class EnemyFlyer : EnemyBase
     private void MovingEnemy()
     {
 
+        if (_beggining)
+        {
+            //Change the localScale relative to the direction the flyer will go only on the beggining
+            if (transform.position.x < _target.x)
+                transform.localScale = new Vector3(1, 1f, 1f);
+            else if (transform.position.x > _target.x)
+                transform.localScale = new Vector3(-1, 1f, 1f);
+            else if (transform.position.x < _flyerData.pf.x)
+                transform.localScale = new Vector3(1, 1f, 1f);
+            else
+                transform.localScale = new Vector3(-1, 1f, 1f);
+            Debug.Log("HEY!");
+            _beggining = false;
+        }
+
         _position = Vector2.SmoothDamp(_position, _target, ref _velocity, _speed / 3f, _speed, Time.deltaTime);
         transform.position = new Vector3(_position.x, _position.y, 0f);
 
@@ -91,7 +111,12 @@ public class EnemyFlyer : EnemyBase
                 {
                     _state = EnemyState.WALKING;
                     sa.SetActiveAnimation("WALKING");
-                    transform.localScale = new Vector3(transform.localScale.x*-1, 1f, 1f);
+                    if(transform.position.x < _target.x)
+                        transform.localScale = new Vector3(1, 1f, 1f);
+                    else if(transform.position.x > _target.x)
+                        transform.localScale = new Vector3(-1, 1f, 1f);
+                    else
+                        transform.localScale = new Vector3(transform.localScale.x*-1, 1f, 1f);
                 }
                 break;
         }
@@ -104,7 +129,8 @@ public class EnemyFlyer : EnemyBase
 		_flyerData = (FlyerEnemyData) data;
         _position = transform.position;
 		_target = _flyerData.p0;
-        transform.localScale = new Vector3(transform.localScale.x * -1, 1f, 1f);
+
+        
         
 	}
 }

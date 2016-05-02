@@ -334,7 +334,7 @@ public class Level
         AddEntity(go, go.name);
 	}
 
-    public GameObject CreateBlock(BlockType type, int x, int y, string texture, float length = 1, bool vertical = false)
+    public GameObject CreateBlock(BlockType type, int x, int y, string texture, float length = 1, bool vertical = false, int sortingOrder = 105)
     {
         GameObject go = new GameObject("_" + x.ToString() + "_" + y.ToString() + "_" + Random.Range(0, 5000).ToString() + "_blockEntity");
         go.transform.position = new Vector3(x, y, 0);
@@ -381,7 +381,7 @@ public class Level
                         new Vector2(0.5f, 0.5f), texSize);
                     rend.sprite = spr;
                     //Adding value to sorting layer
-                    rend.sortingOrder = 100;
+                    rend.sortingOrder = sortingOrder;
 
                     //Adding the SpriteAnimator component
                     SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
@@ -430,7 +430,7 @@ public class Level
                     rend.sprite = spr;
 
                     //Adding value to sorting layer
-                    rend.sortingOrder = 100;
+                    rend.sortingOrder = sortingOrder;
 
                     //SpriteAnimator
                     SpriteAnimator sprite_animator = go_child.AddComponent<SpriteAnimator>();
@@ -469,7 +469,7 @@ public class Level
                         rend.sprite = spr;
 
                         //Adding value to sorting layer
-                        rend.sortingOrder = 100;
+                        rend.sortingOrder = sortingOrder;
                         //Adding the SpriteAnimator component
                         sprite_animator = go_child.AddComponent<SpriteAnimator>();
                         if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_14" + (vertical ? "_vert" : "") + "_Anim") != null)
@@ -508,7 +508,7 @@ public class Level
                     rend.sprite = spr;
 
                     //Adding value to sorting layer
-                    rend.sortingOrder = 100;
+                    rend.sortingOrder = sortingOrder;
                     //Adding the SpriteAnimator component
                     sprite_animator = go_child.AddComponent<SpriteAnimator>();
                     if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_15" + (vertical ? "_vert" : "") + "_Anim") != null)
@@ -570,7 +570,7 @@ public class Level
 		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
 			new Vector2(0.5f, 0.5f), texSize);
 		rend.sprite = spr;
-		rend.sortingOrder = 100;
+		rend.sortingOrder = 110;
 
         SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
 		if (_levelController.GetGameController().GetTextureController().GetAnimation("Blocks/Fireball/Fireball_1_Anim") != null)
@@ -588,7 +588,7 @@ public class Level
 		go.transform.position = new Vector3(x, y+0.15f, 0);
 		
 		BoxCollider2D col = go.AddComponent<BoxCollider2D>();
-		col.size = new Vector2(0.6f, 1f);
+		col.size = new Vector2(0.1f, 1f);
 		
 		Rigidbody2D r = go.AddComponent<Rigidbody2D>();
 		r.isKinematic = true;
@@ -611,7 +611,7 @@ public class Level
 		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
             new Vector2(0.5f, 0.5f), texSize);
 		rend.sprite = spr;
-		rend.sortingOrder = 100;
+		rend.sortingOrder = 90;
 		
 		return go;
 	}
@@ -735,8 +735,7 @@ public class Level
             case EnemyType.Lever:
                 Lever lv = go.AddComponent<Lever>();
                 lv.SetLevel(this);
-                GameObject bl = CreateBlock(BlockType.Crate, x, y, name, (data.speed > 0 ? data.speed : 1), (data.hp > 0 ? true : false));
-                bl.GetComponent<Block>().SetPlatform(true);
+                GameObject bl = CreateBlock(BlockType.Crate, x, y, name, (data.speed > 0 ? data.speed : 1), (data.hp > 0 ? true : false), 104);
                 AddEntity(bl, "blockEntity_" + x + "_" + y + "_crate");
                 lv.SetDoor(bl);
                 lv.SetEnemyData(data);
@@ -754,7 +753,7 @@ public class Level
                 new Vector2(0.5f, 0.5f), texSize);
 
             rend.sprite = spr;
-            rend.sortingOrder = 100;
+            rend.sortingOrder = 105;
 
             Lever lv = go.GetComponent<Lever>();
             lv.SetSprites("Blocks/Lever/Lever_1_Frame_1", "Blocks/Lever/Lever_1_Frame_2");
@@ -771,7 +770,7 @@ public class Level
                 new Vector2(0.5f, 0.5f), texSize);
 
             rend.sprite = spr;
-            rend.sortingOrder = 100;
+            rend.sortingOrder = 103;
 
 
             SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
