@@ -119,6 +119,10 @@ public class SaveGameController : MonoBehaviour
         json.AddField("levels", jlist);
 
         File.WriteAllText(_path, Cypher(json.Print()));
+        
+        #if UNITY_WEBGL
+        Application.ExternalCall("FS.syncfs", false, null);
+        #endif
     }
 
     public void Load()
@@ -173,7 +177,10 @@ public class SaveGameController : MonoBehaviour
         {
             result[i] ^= _saveKey[k++];
 
-            if (k > _saveKey.Length) k = 0;
+            if (k > _saveKey.Length)
+            {
+                k = 0;
+            }
         }
 
         return result.ToString();
