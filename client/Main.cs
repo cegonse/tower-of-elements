@@ -114,40 +114,5 @@ public class Main : MonoBehaviour
 
     }
 
-    /*
-      Estos métodos se llaman cuando un botón acciona un callback
-    */
-    public void PointerDown(UnityEngine.UI.Image img)
-    {
-        GameObject go = img.gameObject;
-        Debug.Log("PointerDown!");
-        switch (go.name)
-        {
-            case "Left" :
-                _gameController.GetGuiController().MovePlayerLeft();
-                Debug.Log("Left done!");
-                break;
-            case "Right" :
-                _gameController.GetGuiController().MovePlayerRight();
-                Debug.Log("Right done!");
-                break;
-
-        }
-    }
-
-    public void PointerUp(UnityEngine.UI.Image img)
-    {
-        GameObject go = img.gameObject;
-
-        switch (go.name)
-        {
-            case "Left":
-            case "Right":
-                _gameController.GetGuiController().StopPlayer();
-                break;
-
-        }
-    }
-
 }
 

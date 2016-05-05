@@ -62,9 +62,17 @@ public class Player : MonoBehaviour {
     private Ray2D _leftRay2;
 
     private Ray2D _upRay;
-    
+
+    //Offset values
     private const float _rayDownCollisionOffset = 0.25f;
     private const float _raySidesCollisionOffset = 0.31f;
+
+    //Offset Vectors
+    private Vector3 _vectorDownCollisionOffset;
+    private Vector3 _vectorRight1CollisionOffset;
+    private Vector3 _vectorRight2CollisionOffset;
+    private Vector3 _vectorLeft1CollisionOffset;
+    private Vector3 _vectorLeft2CollisionOffset;
 
     private Ray2D _actionRay;
 
@@ -127,6 +135,13 @@ public class Player : MonoBehaviour {
         _upRay = new Ray2D();
         _upRay.direction = Vector2.up;
 
+        //Vector Offsets
+        _vectorDownCollisionOffset = new Vector3(-_rayDownCollisionOffset, -0.51f, 0f);
+        _vectorRight1CollisionOffset = new Vector3(_raySidesCollisionOffset, 0f, 0f);
+        _vectorRight2CollisionOffset = new Vector3(_raySidesCollisionOffset, 1f, 0f);
+        _vectorLeft1CollisionOffset = new Vector3(-_raySidesCollisionOffset, 0f, 0f);
+        _vectorLeft2CollisionOffset = new Vector3(-_raySidesCollisionOffset, 1f, 0f);
+
 		_cameraVelocity = new Vector3();
 
         _animState = PlayerAnimState.IdleFront;
@@ -171,7 +186,7 @@ public class Player : MonoBehaviour {
     {
         if (_state != State.Jumping)
         {
-            _downRay.origin = transform.position + new Vector3(-_rayDownCollisionOffset, -0.51f, 0f);
+            _downRay.origin = transform.position + _vectorDownCollisionOffset;
 
             RaycastHit2D hit_down = Physics2D.Raycast(_downRay.origin, _downRay.direction, _rayDownCollisionOffset*2);
 
@@ -202,7 +217,7 @@ public class Player : MonoBehaviour {
                     //Check the player's Right
                     if (_playerDirection == Direction.Right)
                     {
-                        _rightRay1.origin = transform.position + new Vector3(_raySidesCollisionOffset, 0f, 0f);
+                        _rightRay1.origin = transform.position + _vectorRight1CollisionOffset;
 
                         RaycastHit2D hit_right = Physics2D.Raycast(_rightRay1.origin, _rightRay1.direction, 0.01f);
                         //Check if there is something on the player's Right
@@ -218,14 +233,14 @@ public class Player : MonoBehaviour {
                                 _playerDirection = Direction.None;
 
                                 //Check if there is a block over the block which player collided with
-                                _rightRay2.origin = transform.position + new Vector3(_raySidesCollisionOffset, 1f, 0f);
+                                _rightRay2.origin = transform.position + _vectorRight2CollisionOffset;
 
                                 RaycastHit2D hit_right2 = Physics2D.Raycast(_rightRay2.origin, _rightRay2.direction, 0.01f);
 
                                 if(hit_right2.collider == null)
                                 {
                                     //Check if ther is a block over the player
-                                    _upRay.origin = transform.position + new Vector3(0f, 1f, 0f);
+                                    _upRay.origin = transform.position + Vector3.up;
 
                                     RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
 
@@ -245,8 +260,8 @@ public class Player : MonoBehaviour {
                     //Check the player's Left
                     if (_playerDirection == Direction.Left)
                     {
-                        
-                        _leftRay1.origin = transform.position + new Vector3(-_raySidesCollisionOffset, 0f, 0f);
+
+                        _leftRay1.origin = transform.position + _vectorLeft1CollisionOffset;
 
                         RaycastHit2D hit_left = Physics2D.Raycast(_leftRay1.origin, _leftRay1.direction, 0.01f);
                         
@@ -263,7 +278,7 @@ public class Player : MonoBehaviour {
                                 _playerDirection = Direction.None;
 
                                 //Check if there is a block over the block which player collided with
-                                _leftRay2.origin = transform.position + new Vector3(-_raySidesCollisionOffset, 1f, 0f);
+                                _leftRay2.origin = transform.position + _vectorLeft2CollisionOffset;
 
                                 RaycastHit2D hit_left2 = Physics2D.Raycast(_leftRay2.origin, _leftRay2.direction, 0.01f);
 
@@ -271,7 +286,7 @@ public class Player : MonoBehaviour {
                                 {
 
                                     //Check if ther is a block over the player
-                                    _upRay.origin = transform.position + new Vector3(0f, 1f, 0f);
+                                    _upRay.origin = transform.position + Vector3.up;
 
                                     RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
 
@@ -917,7 +932,7 @@ public class Player : MonoBehaviour {
 
     public void DestroyPlayer()
     {
-        if (!_isDying)
+        if (!_isDying && !_isOnDoor)
         {
             _animState = PlayerAnimState.Death;
             _changeAnimation = true;

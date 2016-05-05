@@ -121,7 +121,7 @@ public class SaveGameController : MonoBehaviour
         File.WriteAllText(_path, Cypher(json.Print()));
         
         #if UNITY_WEBGL
-        Application.ExternalCall("FS.syncfs", false, null);
+        Application.ExternalCall("FS.syncfs", false);
         #endif
     }
 
