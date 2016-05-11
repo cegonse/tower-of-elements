@@ -7,7 +7,7 @@ public class SaveGameController : MonoBehaviour
 {
     public struct LevelProgressData
     {
-        public int Id;
+        public string Id;
         public float Score;
     }
 
@@ -21,12 +21,28 @@ public class SaveGameController : MonoBehaviour
     private bool _sfxOn = true;
 
     private List<LevelProgressData> _levels;
+	
+	private bool _hasWindPower = false;
+    private bool _hasIcePower = false;
+    private bool _hasFirePower = false;
+    private bool _hasEarthPower = false;
+
+    private string _targetLevel;
+
+    public enum UnlockablePowers
+    {
+        Wind,
+        Ice,
+        Fire,
+        Earth
+    }
 
     void Start()
     {
         if (instance == null)
         {
             instance = this;
+            GameObject.DontDestroyOnLoad(gameObject);
         }
 
         _path = Application.persistentDataPath + Path.DirectorySeparatorChar + "save.json";
@@ -65,16 +81,19 @@ public class SaveGameController : MonoBehaviour
     public void ToggleMusic(bool m)
     {
         _musicOn = m;
+        Save();
     }
 
     public void ToggleSfx(bool s)
     {
         _sfxOn = s;
+        Save();
     }
 
     public void SetActiveLanguage(SystemLanguage l)
     {
         _language = l;
+        Save();
     }
 
     public void SetLevelProgress(LevelProgressData lvp)
@@ -94,6 +113,69 @@ public class SaveGameController : MonoBehaviour
         {
             _levels.Add(lvp);
         }
+
+        Save();
+    }
+	
+	public bool HasPower(UnlockablePowers p)
+    {
+        bool result = false;
+
+        switch (p)
+        {
+            case UnlockablePowers.Earth:
+                result = _hasEarthPower;
+                break;
+
+            case UnlockablePowers.Fire:
+                result = _hasFirePower;
+                break;
+
+            case UnlockablePowers.Ice:
+                result = _hasIcePower;
+                break;
+
+            case UnlockablePowers.Wind:
+                result = _hasWindPower;
+                break;
+        }
+
+        return result;
+    }
+
+    public void UnlockPower(UnlockablePowers p)
+    {
+        switch (p)
+        {
+            case UnlockablePowers.Earth:
+                _hasEarthPower = true;
+                break;
+
+            case UnlockablePowers.Fire:
+                _hasFirePower = true;
+                break;
+
+            case UnlockablePowers.Ice:
+                _hasIcePower = true;
+                break;
+
+            case UnlockablePowers.Wind:
+                _hasWindPower = true;
+                break;
+        }
+
+        Save();
+    }
+
+    public void SetTargetLevel(string tg)
+    {
+        _targetLevel = tg;
+        Save();
+    }
+
+    public string GetTargetLevel()
+    {
+        return _targetLevel;
     }
 
     public void Save()
@@ -103,6 +185,13 @@ public class SaveGameController : MonoBehaviour
         json.AddField("language", (int)_language);
         json.AddField("music", _musicOn);
         json.AddField("sfx", _sfxOn);
+		
+		json.AddField("has_wind", _hasWindPower);
+        json.AddField("has_ice", _hasIcePower);
+        json.AddField("has_fire", _hasFirePower);
+        json.AddField("has_earth", _hasEarthPower);
+
+        json.AddField("target_level", _targetLevel);
 
         JSONObject jlist = new JSONObject(JSONObject.Type.ARRAY);
 
@@ -144,6 +233,13 @@ public class SaveGameController : MonoBehaviour
                     _musicOn = save["music"].b;
                     _sfxOn = save["sfx"].b;
 
+                    _hasWindPower = save["has_wind"].b;
+                    _hasIcePower = save["has_ice"].b;
+                    _hasFirePower = save["has_fire"].b;
+                    _hasEarthPower = save["has_earth"].b;
+
+                    _targetLevel = save["target_level"].str;
+
                     List<JSONObject> lv = save["levels"].list;
 
                     if (lv != null)
@@ -154,7 +250,7 @@ public class SaveGameController : MonoBehaviour
                         {
                             LevelProgressData lvp = new LevelProgressData();
 
-                            lvp.Id = (int)lv[i]["id"].n;
+                            lvp.Id = lv[i]["id"].str;
                             lvp.Score = lv[i]["score"].n;
 
                             _levels.Add(lvp);
