@@ -449,6 +449,12 @@ public class GuiCallbacks : MonoBehaviour
     private void OnContinueNextLevel()
     {
         string lv = _gameController.GetLevelController().GetActiveLevel().GetTargetLevel();
+
+        if (SaveGameController.instance != null)
+        {
+            SaveGameController.instance.SetTargetLevel(lv);
+        }
+
         _gameController.GetLevelController().GetActiveLevel().ClearLevel();
         _gameController.GetLevelController().SetActiveLevel(lv);
     }

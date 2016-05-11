@@ -31,10 +31,12 @@ public class Door : MonoBehaviour
         if (!_playerHit)
         {
             RaycastHit2D hit = Physics2D.Raycast(_downRay.origin, Vector2.up, 0.71f);
+
             if (hit.collider != null)
             {
                 GameObject goHit = hit.collider.gameObject;
                 Player pl = goHit.GetComponent<Player>();
+
                 if (pl != null)
                 {
                     OnPlayerHit(pl);
@@ -45,16 +47,12 @@ public class Door : MonoBehaviour
 
     private void OnPlayerHit(Player p)
     {
-
         #if UNITY_EDITOR
         Debug.Log("Loading next level");
         #endif
 
         p.OnLevelFinished();
         _playerHit = true;
-        //_activeLevel.ClearLevel();
-        //_activeLevel.GetLevelController().SetActiveLevel(_destinationLevel);
-
     }
 	
 	public void SetDestinationLevel(string lv)
