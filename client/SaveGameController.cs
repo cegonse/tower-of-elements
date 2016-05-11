@@ -27,7 +27,7 @@ public class SaveGameController : MonoBehaviour
     private bool _hasFirePower = false;
     private bool _hasEarthPower = false;
 
-    private string _targetLevel;
+    private string _targetLevel = "0_01";
 
     public enum UnlockablePowers
     {
@@ -240,20 +240,23 @@ public class SaveGameController : MonoBehaviour
 
                     _targetLevel = save["target_level"].str;
 
-                    List<JSONObject> lv = save["levels"].list;
-
-                    if (lv != null)
+                    if (save["levels"] != null)
                     {
-                        _levels.Clear();
+                        List<JSONObject> lv = save["levels"].list;
 
-                        for (int i = 0; i < lv.Count; i++)
+                        if (lv != null)
                         {
-                            LevelProgressData lvp = new LevelProgressData();
+                            _levels.Clear();
 
-                            lvp.Id = lv[i]["id"].str;
-                            lvp.Score = lv[i]["score"].n;
+                            for (int i = 0; i < lv.Count; i++)
+                            {
+                                LevelProgressData lvp = new LevelProgressData();
 
-                            _levels.Add(lvp);
+                                lvp.Id = lv[i]["id"].str;
+                                lvp.Score = lv[i]["score"].n;
+
+                                _levels.Add(lvp);
+                            }
                         }
                     }
                 }
