@@ -205,7 +205,7 @@ public class SaveGameController : MonoBehaviour
             jlist.Add(jfield);
         }
 
-        json.AddField("levels", jlist);
+        Debug.Log(json.Print());
 
         File.WriteAllText(_path, Cypher(json.Print()));
         
@@ -273,7 +273,7 @@ public class SaveGameController : MonoBehaviour
         {
             result[i] ^= _saveKey[k++];
 
-            if (k > _saveKey.Length)
+            if (k >= _saveKey.Length)
             {
                 k = 0;
             }
