@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class GameController
 {
 	public const bool IS_EDITOR_RUNTIME = false;
-    public const bool IS_DEBUG_MODE = false;
+    public const bool IS_DEBUG_MODE = true;
 
 	public enum GameState
 	{
@@ -19,7 +19,7 @@ public class GameController
     private GuiController _guiController;
 	private DebugMenuController _debugMenuController;
 
-	public GameState _state = GameState.Init;
+	private GameState _state = GameState.Init;
 
     private Camera _cam;
 	private string _targetLevel;
@@ -45,6 +45,8 @@ public class GameController
 				_cam.orthographic = true;
 				_cam.orthographicSize = 3.5f;
 				_cam.backgroundColor = Color.black;
+
+                go.AddComponent<AudioListener>();
 			
 				_guiController.HideDialog("InGameUI");
 

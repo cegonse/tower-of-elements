@@ -22,12 +22,14 @@ public class Level
     private int _minX, _minY, _maxX, _maxY;
     private int[] _camBounds = new int[4];
 	private string _targetLevel;
+    private AudioClip _aud;
 	
 	public Level(LevelController levelController, string name)
 	{
 		_levelController = levelController;
 		_name = name;
 		_entities = new Dictionary<string, GameObject>();
+        _aud = Resources.Load("Music/IG_1") as AudioClip;
 	}
 	
 	public void AddEntity(GameObject go, string name)
@@ -53,22 +55,22 @@ public class Level
 
         if (json)
         {
-			_publicName = json["public_name"].str;
-			_difficulty = (int)json["difficulty"].n;
+            _publicName = json["public_name"].str;
+            _difficulty = (int)json["difficulty"].n;
             _illuminated = json["illuminated"].n == 1;
-            
-			string songName = json["song"].str;
-			
-			if (!string.IsNullOrEmpty(songName))
-			{
-				_song = Resources.Load("Music/" + songName) as AudioClip;
-			}
-			
+
+            string songName = json["song"].str;
+
+            if (!string.IsNullOrEmpty(songName))
+            {
+                _song = Resources.Load("Music/" + songName) as AudioClip;
+            }
+
             JSONObject door = json["door"];
 
             if (door)
             {
-				// Create door entity and assign data
+                // Create door entity and assign data
                 int doorx = (int)door["x"].n;
                 int doory = (int)door["y"].n;
                 _targetLevel = door["targetLevel"].str;
@@ -79,16 +81,16 @@ public class Level
                     Debug.LogError("Setting target level to self.");
                     _targetLevel = _name;
                 }
-				
-				GameObject go_door = CreateDoor(doorx, doory, _targetLevel);
-				AddEntity(go_door, go_door.name);
+
+                GameObject go_door = CreateDoor(doorx, doory, _targetLevel);
+                AddEntity(go_door, go_door.name);
             }
 
             JSONObject player = json["player"];
 
             if (player)
             {
-				// Load player data from JSON
+                // Load player data from JSON
                 int x = (int)player["x"].n;
                 int y = (int)player["y"].n;
 
@@ -96,30 +98,23 @@ public class Level
                 int fire = (int)player["fire"].n;
                 int earth = (int)player["earth"].n;
                 int wind = (int)player["wind"].n;
-				
-				JSONObject light = player["light"];
-				
-				// If the player has a light, assign light data
+
+                JSONObject light = player["light"];
+
+                // If the player has a light, assign light data
                 if (light)
                 {
-                    //_player.light = new Light();
-
                     float color_r = light["color_r"].n;
                     float color_g = light["color_g"].n;
                     float color_b = light["color_b"].n;
                     float radius = light["radius"].n;
-
-                    /*_player.light.color_r = color_r;
-                    _player.light.color_g = color_g;
-                    _player.light.color_b = color_b;
-                    _player.light.radius = radius;*/
                 }
-				
-				GameObject go_player = CreatePlayer(x, y, ice, fire, earth, wind);
-				AddEntity(go_player, go_player.name);
+
+                GameObject go_player = CreatePlayer(x, y, ice, fire, earth, wind);
+                AddEntity(go_player, go_player.name);
             }
 
-			List<JSONObject> jsonBlocks = json["blocks"].list;
+            List<JSONObject> jsonBlocks = json["blocks"].list;
 
             for (int i = 0; i < jsonBlocks.Count; i++)
             {
@@ -130,128 +125,95 @@ public class Level
                 string destruction_sound = jsonBlocks[i]["destruction_sound"].str;
                 string walk_sound = jsonBlocks[i]["walk_sound"].str;
                 string move_sound = jsonBlocks[i]["move_sound"].str;
-				
-				float length = 1f;
-				
-				if (jsonBlocks[i]["length"] != null)
-				{
-					length = jsonBlocks[i]["length"].n;
-				}
-				
-                /*JSONObject light = jsonBlocks[i]["light"];
 
-                if (light)
+                float length = 1f;
+
+                if (jsonBlocks[i]["length"] != null)
                 {
-                    d.light = new Light();
+                    length = jsonBlocks[i]["length"].n;
+                }
 
-                    float color_r = light["color_r"].n;
-                    float color_g = light["color_g"].n;
-                    float color_b = light["color_b"].n;
-                    float radius = light["radius"].n;
-
-                    d.light.color_r = color_r;
-                    d.light.color_g = color_g;
-                    d.light.color_b = color_b;
-                    d.light.radius = radius;
-                }*/
-				
-				LoadBlock(t,x,y,texture,length);
+                LoadBlock(t, x, y, texture, length);
             }
-			
-			// Background loading
-			if (json["backgrounds"] != null)
-			{
-				List<JSONObject> jsonBgs = json["backgrounds"].list;
-				
-				for (int i = 0; i < jsonBgs.Count; i++)
-				{
-					int x = (int)jsonBgs[i]["x"].n;
-					int y = (int)jsonBgs[i]["y"].n;
-					string texture = jsonBgs[i]["texture"].str;
+
+            // Background loading
+            if (json["backgrounds"] != null)
+            {
+                List<JSONObject> jsonBgs = json["backgrounds"].list;
+
+                for (int i = 0; i < jsonBgs.Count; i++)
+                {
+                    int x = (int)jsonBgs[i]["x"].n;
+                    int y = (int)jsonBgs[i]["y"].n;
+                    string texture = jsonBgs[i]["texture"].str;
                     int layer = (int)jsonBgs[i]["layer"].n;
-					/*JSONObject light = jsonBlocks[i]["light"];
 
-					if (light)
-					{
-						d.light = new Light();
+                    GameObject go = CreateBackground(x, y, texture, layer);
+                    AddEntity(go, go.name);
+                }
+            }
 
-						float color_r = light["color_r"].n;
-						float color_g = light["color_g"].n;
-						float color_b = light["color_b"].n;
-						float radius = light["radius"].n;
+            if (json["enemies"] != null)
+            {
+                List<JSONObject> jsonEnemies = json["enemies"].list;
 
-						d.light.color_r = color_r;
-						d.light.color_g = color_g;
-						d.light.color_b = color_b;
-						d.light.radius = radius;
-					}*/
-					
-					GameObject go = CreateBackground(x,y,texture,layer);
-					AddEntity(go, go.name);
-				}
-			}
-			
-			if (json["enemies"] != null)
-			{
-				List<JSONObject> jsonEnemies = json["enemies"].list;
-				
-				for (int i = 0; i < jsonEnemies.Count; i++)
-				{
-					EnemyType type = (EnemyType)jsonEnemies[i]["type"].n;
-					float speed = jsonEnemies[i]["speed"].n;
-					int hp = (int)jsonEnemies[i]["hp"].n;
-					string texture = jsonEnemies[i]["texture"].str;
-					int spawnx = (int)jsonEnemies[i]["spawnx"].n;
-					int spawny = (int)jsonEnemies[i]["spawny"].n;
-					
-					if (type == EnemyType.Flyer)
-					{
-						FlyerEnemyData dd = new FlyerEnemyData();
-						
-						int p0x = (int)jsonEnemies[i]["x0"].n;
-						int p0y = (int)jsonEnemies[i]["y0"].n;
-						int pfx = (int)jsonEnemies[i]["xf"].n;
-						int pfy = (int)jsonEnemies[i]["yf"].n;
-						
-						dd.p0 = new Vector2(p0x, p0y);
-						dd.pf = new Vector2(pfx, pfy);
-						dd.speed = speed;
-						dd.hp = hp;
-						
-						GameObject go_en = CreateEnemy(EnemyType.Flyer, spawnx, spawny, texture, (BaseEnemyData)dd);
-						AddEntity(go_en, "flyer_enemy" + "_" + spawnx.ToString() + "_" + spawny.ToString());
-					}
-					else if (type == EnemyType.Walker)
-					{
-						WalkerEnemyData dd = new WalkerEnemyData();
-						
-						int p0x = (int)jsonEnemies[i]["x0"].n;
-						int p0y = (int)jsonEnemies[i]["y0"].n;
-						int pfx = (int)jsonEnemies[i]["xf"].n;
-						int pfy = (int)jsonEnemies[i]["yf"].n;
-						
-						dd.p0 = new Vector2(p0x, p0y);
-						dd.p1 = new Vector2(pfx, pfy);
-						dd.speed = speed;
-						dd.hp = hp;
+                for (int i = 0; i < jsonEnemies.Count; i++)
+                {
+                    EnemyType type = (EnemyType)jsonEnemies[i]["type"].n;
+                    float speed = jsonEnemies[i]["speed"].n;
+                    int hp = (int)jsonEnemies[i]["hp"].n;
+                    string texture = jsonEnemies[i]["texture"].str;
+                    int spawnx = (int)jsonEnemies[i]["spawnx"].n;
+                    int spawny = (int)jsonEnemies[i]["spawny"].n;
+
+                    if (type == EnemyType.Flyer)
+                    {
+                        FlyerEnemyData dd = new FlyerEnemyData();
+
+                        int p0x = (int)jsonEnemies[i]["x0"].n;
+                        int p0y = (int)jsonEnemies[i]["y0"].n;
+                        int pfx = (int)jsonEnemies[i]["xf"].n;
+                        int pfy = (int)jsonEnemies[i]["yf"].n;
+
+                        dd.p0 = new Vector2(p0x, p0y);
+                        dd.pf = new Vector2(pfx, pfy);
+                        dd.speed = speed;
+                        dd.hp = hp;
+
+                        GameObject go_en = CreateEnemy(EnemyType.Flyer, spawnx, spawny, texture, (BaseEnemyData)dd);
+                        AddEntity(go_en, "flyer_enemy" + "_" + spawnx.ToString() + "_" + spawny.ToString());
+                    }
+                    else if (type == EnemyType.Walker)
+                    {
+                        WalkerEnemyData dd = new WalkerEnemyData();
+
+                        int p0x = (int)jsonEnemies[i]["x0"].n;
+                        int p0y = (int)jsonEnemies[i]["y0"].n;
+                        int pfx = (int)jsonEnemies[i]["xf"].n;
+                        int pfy = (int)jsonEnemies[i]["yf"].n;
+
+                        dd.p0 = new Vector2(p0x, p0y);
+                        dd.p1 = new Vector2(pfx, pfy);
+                        dd.speed = speed;
+                        dd.hp = hp;
                         BaseEnemyData bb = (BaseEnemyData)dd;
                         bb.speed = dd.speed;
                         bb.hp = dd.hp;
-						GameObject go_en = CreateEnemy(EnemyType.Walker, spawnx, spawny, texture, bb);
-						AddEntity(go_en, "walker_enemy" + "_" + spawnx.ToString() + "_" + spawny.ToString());
-					}
-					else if (type == EnemyType.Roamer)
-					{
-						RoamerEnemyData dd = new RoamerEnemyData();
-					
-						int direction = (int)jsonEnemies[i]["direction"].n;
-						dd.direction = (Direction)direction;
+                        GameObject go_en = CreateEnemy(EnemyType.Walker, spawnx, spawny, texture, bb);
+                        AddEntity(go_en, "walker_enemy" + "_" + spawnx.ToString() + "_" + spawny.ToString());
+                    }
+                    else if (type == EnemyType.Roamer)
+                    {
+                        RoamerEnemyData dd = new RoamerEnemyData();
+
+                        int direction = (int)jsonEnemies[i]["direction"].n;
+                        dd.direction = (Direction)direction;
                         dd.speed = speed;
                         dd.hp = hp;
 
                         GameObject go_en = CreateEnemy(EnemyType.Roamer, spawnx, spawny, texture, (BaseEnemyData)dd);
-						AddEntity(go_en, "roamer_enemy" + "_" + spawnx.ToString() + "_" + spawny.ToString());
-					}
+                        AddEntity(go_en, "roamer_enemy" + "_" + spawnx.ToString() + "_" + spawny.ToString());
+                    }
                     else if (type == EnemyType.Lever)
                     {
                         LeverDoorData dd = new LeverDoorData();
@@ -267,12 +229,11 @@ public class Level
                         dd.speed = speed;
                         dd.hp = hp;
 
-                        GameObject go_en = CreateEnemy(EnemyType.Lever, spawnx, spawny, texture, (BaseEnemyData) dd);
-                        //AddEntity(go_en, "lever_door" + "_" + dd.p0.x.ToString() + "_" + dd.p0.y.ToString());
+                        GameObject go_en = CreateEnemy(EnemyType.Lever, spawnx, spawny, texture, (BaseEnemyData)dd);
                         AddEntity(go_en, "lever_door" + "_" + spawnx.ToString() + "_" + spawny.ToString());
                     }
-				}
-			}
+                }
+            }
 
             if (json["enemies"] != null)
             {
@@ -292,40 +253,17 @@ public class Level
                     Debug.LogError("Level " + _name + " doesn't have bounds. Defaulting to zero.");
                 }
             }
+
+            {
+                int x = 0;
+                int y = -3;
+                string texture = "Blocks/Backgrounds/Triggers/WindTrigger_Background";
+                int layer = 99;
+
+                GameObject go = CreateBackground(x, y, texture, layer);
+                AddEntity(go, go.name);
+            }
         }
-
-        /*
-        RoamerEnemyData prueba = new RoamerEnemyData();
-
-        int dir = (int)Direction.Right;
-        prueba.direction = (Direction)dir;
-        Vector2 spawn = new Vector2(3, 4);
-        GameObject go_prueba = CreateEnemy(EnemyType.Roamer, 5, 4, "Blocks/Fireball/Fireball_1", (BaseEnemyData)prueba);
-        AddEntity(go_prueba, "roamer_enemy" + "_" + spawn.x.ToString() + "_" + spawn.y.ToString());
-        
-        FlyerEnemyData prueba2 = new FlyerEnemyData();
-        prueba2.p0 = new Vector2(-1, 4);
-        prueba2.pf = new Vector2(5, 4);
-
-        GameObject go_prueba2 = CreateEnemy(EnemyType.Flyer, 5, 4, "Enemies/EnemyFlyer_1/EnemyFlyer_1", (BaseEnemyData)prueba2);
-        AddEntity(go_prueba2, "flyer_enemy" + "_" + prueba2.p0.x.ToString() + "_" + prueba2.p0.y.ToString());
-        
-        
-        WalkerEnemyData prueba3 = new WalkerEnemyData();
-        prueba3.p0 = new Vector2(-3, 0);
-        prueba3.p1 = new Vector2(4, 4);
-
-        GameObject go_prueba3 = CreateEnemy(EnemyType.Walker, 0, 0, "Enemies/EnemyFlyer_1/EnemyFlyer_1", (BaseEnemyData)prueba3);
-        AddEntity(go_prueba3, "walker_enemy" + "_" + prueba3.p0.x.ToString() + "_" + prueba3.p0.y.ToString());
-        
-
-        LeverDoorData prueba4 = new LeverDoorData();
-        prueba4.p0 = new Vector2(0, 0);
-        prueba4.p1 = new Vector2(0, 4);
-
-        GameObject go_prueba4 = CreateEnemy(EnemyType.Lever, -2, -3, "Blocks/Wood/WoodBox_1", (BaseEnemyData)prueba4);
-        AddEntity(go_prueba4, "lever_door" + "_" + prueba4.p0.x.ToString() + "_" + prueba4.p0.y.ToString());
-        */
     }
 	
 	public void LoadBlock(BlockType type, int x, int y, string name, float length = 1)
@@ -528,21 +466,62 @@ public class Level
 		
 		Texture2D tex = null;
 		
-		tex = (Texture2D) _levelController.GetGameController().
-					GetTextureController().GetTexture(texture);
-        float texSize = _levelController.GetGameController().
-                    GetTextureController().GetTextureSize(texture);
+		tex = (Texture2D) _levelController.GetGameController().GetTextureController().GetTexture(texture);
+        float texSize = _levelController.GetGameController().GetTextureController().GetTextureSize(texture);
 		SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
-		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
-			new Vector2(0.5f, 0.5f), texSize);
+		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), texSize);
 		rend.sprite = spr;
 		rend.sortingOrder = layer;
 
         SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
+
 		if (_levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim") != null)
 		{
             sprite_animator.AddAnimation("STANDING", _levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
 		}
+
+        // Trigger block handling
+        TriggerBlock tgb = null;
+        GameObject ttl = GameObject.Find("TriggerTextLabel");
+
+        // Wind trigger block handler
+        if (texture.Contains("WindTrigger"))
+        {
+            tgb = go.AddComponent<TriggerBlock>();
+            tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Wind, ttl);
+        }
+        else if (texture.Contains("IceTrigger"))
+        {
+            tgb = go.AddComponent<TriggerBlock>();
+            tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Ice, ttl);
+        }
+        else if (texture.Contains("FireTrigger"))
+        {
+            tgb = go.AddComponent<TriggerBlock>();
+            tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Fire, ttl);
+        }
+        else if (texture.Contains("EarthTrigger"))
+        {
+            tgb = go.AddComponent<TriggerBlock>();
+            tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Earth, ttl);
+        }
+
+        if (tgb != null)
+        {
+            if (!GameController.IS_DEBUG_MODE)
+            {
+                rend.enabled = false;
+            }
+
+            BoxCollider2D boxColl = go.AddComponent<BoxCollider2D>();
+            boxColl.size = Vector2.one;
+            boxColl.offset = Vector2.zero;
+
+            Rigidbody2D r = go.AddComponent<Rigidbody2D>();
+            r.isKinematic = true;
+
+            go.name += "_Trigger";
+        }
 		
 		return go;
 	}
@@ -620,6 +599,12 @@ public class Level
     {
         GameObject go = new GameObject("player");
         go.transform.position = new Vector3(x, y, 0);
+
+        // Music loading
+        AudioSource asource = go.AddComponent<AudioSource>();
+        asource.clip = _aud;
+        asource.loop = true;
+        asource.Play();
 
         BoxCollider2D col = go.AddComponent<BoxCollider2D>();
 		col.size = new Vector2(0.6f , 1.0f);
