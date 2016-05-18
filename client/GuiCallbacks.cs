@@ -214,6 +214,7 @@ public class GuiCallbacks : MonoBehaviour
 	{
 		GuiController gc = _gameController.GetGuiController();
 		GameObject pauseMenu = gc.GetDialog("PauseMenuUI");
+        _gameController.GetAudioController().SetChannelVolume(0, 1f);
 		
 		if (pauseMenu != null && _isOnMenu)
 		{
@@ -244,6 +245,7 @@ public class GuiCallbacks : MonoBehaviour
 	{
 		GuiController gc = _gameController.GetGuiController();
 		GameObject pauseMenu = gc.GetDialog("PauseMenuUI");
+        _gameController.GetAudioController().SetChannelVolume(0, 0.5f);
 
 		if (pauseMenu != null && !_isOnMenu)
 		{
@@ -379,6 +381,8 @@ public class GuiCallbacks : MonoBehaviour
 			// Handle reset event
 			if (_wantsToReset)
 			{
+                _gameController.GetAudioController().PauseChannel(0);
+                _gameController.GetAudioController().StopChannel(1, true);
 				_gameController.GetGuiController().ResetLevel();
 				_wantsToReset = false;
 			}
@@ -403,6 +407,8 @@ public class GuiCallbacks : MonoBehaviour
             // Handle reset event
             if (_wantsToReset)
             {
+                _gameController.GetAudioController().PauseChannel(0);
+                _gameController.GetAudioController().StopChannel(1, true);
                 _gameController.GetGuiController().ResetLevel();
                 _wantsToReset = false;
             }

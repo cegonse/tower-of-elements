@@ -3,11 +3,9 @@ using System.Collections.Generic;
 
 public class LevelController
 {
-	
 	private GameController _gameController;
 	private Dictionary<string, Level> _levels;
 	private Level _activeLevel;
-	
     
 	public LevelController(GameController gameController)
 	{
@@ -27,6 +25,9 @@ public class LevelController
                 CreateLevel(jsonLev[i].str);
             }
         }
+
+        _gameController.GetAudioController().PlayChannel(0);
+        _gameController.GetAudioController().PauseChannel(0);
 	}
 	
     
@@ -102,12 +103,16 @@ public class LevelController
         if(_activeLevel != null)
 		    _activeLevel.ClearLevel();
 			
-		if (GameObject.Find("LevelName") != null)
+		if (GameController.IS_DEBUG_MODE)
 		{
 			GameObject.Find("LevelName").GetComponent<UnityEngine.UI.Text>().text = level;
 		}
         
 		_activeLevel = _levels[level];
+
+        _gameController.GetAudioController().PauseChannel(0);
+        _gameController.GetAudioController().StopChannel(1, true);
+
 		_activeLevel.LoadLevel();
 	}
 	

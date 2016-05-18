@@ -131,11 +131,15 @@ public class Block : MonoBehaviour
                         Vector3 pRight = transform.position;
                         pRight.x = goHitRight.transform.position.x - _length;
                         transform.position = pRight;
+
+                        _activeLevel.GetLevelController().GetGameController().GetAudioController().StopChannel(3);
+                        _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(4);
                     }
                 }
                 else
                 {
                     _velocity.x = _speed;
+                    _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(3);
                 }
             }
             else if(_velocity.x < 0)
@@ -149,21 +153,27 @@ public class Block : MonoBehaviour
                     if (goHitLeft.GetComponent<Block>() != null)
                     {
                         _velocity.x = 0;
+
                         //Ajustar posicion del bloque
                         Vector3 pLeft = transform.position;
                         pLeft.x = goHitLeft.transform.position.x + goHitLeft.GetComponent<Block>().GetLength();
                         transform.position = pLeft;
+
+                        _activeLevel.GetLevelController().GetGameController().GetAudioController().StopChannel(3);
+                        _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(4);
                     }
                 }
                 else
                 {
                     _velocity.x = -_speed;
+                    _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(3);
                 }
             }
         }//Down if 1
         else
         {
             _state = State.Falling;
+            _activeLevel.GetLevelController().GetGameController().GetAudioController().StopChannel(3);
         }
         
     }
@@ -198,7 +208,6 @@ public class Block : MonoBehaviour
             case State.Grounded:
             
                 p.x += Time.deltaTime * _velocity.x;
-                //p.y += Time.deltaTime * _velocity.y * _accSpeed;
                 break;
             
             case State.Falling:
@@ -262,6 +271,8 @@ public class Block : MonoBehaviour
                 case Direction.Right: _velocity.x = _speed;
                     break;
             }
+
+            _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(3);
         }
 	}
 	
@@ -282,6 +293,8 @@ public class Block : MonoBehaviour
 
     public void Destroy(Direction dir)
     {
+        _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(1);
+
         if (_length > 1)
         {
 

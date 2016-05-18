@@ -103,6 +103,7 @@ public class Player : MonoBehaviour {
     private Direction _animationDirection = Direction.None;
     private PlayerAnimState _animStateAfterJump = PlayerAnimState.BeginMove;
     private bool _isOnDoor = false;
+    private bool _fadeOutMusic = true;
 
     
     public void SetActiveLevel(Level lv)
@@ -172,6 +173,28 @@ public class Player : MonoBehaviour {
             }
         }
 
+        if (_isOnDoor && _fadeOutMusic)
+        {
+            float vol = _gameController.GetAudioController().GetChannelVolume(0);
+
+            if (vol <= 0.1f)
+            {
+                // Pause in-game music
+                _gameController.GetAudioController().PauseChannel(0);
+                _gameController.GetAudioController().SetChannelVolume(0, 1f);
+
+                // Play winning music
+                //...
+
+                _fadeOutMusic = false;
+            }
+            else
+            {
+                // Fade in 1 sec
+                vol -= Time.deltaTime;
+                _gameController.GetAudioController().SetChannelVolume(0, vol);
+            }
+        }
     }
 
     //Set the player's real direction (_playerDirection) in function of desired direction (_targetDirection)
@@ -462,15 +485,93 @@ public class Player : MonoBehaviour {
     
     public void SetActions(int ice, int fire, int wind, int earth)
     {
+        Text earthLabel = GameObject.Find("EarthUsesLabel").GetComponent<Text>();
+        Text windLabel = GameObject.Find("WindUsesLabel").GetComponent<Text>();
+        Text fireLabel = GameObject.Find("FireUsesLabel").GetComponent<Text>();
+        Text iceLabel = GameObject.Find("WaterUsesLabel").GetComponent<Text>();
+
+        Image earthButton = GameObject.Find("Earth").GetComponent<Image>();
+        Image windButton = GameObject.Find("Wind").GetComponent<Image>();
+        Image fireButton = GameObject.Find("Fire").GetComponent<Image>();
+        Image iceButton = GameObject.Find("Water").GetComponent<Image>();
+
         _ice = ice;
         _fire = fire;
         _wind = wind;
         _earth = earth;
-        
-         GameObject.Find("WaterUsesLabel").GetComponent<Text>().text = _ice.ToString();
-         GameObject.Find("FireUsesLabel").GetComponent<Text>().text = _fire.ToString();
-         GameObject.Find("EarthUsesLabel").GetComponent<Text>().text = _earth.ToString();
-         GameObject.Find("WindUsesLabel").GetComponent<Text>().text = _wind.ToString();
+
+        earthLabel.text = _earth.ToString();
+        fireLabel.text = _fire.ToString();
+        iceLabel.text = _ice.ToString();
+        windLabel.text = _wind.ToString();
+
+        if (_earth == 0 && !GameController.IS_DEBUG_MODE)
+        {
+            earthButton.color = new Color(1f, 1f, 1f, 0f);
+
+            Color c = earthLabel.color;
+            c.a = 0f;
+            earthLabel.color = c;
+        }
+        else
+        {
+            earthButton.color = Color.white;
+
+            Color c = earthLabel.color;
+            c.a = 1f;
+            earthLabel.color = c;
+        }
+
+        if (_fire == 0 && !GameController.IS_DEBUG_MODE)
+        {
+            fireButton.color = new Color(1f, 1f, 1f, 0f);
+
+            Color c = fireLabel.color;
+            c.a = 0f;
+            fireLabel.color = c;
+        }
+        else
+        {
+            fireButton.color = Color.white;
+
+            Color c = fireLabel.color;
+            c.a = 1f;
+            fireLabel.color = c;
+        }
+
+        if (_ice == 0 && !GameController.IS_DEBUG_MODE)
+        {
+            iceButton.color = new Color(1f, 1f, 1f, 0f);
+
+            Color c = iceLabel.color;
+            c.a = 0f;
+            iceLabel.color = c;
+        }
+        else
+        {
+            iceButton.color = Color.white;
+
+            Color c = iceLabel.color;
+            c.a = 1f;
+            iceLabel.color = c;
+        }
+
+        if (_wind == 0 && !GameController.IS_DEBUG_MODE)
+        {
+            windButton.color = new Color(1f, 1f, 1f, 0f);
+
+            Color c = windLabel.color;
+            c.a = 0f;
+            windLabel.color = c;
+        }
+        else
+        {
+            windButton.color = Color.white;
+
+            Color c = windLabel.color;
+            c.a = 1f;
+            windLabel.color = c;
+        }
     }
 
     public void SetUsesOfElem(PlayerActions elem, int uses)
@@ -478,22 +579,112 @@ public class Player : MonoBehaviour {
         switch (elem)
         {
             case PlayerActions.Earth:
-                _earth = uses;
-                GameObject.Find("EarthUsesLabel").GetComponent<Text>().text = _earth.ToString();
-                break;
-            case PlayerActions.Fire:
-                _fire = uses;
-                GameObject.Find("FireUsesLabel").GetComponent<Text>().text = _fire.ToString();
-                break;
-            case PlayerActions.Ice:
-                _ice = uses;
-                GameObject.Find("WaterUsesLabel").GetComponent<Text>().text = _ice.ToString();
-                break;
-            case PlayerActions.Wind:
-                _wind = uses;
-                GameObject.Find("WindUsesLabel").GetComponent<Text>().text = _wind.ToString();
+                {
+                    Text earthLabel = GameObject.Find("EarthUsesLabel").GetComponent<Text>();
+                    Image earthButton = GameObject.Find("Earth").GetComponent<Image>();
+
+                    _earth = uses;
+                    earthLabel.text = _earth.ToString();
+
+                    if (_earth == 0 && !GameController.IS_DEBUG_MODE)
+                    {
+                        earthButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+                        Color c = earthLabel.color;
+                        c.a = 0f;
+                        earthLabel.color = c;
+                    }
+                    else
+                    {
+                        earthButton.color = Color.white;
+
+                        Color c = earthLabel.color;
+                        c.a = 1f;
+                        earthLabel.color = c;
+                    }
+                }
                 break;
 
+            case PlayerActions.Fire:
+                {
+                    Text fireLabel = GameObject.Find("FireUsesLabel").GetComponent<Text>();
+                    Image fireButton = GameObject.Find("Fire").GetComponent<Image>();
+
+                    _fire = uses;
+                    fireLabel.text = _fire.ToString();
+
+                    if (_fire == 0 && !GameController.IS_DEBUG_MODE)
+                    {
+                        fireButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+                        Color c = fireLabel.color;
+                        c.a = 0f;
+                        fireLabel.color = c;
+                    }
+                    else
+                    {
+                        fireButton.color = Color.white;
+
+                        Color c = fireLabel.color;
+                        c.a = 1f;
+                        fireLabel.color = c;
+                    }
+                }
+                break;
+
+            case PlayerActions.Ice:
+                {
+                    Text iceLabel = GameObject.Find("WaterUsesLabel").GetComponent<Text>();
+                    Image iceButton = GameObject.Find("Water").GetComponent<Image>();
+
+                    _ice = uses;
+                    iceLabel.text = _ice.ToString();
+
+                    if (_ice == 0 && !GameController.IS_DEBUG_MODE)
+                    {
+                        iceButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+                        Color c = iceLabel.color;
+                        c.a = 0f;
+                        iceLabel.color = c;
+                    }
+                    else
+                    {
+                        iceButton.color = Color.white;
+
+                        Color c = iceLabel.color;
+                        c.a = 1f;
+                        iceLabel.color = c;
+                    }
+                }
+                break;
+
+            case PlayerActions.Wind:
+                {
+                    Text windLabel = GameObject.Find("WindUsesLabel").GetComponent<Text>();
+                    Image windButton = GameObject.Find("Wind").GetComponent<Image>();
+
+                    _wind = uses;
+                    windLabel.text = _wind.ToString();
+
+                    if (_wind == 0 && !GameController.IS_DEBUG_MODE)
+                    {
+                        windButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+                        Color c = windLabel.color;
+                        c.a = 0f;
+                        windLabel.color = c;
+                    }
+                    else
+                    {
+                        windButton.color = Color.white;
+
+                        Color c = windLabel.color;
+                        c.a = 1f;
+                        windLabel.color = c;
+                    }
+                }
+                break;
         }
     }
 
@@ -548,7 +739,12 @@ public class Player : MonoBehaviour {
                         case PlayerActions.Ice:
                             if (!Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f))
                             {
-                                if (true) //_ice > 0)
+                                if (_ice > 0)
+                                {
+                                    _actionHappen = true;
+                                }
+
+                                if (GameController.IS_DEBUG_MODE)
                                 {
                                     _actionHappen = true;
                                 }
@@ -556,13 +752,12 @@ public class Player : MonoBehaviour {
 
                             break;
                         case PlayerActions.Wind:
-
-                            if (true) //_wind > 0)
                             {
                                 RaycastHit2D[] hit = Physics2D.RaycastAll(transform.position, _actionRay.direction, 0.6f);
 
                                 //Check if there is something on the player's Left or Right
                                 GameObject aux = null;
+
                                 for (int i_hit = 0; i_hit < hit.Length; i_hit++)
                                 {
                                     aux = hit[i_hit].collider.gameObject;
@@ -570,44 +765,49 @@ public class Player : MonoBehaviour {
                                     Block goHitBlock = aux.GetComponent<Block>();
                                     if (goHitBlock != null && goHitBlock.IsMovable())
                                     {
-                                        //Debug.Log("entra en block");
                                         break;
                                     }
                                 }
 
                                 _actionObjectAux = aux;
-                                _actionHappen = true;
-                                //Debug.Log(_actionObjectAux.name);
-                                /*
-                                    if (hit.collider != null)
-                                    {
-                                        _actionObjectAux = hit.collider.gameObject;
 
-                                        //Check if it is a Block
-                                        Block goHitBlock = _actionObjectAux.GetComponent<Block>();
-                                        if (goHitBlock != null && goHitBlock.IsMovable())
-                                        {
-                                            _actionHappen = true;
-                                        }
-                                        //Check if it is a Lever
-                                        Lever goHitLever = _actionObjectAux.GetComponent<Lever>();
-                                        if (goHitLever != null)
-                                        {
-                                            _actionHappen = true;
-                                        }
+                                // Check if the wind in front of the player is a lever
+                                // If it's not, reduce the wind use count
+                                // If it is, force the action to happen and don't change
+                                // the wind use count
+                                if (_actionObjectAux != null)
+                                {
+                                    Lever goHitLever = _actionObjectAux.GetComponent<Lever>();
+
+                                    if (goHitLever != null)
+                                    {
+                                        _actionHappen = true;
                                     }
                                     else
                                     {
-                                        _actionObjectAux = null;
+                                        if (_wind > 0)
+                                        {
+                                            _actionHappen = true;
+                                        }
                                     }
-                                */
+                                }
+
+                                if (GameController.IS_DEBUG_MODE)
+                                {
+                                    _actionHappen = true;
+                                }
                             }
 
                             break;
 
                         case PlayerActions.Fire:
 
-                            if (true) //_fire > 0)
+                            if (_fire > 0)
+                            {
+                                _actionHappen = true;
+                            }
+
+                            if (GameController.IS_DEBUG_MODE)
                             {
                                 _actionHappen = true;
                             }
@@ -618,15 +818,19 @@ public class Player : MonoBehaviour {
 
                             if (!Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f))
                             {
-                                if (true) //_earth > 0)
+                                if (_earth > 0)
                                 {
                                     _actionHappen = true;
                                 }
                             }
 
+                            if (GameController.IS_DEBUG_MODE)
+                            {
+                                _actionHappen = true;
+                            }
+
                             break;
                     }
-
                 }
             }
 

@@ -28,6 +28,7 @@ public class InGameTextController : MonoBehaviour
     private TextState _state = TextState.Idle;
     private UnityEngine.UI.Text _label;
     private Color _textColor = Color.white;
+    private GameController _game;
 
     public void Clear()
     {
@@ -49,7 +50,12 @@ public class InGameTextController : MonoBehaviour
 
         _state = TextState.Showing;
     }
-	
+
+    public void SetGameController(GameController gc)
+    {
+        _game = gc;
+    }
+
 	void Update ()
     {
 	    if (_state == TextState.Showing)
@@ -112,6 +118,7 @@ public class InGameTextController : MonoBehaviour
             if (_timer > _fadeTime)
             {
                 _timer = 0f;
+                _game.SetGamePaused(false);
                 _state = TextState.Idle;
             }
         }

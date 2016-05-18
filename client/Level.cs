@@ -22,14 +22,13 @@ public class Level
     private int _minX, _minY, _maxX, _maxY;
     private int[] _camBounds = new int[4];
 	private string _targetLevel;
-    private AudioClip _aud;
-	
+    private bool _foundTorch = false;
+
 	public Level(LevelController levelController, string name)
 	{
 		_levelController = levelController;
 		_name = name;
 		_entities = new Dictionary<string, GameObject>();
-        _aud = Resources.Load("Music/IG_1") as AudioClip;
 	}
 	
 	public void AddEntity(GameObject go, string name)
@@ -483,6 +482,7 @@ public class Level
         // Trigger block handling
         TriggerBlock tgb = null;
         GameObject ttl = GameObject.Find("TriggerTextLabel");
+        ttl.GetComponent<InGameTextController>().SetGameController(_levelController.GetGameController());
 
         // Wind trigger block handler
         if (texture.Contains("WindTrigger"))
@@ -508,6 +508,8 @@ public class Level
 
         if (tgb != null)
         {
+            tgb.SetGameController(_levelController.GetGameController());
+
             if (!GameController.IS_DEBUG_MODE)
             {
                 rend.enabled = false;
@@ -521,6 +523,13 @@ public class Level
             r.isKinematic = true;
 
             go.name += "_Trigger";
+        }
+
+        // Audio control
+        if (texture.Contains("Torch") && !_foundTorch)
+        {
+            _levelController.GetGameController().GetAudioController().PlayChannel(5);
+            _foundTorch = true;
         }
 		
 		return go;
@@ -599,12 +608,6 @@ public class Level
     {
         GameObject go = new GameObject("player");
         go.transform.position = new Vector3(x, y, 0);
-
-        // Music loading
-        AudioSource asource = go.AddComponent<AudioSource>();
-        asource.clip = _aud;
-        asource.loop = true;
-        asource.Play();
 
         BoxCollider2D col = go.AddComponent<BoxCollider2D>();
 		col.size = new Vector2(0.6f , 1.0f);

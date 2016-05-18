@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class GameController
 {
 	public const bool IS_EDITOR_RUNTIME = false;
-    public const bool IS_DEBUG_MODE = true;
+    public const bool IS_DEBUG_MODE = false;
 
 	public enum GameState
 	{
@@ -18,6 +18,7 @@ public class GameController
     private LevelController _levelController;
     private GuiController _guiController;
 	private DebugMenuController _debugMenuController;
+    private AudioController _audioController;
 
 	private GameState _state = GameState.Init;
 
@@ -25,9 +26,43 @@ public class GameController
 	private string _targetLevel;
     private bool _isGamePaused = false;
 
+    private AudioClip _inGameMusic;
+    private AudioClip _winMusic;
+
+    private AudioClip _torchSfx;
+    private AudioClip _iceDragSfx;
+    private AudioClip _iceDropSfx;
+    private AudioClip _iceBurnSfx;
+    private AudioClip _iceCreateSfx;
+
     public GameController()
     {
         _textureController = new TextureController(this);
+
+        _audioController = new AudioController(this, 12);
+
+        // Load music and SFX
+        _inGameMusic = (AudioClip)Resources.Load("Music/IG_1");
+
+        _torchSfx = (AudioClip)Resources.Load("SFX/Torch");
+        _iceBurnSfx = (AudioClip)Resources.Load("SFX/IceBurn");
+        _iceCreateSfx = (AudioClip)Resources.Load("SFX/IceCreate");
+        _iceDragSfx = (AudioClip)Resources.Load("SFX/IceDrag");
+        _iceDropSfx = (AudioClip)Resources.Load("SFX/IceDrop");
+
+        // Set the audio channels
+        _audioController.SetClipToChannel(0, _inGameMusic);
+        _audioController.SetLoopChannel(0, true);
+
+        _audioController.SetClipToChannel(1, _iceBurnSfx);
+        _audioController.SetClipToChannel(2, _iceCreateSfx);
+
+        _audioController.SetClipToChannel(3, _iceDragSfx);
+        _audioController.SetLoopChannel(3, true);
+
+        _audioController.SetClipToChannel(4, _iceDropSfx);
+        _audioController.SetClipToChannel(5, _torchSfx);
+
         _levelController = new LevelController(this);
         _guiController = new GuiController(this);
 		_debugMenuController = new DebugMenuController(this);
@@ -39,6 +74,7 @@ public class GameController
 		{
 			case GameState.Init:
 				GameObject go = new GameObject();
+                go.name = "Player Camera";
 				go.transform.position = new Vector3(0,0,-1);
 				
 				_cam = go.AddComponent<Camera>();
@@ -47,6 +83,7 @@ public class GameController
 				_cam.backgroundColor = Color.black;
 
                 go.AddComponent<AudioListener>();
+                _audioController.SetFollowGameObject(go);
 			
 				_guiController.HideDialog("InGameUI");
 
@@ -149,7 +186,12 @@ public class GameController
 	{
 		return _debugMenuController;
 	}
-	
+
+    public AudioController GetAudioController()
+    {
+        return _audioController;
+    }
+
     public Camera GetCamera()
     {
         return _cam;
