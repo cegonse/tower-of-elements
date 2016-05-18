@@ -273,7 +273,7 @@ public class GuiCallbacks : MonoBehaviour
 		}
 	}
 
-    public void OnPlayerHitDoor()
+    public void OnPlayerHitDoor(float t, int s)
     {
         GuiController gc = _gameController.GetGuiController();
         GameObject winMenu = gc.GetDialog("WinMenuUI");
@@ -283,19 +283,10 @@ public class GuiCallbacks : MonoBehaviour
             if (!winMenu.activeSelf)
             {
                 _gameController.SetGamePaused(true);
-                TransformTweener tt = winMenu.GetComponent<TransformTweener>();
+                WinMenuController wmc = winMenu.GetComponent<WinMenuController>();
                 winMenu.SetActive(true);
-
-                tt.Position0 = new Vector3(0, 0, 0);
-                tt.PositionF = new Vector3(0, 0, 0);
-
-                tt.Rotation0 = 0f;
-                tt.RotationF = 0f;
-
-                tt.Scale0 = new Vector3(0, 0, 0);
-                tt.ScaleF = new Vector3(1, 1, 1);
-
-                tt.DoTween(this.gameObject);
+                wmc.OnPlayerWin(gameObject, s, t);
+                _isOnWinMenu = true;
             }
         }
         else
@@ -314,18 +305,9 @@ public class GuiCallbacks : MonoBehaviour
             if (winMenu.activeSelf)
             {
                 _gameController.SetGamePaused(false);
-                TransformTweener tt = winMenu.GetComponent<TransformTweener>();
-
-                tt.Position0 = new Vector3(0, 0, 0);
-                tt.PositionF = new Vector3(0, 0, 0);
-
-                tt.Rotation0 = 0f;
-                tt.RotationF = 0f;
-
-                tt.Scale0 = new Vector3(1, 1, 1);
-                tt.ScaleF = new Vector3(0, 0, 0);
-
-                tt.DoTween(this.gameObject);
+                WinMenuController wmc = winMenu.GetComponent<WinMenuController>();
+                wmc.HideMenu();
+                OnTweenFinished("WinMenuUI");
             }
         }
         else

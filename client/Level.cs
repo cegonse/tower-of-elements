@@ -253,15 +253,10 @@ public class Level
                 }
             }
 
-            {
-                int x = 0;
-                int y = -3;
-                string texture = "Blocks/Backgrounds/Triggers/WindTrigger_Background";
-                int layer = 99;
-
-                GameObject go = CreateBackground(x, y, texture, layer);
+            /*{
+                GameObject go = CreateBackground(0, -3, "Blocks/Backgrounds/Triggers/WindTrigger_Background", 99);
                 AddEntity(go, go.name);
-            }
+            }*/
         }
     }
 	
@@ -301,9 +296,6 @@ public class Level
         //****************
         //  Add textures
         //****************
-
-            
-
                 if (length == 1) //Create only one texture for the 'go' object
                 {
                     Texture2D tex = null;

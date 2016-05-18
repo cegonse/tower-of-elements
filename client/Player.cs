@@ -105,6 +105,9 @@ public class Player : MonoBehaviour {
     private bool _isOnDoor = false;
     private bool _fadeOutMusic = true;
 
+    private float _startTime = 0f;
+    private float _endTime = 0f;
+    private int _stars = 3;
     
     public void SetActiveLevel(Level lv)
     {
@@ -146,7 +149,7 @@ public class Player : MonoBehaviour {
 		_cameraVelocity = new Vector3();
 
         _animState = PlayerAnimState.IdleFront;
-
+        _startTime = Time.time;
 	}
 	
 	// Update is called once per frame
@@ -1120,7 +1123,8 @@ public class Player : MonoBehaviour {
 
     public void OnAlphaTweenFinished()
     {
-        GameObject.Find("GuiCallbacks").GetComponent<GuiCallbacks>().OnPlayerHitDoor();
+        _endTime = Time.time - _startTime;
+        GameObject.Find("GuiCallbacks").GetComponent<GuiCallbacks>().OnPlayerHitDoor(_endTime, _stars);
     }
 
     public void OnLevelFinished()
