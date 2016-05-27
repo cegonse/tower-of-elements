@@ -1124,7 +1124,9 @@ public class Player : MonoBehaviour {
     public void OnAlphaTweenFinished()
     {
         _endTime = Time.time - _startTime;
-        GameObject.Find("GuiCallbacks").GetComponent<GuiCallbacks>().OnPlayerHitDoor(_endTime, _stars);
+        _stars = SaveGameController.instance.GetStarCount(_endTime, _activeLevel.GetName());
+
+        GameObject.Find("GuiCallbacks").GetComponent<GuiCallbacks>().OnPlayerHitDoor(_endTime, _stars, _activeLevel.GetName());
     }
 
     public void OnLevelFinished()

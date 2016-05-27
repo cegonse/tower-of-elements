@@ -58,6 +58,12 @@ public class SaveGameController : MonoBehaviour
         Load();
     }
 
+    public int GetStarCount(float time, string lvName)
+    {
+        // fair enough
+        return Random.Range(1,3);
+    }
+
     public bool IsMusicOn()
     {
         return _musicOn;
@@ -204,8 +210,6 @@ public class SaveGameController : MonoBehaviour
 
             jlist.Add(jfield);
         }
-
-        Debug.Log(json.Print());
 
         File.WriteAllText(_path, Cypher(json.Print()));
         

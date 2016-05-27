@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class GameController
 {
 	public const bool IS_EDITOR_RUNTIME = false;
-    public const bool IS_DEBUG_MODE = true;
+    public const bool IS_DEBUG_MODE = false;
 
 	public enum GameState
 	{

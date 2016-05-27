@@ -273,7 +273,7 @@ public class GuiCallbacks : MonoBehaviour
 		}
 	}
 
-    public void OnPlayerHitDoor(float t, int s)
+    public void OnPlayerHitDoor(float t, int s, string id)
     {
         GuiController gc = _gameController.GetGuiController();
         GameObject winMenu = gc.GetDialog("WinMenuUI");
@@ -284,8 +284,15 @@ public class GuiCallbacks : MonoBehaviour
             {
                 _gameController.SetGamePaused(true);
                 WinMenuController wmc = winMenu.GetComponent<WinMenuController>();
+
                 winMenu.SetActive(true);
                 wmc.OnPlayerWin(gameObject, s, t);
+
+                SaveGameController.LevelProgressData lpd = new SaveGameController.LevelProgressData();
+                lpd.Id = id;
+                lpd.Score = t;
+                SaveGameController.instance.SetLevelProgress(lpd);
+
                 _isOnWinMenu = true;
             }
         }
@@ -449,8 +456,7 @@ public class GuiCallbacks : MonoBehaviour
 
     private void OnBackToMenu()
     {
-        // To-Do: Save state and go back to the menu scene
-        Application.Quit();
+        UnityEngine.SceneManagement.SceneManager.LoadScene("IntroMenu");
     }
 	
 	public void DebugMenuPreviousLevel()
