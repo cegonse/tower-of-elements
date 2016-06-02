@@ -32,6 +32,7 @@ public class Block : MonoBehaviour
     //Length
     private float _length = 1;
     private bool _vertical = false;
+    private bool _isPlatform = false;
     //Rays
 
     private Ray2D _downRay;
@@ -398,5 +399,15 @@ public class Block : MonoBehaviour
     public bool IsVertical()
     {
         return _vertical;
+    }
+
+    public void SetPlatform(bool p)
+    {
+        _isPlatform = p;
+    }
+
+    public bool IsPlatform()
+    {
+        return _isPlatform;
     }
 }

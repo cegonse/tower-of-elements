@@ -718,6 +718,7 @@ public class Level
                 GameObject bl = CreateBlock(BlockType.Crate, x, y, name, (data.speed > 0 ? data.speed : 1), (data.hp > 0 ? true : false), 104);
                 AddEntity(bl, "blockEntity_" + x + "_" + y + "_crate");
                 lv.SetDoor(bl);
+                bl.GetComponent<Block>().SetPlatform(true);
                 lv.SetEnemyData(data);
                 break;
         }

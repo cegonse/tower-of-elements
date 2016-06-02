@@ -239,6 +239,16 @@ public class Player : MonoBehaviour {
                     }
                     
                     transform.position = pDown;
+                    
+                    //Check if it is on a platform
+                    if (goHitDownBlock.IsPlatform())
+                    {
+                        transform.parent = goHitDownBlock.transform;
+                    }
+                    else
+                    {
+                        transform.parent = null;
+                    }
 
                     //Check the player's Right
                     if (_playerDirection == Direction.Right)
@@ -333,11 +343,13 @@ public class Player : MonoBehaviour {
                 else
                 {
                     _state = State.Falling;
+                    transform.parent = null;
                 }
             }//Down if 1
             else
             {
                 _state = State.Falling;
+                transform.parent = null;
             }
         }
         
@@ -388,7 +400,7 @@ public class Player : MonoBehaviour {
 
     private void MovingPlayer()
     {
-        Vector3 p = transform.position;
+        Vector3 p = transform.localPosition;
         
         switch(_state)
         {
@@ -452,8 +464,8 @@ public class Player : MonoBehaviour {
                 }
                 break;
         }
-		
-        transform.position = p;
+
+        transform.localPosition = p;
 		
 		
     }
