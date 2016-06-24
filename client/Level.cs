@@ -302,6 +302,10 @@ public class Level
 
                     tex = (Texture2D)_levelController.GetGameController().
                                 GetTextureController().GetTexture(texture);
+                    if (tex == null)
+                    {
+                        Debug.Log("Falta textura: " + texture);
+                    }
                     float texSize = _levelController.GetGameController().
                     GetTextureController().GetTextureSize(texture);
 
@@ -314,6 +318,7 @@ public class Level
 
                     //Adding the SpriteAnimator component
                     SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
+                    sprite_animator.SetActiveLevel(this);
                     if (_levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim") != null)
                     {
                         sprite_animator.AddAnimation("STANDING",_levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
@@ -363,6 +368,7 @@ public class Level
 
                     //SpriteAnimator
                     SpriteAnimator sprite_animator = go_child.AddComponent<SpriteAnimator>();
+                    sprite_animator.SetActiveLevel(this);
                     if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_13" + (vertical ? "_vert" : "") + "_Anim") != null)
                     {
                         sprite_animator.AddAnimation("STANDING",_levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
@@ -401,6 +407,7 @@ public class Level
                         rend.sortingOrder = sortingOrder;
                         //Adding the SpriteAnimator component
                         sprite_animator = go_child.AddComponent<SpriteAnimator>();
+                        sprite_animator.SetActiveLevel(this);
                         if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_14" + (vertical ? "_vert" : "") + "_Anim") != null)
                         {
                             sprite_animator.AddAnimation("STANDING",_levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
@@ -440,6 +447,7 @@ public class Level
                     rend.sortingOrder = sortingOrder;
                     //Adding the SpriteAnimator component
                     sprite_animator = go_child.AddComponent<SpriteAnimator>();
+                    sprite_animator.SetActiveLevel(this);
                     if (_levelController.GetGameController().GetTextureController().GetAnimation(main_tex_id + "_15" + (vertical ? "_vert" : "") + "_Anim") != null)
                     {
                         sprite_animator.AddAnimation("STANDING", _levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
@@ -465,7 +473,7 @@ public class Level
 		rend.sortingOrder = layer;
 
         SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
-
+        sprite_animator.SetActiveLevel(this);
 		if (_levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim") != null)
 		{
             sprite_animator.AddAnimation("STANDING", _levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
@@ -553,6 +561,7 @@ public class Level
 		rend.sortingOrder = 110;
 
         SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
+        sprite_animator.SetActiveLevel(this);
 		if (_levelController.GetGameController().GetTextureController().GetAnimation("Blocks/Fireball/Fireball_1_Anim") != null)
 		{
             sprite_animator.AddAnimation("STANDING", _levelController.GetGameController().GetTextureController().GetAnimation("Blocks/Fireball/Fireball_1_Anim"));
@@ -631,6 +640,7 @@ public class Level
 		rend.sortingOrder = 100;
 
         SpriteAnimator sprite_animator = child.AddComponent<SpriteAnimator>();
+        sprite_animator.SetActiveLevel(this);
 
         //Animations
         string[] anim = new string[9];
@@ -755,6 +765,7 @@ public class Level
 
 
             SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
+            sprite_animator.SetActiveLevel(this);
             if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim") != null)
             {
                 sprite_animator.AddAnimation("WALKING", _levelController.GetGameController().GetTextureController().GetAnimation(name + "_Anim"));

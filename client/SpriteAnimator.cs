@@ -16,6 +16,7 @@ public class SpriteAnimator : MonoBehaviour
     private int _animationIndex = -1;
     private float _animationTimer = 0f;
     private float _animationTimerScaler = 1f;
+    private Level _activeLevel;
 
     // Use this for initialization
     void Start()
@@ -28,7 +29,7 @@ public class SpriteAnimator : MonoBehaviour
     void Update()
     {
 
-        if (_animationIndex != -1)
+        if (_animationIndex != -1 && !_activeLevel.GetLevelController().GetGameController().IsGamePaused())
         {
             if (_animations[_activeAnimation][_animationIndex].timeToNext > _animationTimer * _animationTimerScaler)
             {
@@ -107,5 +108,15 @@ public class SpriteAnimator : MonoBehaviour
     public bool IsTheLastFrame()
     {
         return _animationIndex == _animations[_activeAnimation].Count - 1;
+    }
+
+    public void SetActiveLevel(Level level)
+    {
+        _activeLevel = level;
+    }
+
+    public Level GetActiveLevel()
+    {
+        return _activeLevel;
     }
 }

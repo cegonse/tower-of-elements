@@ -82,18 +82,19 @@ public class Block : MonoBehaviour
         GameObject blockDown = null;
         RaycastHit2D[] hit_down;
 
-        _downRay.origin = transform.position + new Vector3(0, -0.51f, 0);
-        hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, _length - 1f);
+        _downRay.origin = transform.position + new Vector3(-0.45f, -0.51f, 0);
+        hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, _length - 0.1f);
         //Go through all the colliders of the raycast
         for (int i_down = 0; i_down < hit_down.Length; i_down++)
         {
             goHitDown = hit_down[i_down].collider.gameObject;
 
             Block blockComponent = goHitDown.GetComponent<Block>();
-            //Check if it is a block and if it is over the other blocks.
-            //If it is over the other blocks means that it is the block
+            Player playerComponent = goHitDown.GetComponent<Player>();
+            //Check if it is a block or a player and if it is over the other objects.
+            //If it is over the other objects means that it is the block
             // that we must save to adjust our position.y
-            if (blockComponent != null && ymax <= goHitDown.transform.position.y)
+            if ((blockComponent != null || playerComponent != null) && ymax <= goHitDown.transform.position.y)
             {
                 //Save the maximum Y
                 ymax = goHitDown.transform.position.y;

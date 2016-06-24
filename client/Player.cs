@@ -417,6 +417,7 @@ public class Player : MonoBehaviour {
                     _animState = _animStateAfterJump;
                     _changeAnimation = true;
                 }
+                transform.localPosition = p;
 
                 break;
             
@@ -436,7 +437,6 @@ public class Player : MonoBehaviour {
                         _jumpTimeActive * _jumpTimeActive * _jumpPoint2;
     
                     _jumpTimeActive += Time.deltaTime /_jumpTime;
-
                 }
                 else
                 {
@@ -448,6 +448,7 @@ public class Player : MonoBehaviour {
                     _animState = _animStateAfterJump;
                     _changeAnimation = true;
                 }
+                transform.position = p;
                 
                 break;
             
@@ -462,10 +463,12 @@ public class Player : MonoBehaviour {
                     _beginFalling = false;
                     _falling = true;
                 }
+
+                transform.localPosition = p;
                 break;
         }
 
-        transform.localPosition = p;
+        
 		
 		
     }
@@ -754,12 +757,7 @@ public class Player : MonoBehaviour {
                         case PlayerActions.Ice:
                             if (!Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f))
                             {
-                                if (_ice > 0)
-                                {
-                                    _actionHappen = true;
-                                }
-
-                                if (GameController.IS_DEBUG_MODE)
+                                if (_ice > 0 || GameController.IS_DEBUG_MODE)
                                 {
                                     _actionHappen = true;
                                 }
@@ -800,29 +798,20 @@ public class Player : MonoBehaviour {
                                     }
                                     else
                                     {
-                                        if (_wind > 0)
+                                        if (_wind > 0 || GameController.IS_DEBUG_MODE)
                                         {
                                             _actionHappen = true;
                                         }
                                     }
                                 }
 
-                                if (GameController.IS_DEBUG_MODE)
-                                {
-                                    _actionHappen = true;
-                                }
                             }
 
                             break;
 
                         case PlayerActions.Fire:
 
-                            if (_fire > 0)
-                            {
-                                _actionHappen = true;
-                            }
-
-                            if (GameController.IS_DEBUG_MODE)
+                            if (_fire > 0 || GameController.IS_DEBUG_MODE)
                             {
                                 _actionHappen = true;
                             }
@@ -833,17 +822,14 @@ public class Player : MonoBehaviour {
 
                             if (!Physics2D.Raycast(_actionRay.origin, _actionRay.direction, 0.1f))
                             {
-                                if (_earth > 0)
+                                if (_earth > 0 || GameController.IS_DEBUG_MODE)
                                 {
                                     _actionHappen = true;
                                 }
+
                             }
 
-                            if (GameController.IS_DEBUG_MODE)
-                            {
-                                _actionHappen = true;
-                            }
-
+                            
                             break;
                     }
                 }
