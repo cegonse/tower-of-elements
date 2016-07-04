@@ -21,6 +21,8 @@ public class GuiCallbacks : MonoBehaviour
     GameObject earth;
     GameObject wind;
     GameObject skills;
+    GameObject right;
+    GameObject left;
 
 
     void Start()
@@ -31,6 +33,8 @@ public class GuiCallbacks : MonoBehaviour
         earth = GameObject.Find("Earth");
         wind = GameObject.Find("Wind");
         skills = GameObject.Find("Skills_Background");
+        right = GameObject.Find("Right");
+        left = GameObject.Find("Left");
     }
 
     public void SetGameController(GameController gc)
@@ -124,6 +128,8 @@ public class GuiCallbacks : MonoBehaviour
                     wind.SetActive(false);
                     earth.SetActive(false);
                     skills.SetActive(false);
+                    right.SetActive(false);
+                    left.SetActive(false);
                 }
                  else
                  {
@@ -138,6 +144,8 @@ public class GuiCallbacks : MonoBehaviour
                     wind.SetActive(true);
                     earth.SetActive(true);
                     skills.SetActive(true);
+                    right.SetActive(true);
+                    left.SetActive(true);
                 }
 
                 _gameController.SetGamePaused(_pause);
