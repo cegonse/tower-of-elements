@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
@@ -13,6 +14,24 @@ public class GuiCallbacks : MonoBehaviour
     private bool _isCameraMoving = false;
     private bool _isOnWinMenu = false;
     private bool _wantsToContinue = false;
+
+    GameObject settings;
+    GameObject fire;
+    GameObject water;
+    GameObject earth;
+    GameObject wind;
+    GameObject skills;
+
+
+    void Start()
+    {
+        settings = GameObject.Find("Settings"); 
+        fire = GameObject.Find("Fire");
+        water = GameObject.Find("Water");
+        earth = GameObject.Find("Earth");
+        wind = GameObject.Find("Wind");
+        skills = GameObject.Find("Skills_Background");
+    }
 
     public void SetGameController(GameController gc)
     {
@@ -98,14 +117,28 @@ public class GuiCallbacks : MonoBehaviour
                     //Time.timeScale = 0;
                     _isCameraMoving = true;
                     _pause = true;
-                 }
+
+                    settings.GetComponent<Button>().interactable = false;
+                    fire.SetActive(false);
+                    water.SetActive(false);
+                    wind.SetActive(false);
+                    earth.SetActive(false);
+                    skills.SetActive(false);
+                }
                  else
                  {
                     //Time.timeScale = 1;
                     _isCameraMoving = false;
                     _gameController.GetCamera().GetComponent<Camera>().orthographicSize = 3.5f;
                     _pause = false;
-                 }
+
+                    settings.GetComponent<Button>().interactable = true;
+                    fire.SetActive(true);
+                    water.SetActive(true);
+                    wind.SetActive(true);
+                    earth.SetActive(true);
+                    skills.SetActive(true);
+                }
 
                 _gameController.SetGamePaused(_pause);
                 _gameController.GetGuiController().MoveCamera(_pause);
@@ -456,7 +489,7 @@ public class GuiCallbacks : MonoBehaviour
 
     private void OnBackToMenu()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("IntroMenu");
+        //UnityEngine.SceneManagement.SceneManager.LoadScene("IntroMenu");
     }
 	
 	public void DebugMenuPreviousLevel()
