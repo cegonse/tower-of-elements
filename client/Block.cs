@@ -360,7 +360,7 @@ public class Block : MonoBehaviour
                 new Vector2(0.5f, 0.5f), 256f);
             rend.sprite = spr;
             //Adding value to sorting layer
-            rend.sortingOrder = 100;
+            rend.sortingOrder = 105;
             //Adding the SpriteAnimator component
             if (_activeLevel.GetLevelController().GetGameController().GetTextureController().GetAnimation(tex_route + "_Anim") != null)
             {
