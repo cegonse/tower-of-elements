@@ -282,9 +282,14 @@ public class Level
             boxColl.size = new Vector2(length, 1f);
             boxColl.offset = new Vector2((length / 2) - 0.5f, 0f);
         }
-        
-        Rigidbody2D r = go.AddComponent<Rigidbody2D>();
-        r.isKinematic = true;
+
+        // --------- TEST --------- //
+        // - Disabled rigidbodies on blocks
+        //   to check the effect
+        //
+        //Rigidbody2D r = go.AddComponent<Rigidbody2D>();
+        //r.isKinematic = true;
+        // --------- TEST --------- //
 
         Block b = go.AddComponent<Block>();
         b.SetType(type);
@@ -460,72 +465,82 @@ public class Level
 	
 	public GameObject CreateBackground(int x, int y, string texture, int layer)
 	{
+        // Instantiate background tile GameObject and set it to its position
 		GameObject go = new GameObject("_" + x.ToString() + "_" + y.ToString() + "_" + Random.Range(0, 5000).ToString()+ "_backgroundEntity");
 		go.transform.position = new Vector3(x, y, 0);
 		
-		Texture2D tex = null;
-		
-		tex = (Texture2D) _levelController.GetGameController().GetTextureController().GetTexture(texture);
+        // Fetch the texture from the controller and get its size
+		Texture2D tex = (Texture2D) _levelController.GetGameController().GetTextureController().GetTexture(texture);
         float texSize = _levelController.GetGameController().GetTextureController().GetTextureSize(texture);
+
+        // Create the sprite renderer and set the texture and layer data
 		SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
 		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), texSize);
 		rend.sprite = spr;
 		rend.sortingOrder = layer;
 
-        SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
-        sprite_animator.SetActiveLevel(this);
+        // If the background tile is animated, create the animation and set its animation data
 		if (_levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim") != null)
 		{
+            SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
+            sprite_animator.SetActiveLevel(this);
             sprite_animator.AddAnimation("STANDING", _levelController.GetGameController().GetTextureController().GetAnimation(texture + "_Anim"));
 		}
 
         // Trigger block handling
-        TriggerBlock tgb = null;
-        GameObject ttl = GameObject.Find("TriggerTextLabel");
-        ttl.GetComponent<InGameTextController>().SetGameController(_levelController.GetGameController());
+        // This only is handled if the background is a trigger block
+        if (texture.Contains("Trigger"))
+        {
+            TriggerBlock tgb = null;
+            GameObject ttl = GameObject.Find("TriggerTextLabel");
+            ttl.GetComponent<InGameTextController>().SetGameController(_levelController.GetGameController());
 
-        // Wind trigger block handler
-        if (texture.Contains("WindTrigger"))
-        {
-            tgb = go.AddComponent<TriggerBlock>();
-            tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Wind, ttl);
-        }
-        else if (texture.Contains("IceTrigger"))
-        {
-            tgb = go.AddComponent<TriggerBlock>();
-            tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Ice, ttl);
-        }
-        else if (texture.Contains("FireTrigger"))
-        {
-            tgb = go.AddComponent<TriggerBlock>();
-            tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Fire, ttl);
-        }
-        else if (texture.Contains("EarthTrigger"))
-        {
-            tgb = go.AddComponent<TriggerBlock>();
-            tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Earth, ttl);
-        }
-
-        if (tgb != null)
-        {
-            tgb.SetGameController(_levelController.GetGameController());
-
-            if (!GameController.IS_DEBUG_MODE)
+            // Wind trigger block handler
+            // Trigger block is hardcoded depending on the trigger type
+            if (texture.Contains("WindTrigger"))
             {
-                rend.enabled = false;
+                tgb = go.AddComponent<TriggerBlock>();
+                tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Wind, ttl);
+            }
+            else if (texture.Contains("IceTrigger"))
+            {
+                tgb = go.AddComponent<TriggerBlock>();
+                tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Ice, ttl);
+            }
+            else if (texture.Contains("FireTrigger"))
+            {
+                tgb = go.AddComponent<TriggerBlock>();
+                tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Fire, ttl);
+            }
+            else if (texture.Contains("EarthTrigger"))
+            {
+                tgb = go.AddComponent<TriggerBlock>();
+                tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Earth, ttl);
+            }
+            else
+            {
+                Debug.LogError("[Level.cs:CreateBackground()] Trigger type " + texture + " unknown!");
             }
 
-            BoxCollider2D boxColl = go.AddComponent<BoxCollider2D>();
-            boxColl.size = Vector2.one;
-            boxColl.offset = Vector2.zero;
+            if (tgb != null)
+            {
+                tgb.SetGameController(_levelController.GetGameController());
 
-            Rigidbody2D r = go.AddComponent<Rigidbody2D>();
-            r.isKinematic = true;
+                if (!GameController.IS_DEBUG_MODE)
+                {
+                    rend.enabled = false;
+                }
 
-            go.name += "_Trigger";
+                BoxCollider2D boxColl = go.AddComponent<BoxCollider2D>();
+                boxColl.size = Vector2.one;
+                boxColl.offset = Vector2.zero;
+
+                go.name += "_Trigger";
+            }
         }
 
-        // Audio control
+        // Audio control, set the appropiate sound effect to the channels if
+        // there is a background tile with sound
         if (texture.Contains("Torch") && !_foundTorch)
         {
             _levelController.GetGameController().GetAudioController().PlayChannel(5);
@@ -541,10 +556,16 @@ public class Level
 		go.transform.position = new Vector3(x, y, 0);
 		
 		go.AddComponent<BoxCollider2D>();
-		Rigidbody2D r = go.AddComponent<Rigidbody2D>();
+
+        // ---------TEST-------- - //
+        // - Disabled rigidbodies on blocks
+        //   to check the effect
+        //
+        Rigidbody2D r = go.AddComponent<Rigidbody2D>();
 		r.isKinematic = true;
-		
-		FireBall fb = go.AddComponent<FireBall>();
+        // ---------TEST-------- - //
+
+        FireBall fb = go.AddComponent<FireBall>();
 		fb.SetActiveLevel(this);
 		fb.SetDirection(dir);
 		
@@ -578,11 +599,13 @@ public class Level
 		
 		BoxCollider2D col = go.AddComponent<BoxCollider2D>();
 		col.size = new Vector2(0.1f, 1f);
-		
-		Rigidbody2D r = go.AddComponent<Rigidbody2D>();
-		r.isKinematic = true;
-		
-		Door d = go.AddComponent<Door>();
+
+        // ---------TEST-------- - //
+        //Rigidbody2D r = go.AddComponent<Rigidbody2D>();
+		//r.isKinematic = true;
+        // ---------TEST-------- - //
+
+        Door d = go.AddComponent<Door>();
 		d.SetActiveLevel(this);
 		
 		if (next != "")
@@ -612,8 +635,11 @@ public class Level
 
         BoxCollider2D col = go.AddComponent<BoxCollider2D>();
 		col.size = new Vector2(0.6f , 1.0f);
-        Rigidbody2D r = go.AddComponent<Rigidbody2D>();
-        r.isKinematic = true;
+
+        // ---------TEST-------- - //
+        //Rigidbody2D r = go.AddComponent<Rigidbody2D>();
+        //r.isKinematic = true;
+        // ---------TEST-------- - //
 
         Player p = go.AddComponent<Player>();
 		p.SetActiveLevel(this);
@@ -694,10 +720,13 @@ public class Level
 		
 		BoxCollider2D box = go.AddComponent<BoxCollider2D>();
         box.size = new Vector2(0.9f, 0.9f);
-		Rigidbody2D r = go.AddComponent<Rigidbody2D>();
-		r.isKinematic = true;
-		
-		Texture2D tex = null;
+
+        // ---------TEST-------- - //
+        //Rigidbody2D r = go.AddComponent<Rigidbody2D>();
+		//r.isKinematic = true;
+        // ---------TEST-------- - //
+
+        Texture2D tex = null;
 		
 		switch (type)
 		{
