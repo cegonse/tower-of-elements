@@ -22,7 +22,10 @@ public class SpriteAnimator : MonoBehaviour
     void Start()
     {
 
-
+        if (_activeLevel == null)
+        {
+            Debug.LogError("SpriteAnimator needs an active level!!");
+        }
     }
 
     // Update is called once per frame

@@ -9,6 +9,7 @@ public class AnimationObject : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         _spriteAnimator = gameObject.AddComponent<SpriteAnimator>();
+        _spriteAnimator.SetActiveLevel(_level);
 
         if (_level.GetLevelController().GetGameController().GetTextureController().GetAnimation(_animation) != null)
         {
