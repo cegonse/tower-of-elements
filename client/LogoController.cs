@@ -1,15 +1,22 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class LogoController : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
-        Application.LoadLevel("IntroMenu");
+public class LogoController : MonoBehaviour
+{
+	void Start ()
+    {
+        if (GameController.IS_DEBUG_MODE)
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("game");
+        }
+        else
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("IntroMenu");
+        }
 	}
 	
-	// Update is called once per frame
-	void Update () {
+	void Update ()
+    {
 	
 	}
 }
