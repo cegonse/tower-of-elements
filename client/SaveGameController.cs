@@ -9,11 +9,14 @@ public class SaveGameController : MonoBehaviour
     {
         public string Id;
         public float Score;
+        public float ThreeStarsTime;
     }
 
     public static SaveGameController instance = null;
 
     private string _path;
+    private string _pathThreeStars = "static_values";
+    
     private const string _saveKey = "Tdcc6LpsMD2uPxt97Cwtx2C6eWZkDD9hSHGEv7KNewtwbR9hkNMgNXhJCGPyYChX";
 
     private SystemLanguage _language = SystemLanguage.English;
@@ -21,7 +24,8 @@ public class SaveGameController : MonoBehaviour
     private bool _sfxOn = true;
 
     private List<LevelProgressData> _levels;
-	
+    private Dictionary<string, float> _threeStarTimes;
+
 	private bool _hasWindPower = false;
     private bool _hasIcePower = false;
     private bool _hasFirePower = false;
@@ -56,6 +60,9 @@ public class SaveGameController : MonoBehaviour
         }
 
         Load();
+
+        //Load all the static values needed
+        LoadStaticValues();
     }
 
     public int GetStarCount(float time, string lvName)
@@ -106,7 +113,7 @@ public class SaveGameController : MonoBehaviour
     {
         bool found = false;
 
-        for (int i = 0; i < _levels.Count; i++)
+        for (int i = 0; i < _levels.Count && !found; i++)
         {
             if (lvp.Id == _levels[i].Id)
             {
@@ -210,7 +217,7 @@ public class SaveGameController : MonoBehaviour
 
             jlist.Add(jfield);
         }
-
+        Debug.Log(json.Print());
         File.WriteAllText(_path, Cypher(json.Print()));
         
         #if UNITY_WEBGL
@@ -230,7 +237,7 @@ public class SaveGameController : MonoBehaviour
             if (!string.IsNullOrEmpty(jsonSave))
             {
                 save = new JSONObject(Cypher(jsonSave));
-
+                Debug.Log(Cypher(jsonSave));
                 if (save != null)
                 {
                     _language = (SystemLanguage)save["language"].n;
@@ -258,7 +265,7 @@ public class SaveGameController : MonoBehaviour
 
                                 lvp.Id = lv[i]["id"].str;
                                 lvp.Score = lv[i]["score"].n;
-
+                                lvp.ThreeStarsTime = Random.Range(0f, 50f);
                                 _levels.Add(lvp);
                             }
                         }
@@ -287,5 +294,42 @@ public class SaveGameController : MonoBehaviour
         }
 
         return result.ToString();
+    }
+
+    private void LoadStaticValues()
+    {
+        //Load the threeStarsTimes dictionary
+        _threeStarTimes = new Dictionary<string, float>();
+        string threeStarsTextString = (Resources.Load(_pathThreeStars) as TextAsset).text;
+        if (!string.IsNullOrEmpty(threeStarsTextString))
+        {
+            JSONObject threeStarsJSON = new JSONObject(threeStarsTextString);
+
+            if (threeStarsJSON["level_values"] != null)
+            {
+                List<JSONObject> staticValues = threeStarsJSON["level_values"].list;
+                for (int i = 0; i < staticValues.Count; i++ )
+                {
+                    _threeStarTimes.Add(staticValues[i]["name"].str, staticValues[i]["threeStarsTime"].n);
+                }
+            }
+        }
+        else
+        {
+            Debug.LogError("The static values json is not found!");
+        }
+    }
+
+    public float GetThreeStarsTime(string lvl)
+    {
+        if (_threeStarTimes.ContainsKey(lvl))
+        {
+            return _threeStarTimes[lvl];
+        }
+        else
+        {
+            Debug.LogError("The level " + lvl + " is not in the _threeStarsTimes dictionary.");
+            return -1f;
+        }
     }
 }
