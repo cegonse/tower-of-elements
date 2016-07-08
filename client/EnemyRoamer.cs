@@ -7,16 +7,19 @@ public class RoamerEnemyData : BaseEnemyData
     public Direction direction;
 }
 
-public class EnemyRoamer : EnemyBase {
+public class EnemyRoamer : EnemyBase
+{
+    private int ROAMER_FRAME_SKIP = 0;
 
     private RoamerEnemyData _roamerData;
     private Direction _targetDirection;
     private Direction _direction;
     private Direction _direccionAnterior;
-    private State _state =State.Falling;
+    private State _state = State.Falling;
     private bool[] _arrayBlocks = new bool[8];
     private int i_anterior = 0;
     private EnemyBase _enemy;
+    private int _skippedFrames = 0;
 
     //Rays
     private Ray2D _downRay;
@@ -34,8 +37,10 @@ public class EnemyRoamer : EnemyBase {
     private float _accSpeed = _minAccSpeed;
     private const float _incrSpeed = 0.1f;
 
-	// Use this for initialization
-	void Start () {
+    private int _debugItCount = 0;
+
+	void Start ()
+    {
         base.Start();
 
         _downRay = new Ray2D();
@@ -61,21 +66,41 @@ public class EnemyRoamer : EnemyBase {
 
         _leftDownRay = new Ray2D();
         _leftDownRay.direction = new Vector2(-1f, -1f);
-
-        
 	}
 	
-	// Update is called once per frame
-	void Update () {
-        if(GetActiveLevel().GetLevelController().GetGameController().IsGamePaused() == false)
+	void Update ()
+    {
+        // Handle roamer state update
+        if (GetActiveLevel().GetLevelController().GetGameController().IsGamePaused() == false)
+        {
+            RoamerStateUpdate();
+            AdjustVelocity();
+            MovingEnemy();
+        }
+    }
+
+    private void RoamerStateUpdate()
+    {
+        if (ROAMER_FRAME_SKIP != 0)
+        {
+            _skippedFrames++;
+
+            if (_skippedFrames > ROAMER_FRAME_SKIP)
+            {
+                CheckPlayerCollisions();
+                CheckBlockCollisions();
+                AdjustDirectionAndState();
+
+                _skippedFrames = 0;
+            }
+        }
+        else
         {
             CheckPlayerCollisions();
             CheckBlockCollisions();
             AdjustDirectionAndState();
-            AdjustVelocity();
-            MovingEnemy();
         }
-	}
+    }
 
     private void CheckBlockCollisions()
     {
@@ -92,103 +117,110 @@ public class EnemyRoamer : EnemyBase {
         _leftRay.origin = transform.position + new Vector3(-0.61f, 0f, 0f);
         _leftDownRay.origin = transform.position + new Vector3(-0.61f, -0.61f, 0f);
 
-        //Do the raycasts
-        RaycastHit2D hit_down = Physics2D.Raycast(_downRay.origin, _downRay.direction, 0.1f);
-        RaycastHit2D hit_downRight = Physics2D.Raycast(_downRightRay.origin, _downRightRay.direction, 0.1f);
+        // Do the raycasts
+        // We check against all the colliders to ensure that the hit
+        // (in case there is a hit) is a block: it could be an enemy, lever, etc
+        RaycastHit2D[] hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, 0.1f);
+        RaycastHit2D[] hit_downRight = Physics2D.RaycastAll(_downRightRay.origin, _downRightRay.direction, 0.1f);
 
-        RaycastHit2D hit_right = Physics2D.Raycast(_rightRay.origin, _rightRay.direction, 0.1f);
-        RaycastHit2D hit_rightUp = Physics2D.Raycast(_rightUpRay.origin, _rightUpRay.direction, 0.1f);
+        RaycastHit2D[] hit_right = Physics2D.RaycastAll(_rightRay.origin, _rightRay.direction, 0.1f);
+        RaycastHit2D[] hit_rightUp = Physics2D.RaycastAll(_rightUpRay.origin, _rightUpRay.direction, 0.1f);
 
-        RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.1f);
-        RaycastHit2D hit_upLeft = Physics2D.Raycast(_upLeftRay.origin, _upLeftRay.direction, 0.1f);
+        RaycastHit2D[] hit_up = Physics2D.RaycastAll(_upRay.origin, _upRay.direction, 0.1f);
+        RaycastHit2D[] hit_upLeft = Physics2D.RaycastAll(_upLeftRay.origin, _upLeftRay.direction, 0.1f);
 
-        RaycastHit2D hit_left = Physics2D.Raycast(_leftRay.origin, _leftRay.direction, 0.1f);
-        RaycastHit2D hit_leftDown = Physics2D.Raycast(_leftDownRay.origin, _leftDownRay.direction, 0.1f);
+        RaycastHit2D[] hit_left = Physics2D.RaycastAll(_leftRay.origin, _leftRay.direction, 0.1f);
+        RaycastHit2D[] hit_leftDown = Physics2D.RaycastAll(_leftDownRay.origin, _leftDownRay.direction, 0.1f);
 
 
         //Check the blocks the enemy is colliding with
         //    5   4   3
         //    6   -   2
         //    7   0   1
+        //
+        // Initialize all values to false
+        _arrayBlocks[0] = false;
+        _arrayBlocks[1] = false;
+        _arrayBlocks[2] = false;
+        _arrayBlocks[3] = false;
+        _arrayBlocks[4] = false;
+        _arrayBlocks[5] = false;
+        _arrayBlocks[6] = false;
+        _arrayBlocks[7] = false;
+
+        // Loop through all the hits and check if they collided with a block
+        //
         //Down -> 0
-        if (hit_down.collider != null && hit_down.collider.gameObject.GetComponent<Block>() != null)
+        for (int i = 0; i < hit_down.Length; i++)
         {
-            //transform.position = new Vector3(transform.position.x, hit_down.transform.position.y + 1,0);
-            _arrayBlocks[0] = true;
+            if (hit_down[i].collider != null && hit_down[i].collider.gameObject.GetComponent<Block>() != null)
+            {
+                _arrayBlocks[0] = true;
+            }
         }
-        else
-        {
-            _arrayBlocks[0] = false;
-        }
+
         //Down-Right -> 1
-        if (hit_downRight.collider != null && hit_downRight.collider.gameObject.GetComponent<Block>() != null)
+        for (int i = 0; i < hit_downRight.Length; i++)
         {
-            
-            _arrayBlocks[1] = true;
+            if (hit_downRight[i].collider != null && hit_downRight[i].collider.gameObject.GetComponent<Block>() != null)
+            {
+                _arrayBlocks[1] = true;
+            }
         }
-        else
-        {
-            _arrayBlocks[1] = false;
-        }
+
         //Right -> 2
-        if (hit_right.collider != null && hit_right.collider.gameObject.GetComponent<Block>() != null)
+        for (int i = 0; i < hit_right.Length; i++)
         {
-            //transform.position = new Vector3(hit_right.transform.position.x - 1, transform.position.y, 0);
-            _arrayBlocks[2] = true;
+            if (hit_right[i].collider != null && hit_right[i].collider.gameObject.GetComponent<Block>() != null)
+            {
+                _arrayBlocks[2] = true;
+            }
         }
-        else
-        {
-            _arrayBlocks[2] = false;
-        }
+
         //Right-Up -> 3
-        if (hit_rightUp.collider != null && hit_rightUp.collider.gameObject.GetComponent<Block>() != null)
+        for (int i = 0; i < hit_rightUp.Length; i++)
         {
-            _arrayBlocks[3] = true;
+            if (hit_rightUp[i].collider != null && hit_rightUp[i].collider.gameObject.GetComponent<Block>() != null)
+            {
+                _arrayBlocks[3] = true;
+            }
         }
-        else
-        {
-            _arrayBlocks[3] = false;
-        }
+
         //Up -> 4
-        if (hit_up.collider != null && hit_up.collider.gameObject.GetComponent<Block>() != null)
+        for (int i = 0; i < hit_up.Length; i++)
         {
-            //transform.position = new Vector3(transform.position.x, hit_up.transform.position.y - 1, 0);
-            _arrayBlocks[4] = true;
+            if (hit_up[i].collider != null && hit_up[i].collider.gameObject.GetComponent<Block>() != null)
+            {
+                _arrayBlocks[4] = true;
+            }
         }
-        else
-        {
-            _arrayBlocks[4] = false;
-        }
+
         //Up-Left -> 5
-        if (hit_upLeft.collider != null && hit_upLeft.collider.gameObject.GetComponent<Block>() != null)
+        for (int i = 0; i < hit_upLeft.Length; i++)
         {
-            _arrayBlocks[5] = true;
+            if (hit_upLeft[i].collider != null && hit_upLeft[i].collider.gameObject.GetComponent<Block>() != null)
+            {
+                _arrayBlocks[5] = true;
+            }
         }
-        else
-        {
-            _arrayBlocks[5] = false;
-        }
+
         //Left -> 6
-        if (hit_left.collider != null && hit_left.collider.gameObject.GetComponent<Block>() != null)
+        for (int i = 0; i < hit_left.Length; i++)
         {
-            //transform.position = new Vector3(hit_left.transform.position.x+1, transform.position.y, 0);
-            _arrayBlocks[6] = true;
+            if (hit_left[i].collider != null && hit_left[i].collider.gameObject.GetComponent<Block>() != null)
+            {
+                _arrayBlocks[6] = true;
+            }
         }
-        else
-        {
-            _arrayBlocks[6] = false;
-        }
+
         //Left-Down -> 7
-        if (hit_leftDown.collider != null && hit_leftDown.collider.gameObject.GetComponent<Block>() != null)
+        for (int i = 0; i < hit_leftDown.Length; i++)
         {
-            _arrayBlocks[7] = true;
+            if (hit_leftDown[i].collider != null && hit_leftDown[i].collider.gameObject.GetComponent<Block>() != null)
+            {
+                _arrayBlocks[7] = true;
+            }
         }
-        else
-        {
-            _arrayBlocks[7] = false;
-        }
-
-
     }
 
     private void AdjustDirectionAndState()

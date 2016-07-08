@@ -497,7 +497,7 @@ public class GuiCallbacks : MonoBehaviour
 
     private void OnBackToMenu()
     {
-        //UnityEngine.SceneManagement.SceneManager.LoadScene("IntroMenu");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("IntroMenu");
     }
 	
 	public void DebugMenuPreviousLevel()
