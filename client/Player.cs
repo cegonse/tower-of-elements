@@ -77,6 +77,10 @@ public class Player : MonoBehaviour {
     private Ray2D _actionRay;
 
     //Jumping
+    private BoxCollider2D _collider;
+    private Vector2 _jumpColliderSize;
+    private Vector2 _originalJumpColliderSize;
+    private Vector2 _jumpColliderOffset;
 
     private Vector2 _jumpPoint0, _jumpPoint1, _jumpPoint2;
     private const float _jumpTime = 0.5f;
@@ -121,8 +125,8 @@ public class Player : MonoBehaviour {
 
 
     // Use this for initialization
-    void Start () {
-
+    void Start ()
+    {
         _downRay = new Ray2D();
         _downRay.direction = Vector2.right;
 
@@ -150,11 +154,16 @@ public class Player : MonoBehaviour {
 
         _animState = PlayerAnimState.IdleFront;
         _startTime = Time.time;
-	}
+
+        _collider = GetComponent<BoxCollider2D>();
+        _jumpColliderSize = new Vector2(0.6f, 0.8f);
+        _jumpColliderOffset = new Vector2(0.0f, -0.1f);
+        _originalJumpColliderSize = _collider.size;
+    }
 	
 	// Update is called once per frame
-	void Update () {
-
+	void Update ()
+    {
         if (_gameController.IsGamePaused() == false)
         {
             if (!_activeLevel.GetLevelController().GetGameController().IsGamePaused())
@@ -339,11 +348,6 @@ public class Player : MonoBehaviour {
                 transform.parent = null;
             }
         }
-        /*else
-        {
-            _state = State.Falling;
-            transform.parent = null;
-        }*/
     }
 
     //Adjust the velocity parameter (_velocity) in function of the real player's direction (_playerDirection), state
@@ -390,8 +394,11 @@ public class Player : MonoBehaviour {
     private void MovingPlayer()
     {
         Vector3 p = transform.localPosition;
-        
-        switch(_state)
+
+        _collider.size = _originalJumpColliderSize;
+        _collider.offset = Vector3.zero;
+
+        switch (_state)
         {
             case State.Grounded:
                 if (_canMove)
@@ -438,6 +445,11 @@ public class Player : MonoBehaviour {
                     _animState = _animStateAfterJump;
                     _changeAnimation = true;
                 }
+
+                // Change collider size to fix the bug where ice blocks
+                // get pushed while jumping
+                _collider.size = _jumpColliderSize;
+                _collider.offset = _jumpColliderOffset;
 
                 transform.position = p;
                 break;
