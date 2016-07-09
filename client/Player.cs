@@ -162,16 +162,12 @@ public class Player : MonoBehaviour {
                 if (!_isDying && !_isOnDoor)
                 {
                     SetPreviousPlayerDirection();
-
                     CheckMovingCollisions();
-
                     AdjustVelocityByParams();
-
                     MovingPlayer();
                 }
 
                 AdjustCamera();
-
                 AnimatingPlayer();
             }
         }
@@ -210,149 +206,144 @@ public class Player : MonoBehaviour {
     //Check all collisions on the player's way to find the real player's direction
     private void CheckMovingCollisions()
     {
+        bool hasHitDown = false;
+        transform.parent = null;
+
         if (_state != State.Jumping)
         {
             _downRay.origin = transform.position + _vectorDownCollisionOffset;
-
-            RaycastHit2D hit_down = Physics2D.Raycast(_downRay.origin, _downRay.direction, _rayDownCollisionOffset*2);
+            RaycastHit2D[] hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, _rayDownCollisionOffset * 2);
 
             //Check for something on the player's Down
-            if (hit_down.collider != null)
+            // We cycle through all the possible colliders
+            for (int i = 0; i < hit_down.Length; i++)
             {
-                GameObject goHitDown;
-                goHitDown = hit_down.collider.gameObject;
-                    
-                //Check if there is a Block on player's Down
-                Block goHitDownBlock = goHitDown.GetComponent<Block>();
-                if (goHitDownBlock != null)
+                if (hit_down[i].collider != null)
                 {
-                    _state = State.Grounded;
-                    //Adjust player position to the height of the block
-                    Vector3 pDown = transform.position;
-                    if (goHitDownBlock.IsVertical())
-                    {
-                        pDown.y = goHitDown.transform.position.y + goHitDownBlock.GetLength();
-                    }
-                    else
-                    {
-                        pDown.y = goHitDown.transform.position.y + 1;
-                    }
-                    
-                    transform.position = pDown;
-                    
-                    //Check if it is on a platform
-                    if (goHitDownBlock.IsPlatform())
-                    {
-                        transform.parent = goHitDownBlock.transform;
-                    }
-                    else
-                    {
-                        transform.parent = null;
-                    }
+                    GameObject goHitDown;
+                    goHitDown = hit_down[i].collider.gameObject;
 
-                    //Check the player's Right
-                    if (_playerDirection == Direction.Right)
-                    {
-                        _rightRay1.origin = transform.position + _vectorRight1CollisionOffset;
+                    //Check if there is a Block on player's Down
+                    Block goHitDownBlock = goHitDown.GetComponent<Block>();
 
-                        RaycastHit2D hit_right = Physics2D.Raycast(_rightRay1.origin, _rightRay1.direction, 0.01f);
-                        //Check if there is something on the player's Right
-                        if (hit_right.collider != null)
+                    if (goHitDownBlock != null)
+                    {
+                        _state = State.Grounded;
+
+                        //Adjust player position to the height of the block
+                        Vector3 pDown = transform.position;
+
+                        if (goHitDownBlock.IsVertical())
                         {
-                            GameObject goHitRight = hit_right.collider.gameObject;
-                            
-                            //Check if it is a Block
-                            if (goHitRight.GetComponent<Block>() != null)
-                            {
-                                
-                                //Adjust player's real direction
-                                _playerDirection = Direction.None;
-
-                                //Check if there is a block over the block which player collided with
-                                _rightRay2.origin = transform.position + _vectorRight2CollisionOffset;
-
-                                RaycastHit2D hit_right2 = Physics2D.Raycast(_rightRay2.origin, _rightRay2.direction, 0.01f);
-
-                                if(hit_right2.collider == null)
-                                {
-                                    //Check if ther is a block over the player
-                                    _upRay.origin = transform.position + Vector3.up;
-
-                                    RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
-
-                                    if (hit_up.collider == null)
-                                    {
-                                        _state = State.Jumping;
-                                        _playerDirection = Direction.Up;
-                                        SetJumpingValues();
-                                    }
-                                }
-
-                            }
+                            pDown.y = goHitDown.transform.position.y + goHitDownBlock.GetLength();
+                        }
+                        else
+                        {
+                            pDown.y = goHitDown.transform.position.y + 1;
                         }
 
-                    }
+                        transform.position = pDown;
 
-                    //Check the player's Left
-                    if (_playerDirection == Direction.Left)
-                    {
-
-                        _leftRay1.origin = transform.position + _vectorLeft1CollisionOffset;
-
-                        RaycastHit2D hit_left = Physics2D.Raycast(_leftRay1.origin, _leftRay1.direction, 0.01f);
-                        
-                        //Check if there is something on the player's Left
-                        if (hit_left.collider != null)
+                        //Check if it is on a platform
+                        if (goHitDownBlock.IsPlatform())
                         {
-                            GameObject goHitLeft = hit_left.collider.gameObject;
-                            
-                            //Check if it is a Block
-                            if (goHitLeft.GetComponent<Block>() != null)
-                            {
-                                
-                                //Adjust player's real direction
-                                _playerDirection = Direction.None;
-
-                                //Check if there is a block over the block which player collided with
-                                _leftRay2.origin = transform.position + _vectorLeft2CollisionOffset;
-
-                                RaycastHit2D hit_left2 = Physics2D.Raycast(_leftRay2.origin, _leftRay2.direction, 0.01f);
-
-                                if(hit_left2.collider == null)
-                                {
-
-                                    //Check if ther is a block over the player
-                                    _upRay.origin = transform.position + Vector3.up;
-
-                                    RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
-
-                                    if (hit_up.collider == null)
-                                    {
-                                        _state = State.Jumping;
-                                        _playerDirection = Direction.Up;
-                                        SetJumpingValues();
-                                    }
-                                }
-
-                            }
+                            transform.parent = goHitDownBlock.transform;
                         }
 
+                        hasHitDown = true;
                     }
-
-                }//Down if 2
-                else
-                {
-                    _state = State.Falling;
-                    transform.parent = null;
                 }
-            }//Down if 1
+            }
+
+            if (hasHitDown)
+            {
+                //Check the player's Right
+                if (_playerDirection == Direction.Right)
+                {
+                    _rightRay1.origin = transform.position + _vectorRight1CollisionOffset;
+                    RaycastHit2D hit_right = Physics2D.Raycast(_rightRay1.origin, _rightRay1.direction, 0.01f);
+
+                    //Check if there is something on the player's Right
+                    if (hit_right.collider != null)
+                    {
+                        GameObject goHitRight = hit_right.collider.gameObject;
+
+                        //Check if it is a Block
+                        if (goHitRight.GetComponent<Block>() != null)
+                        {
+                            //Adjust player's real direction
+                            _playerDirection = Direction.None;
+
+                            //Check if there is a block over the block which player collided with
+                            _rightRay2.origin = transform.position + _vectorRight2CollisionOffset;
+                            RaycastHit2D hit_right2 = Physics2D.Raycast(_rightRay2.origin, _rightRay2.direction, 0.01f);
+
+                            if (hit_right2.collider == null)
+                            {
+                                //Check if there is a block over the player
+                                _upRay.origin = transform.position + Vector3.up;
+                                RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
+
+                                if (hit_up.collider == null)
+                                {
+                                    _state = State.Jumping;
+                                    _playerDirection = Direction.Up;
+                                    SetJumpingValues();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //Check the player's Left
+                if (_playerDirection == Direction.Left)
+                {
+                    _leftRay1.origin = transform.position + _vectorLeft1CollisionOffset;
+                    RaycastHit2D hit_left = Physics2D.Raycast(_leftRay1.origin, _leftRay1.direction, 0.01f);
+
+                    //Check if there is something on the player's Left
+                    if (hit_left.collider != null)
+                    {
+                        GameObject goHitLeft = hit_left.collider.gameObject;
+
+                        //Check if it is a Block
+                        if (goHitLeft.GetComponent<Block>() != null)
+                        {
+                            //Adjust player's real direction
+                            _playerDirection = Direction.None;
+
+                            //Check if there is a block over the block which player collided with
+                            _leftRay2.origin = transform.position + _vectorLeft2CollisionOffset;
+                            RaycastHit2D hit_left2 = Physics2D.Raycast(_leftRay2.origin, _leftRay2.direction, 0.01f);
+
+                            if (hit_left2.collider == null)
+                            {
+                                //Check if there is a block over the player
+                                _upRay.origin = transform.position + Vector3.up;
+                                RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
+
+                                if (hit_up.collider == null)
+                                {
+                                    _state = State.Jumping;
+                                    _playerDirection = Direction.Up;
+                                    SetJumpingValues();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             else
             {
                 _state = State.Falling;
                 transform.parent = null;
             }
         }
-        
+        /*else
+        {
+            _state = State.Falling;
+            transform.parent = null;
+        }*/
     }
 
     //Adjust the velocity parameter (_velocity) in function of the real player's direction (_playerDirection), state
@@ -362,38 +353,36 @@ public class Player : MonoBehaviour {
         switch(_state)
         {
             case State.Grounded:
-                //if (_canMove)
-                //{
-                    _velocity.y = 0;
-                    _accSpeed = _minAccSpeed;
-                    switch (_playerDirection)
-                    {
-                        case Direction.Right:
+            {
+                _velocity.y = 0;
+                _accSpeed = _minAccSpeed;
 
-                            _velocity.x = _speed;
+                switch (_playerDirection)
+                {
+                    case Direction.Right:
+                        _velocity.x = _speed;
+                        break;
 
-                            break;
-                        case Direction.Left:
+                    case Direction.Left:
+                        _velocity.x = -_speed;
+                        break;
 
-                            _velocity.x = -_speed;
-
-                            break;
-
-                        default:
-                            _velocity.x = 0;
-                            break;
-                    }
-                //}
+                    default:
+                        _velocity.x = 0;
+                        break;
+                }
 
                 break;
+            }
             
             case State.Falling:
-            
+            {
                 _velocity.y = -_speed;
                 _accSpeed += _incrSpeed;
                 _velocity.x = 0;
-                
+
                 break;
+            }
         }
         
     }
@@ -413,16 +402,16 @@ public class Player : MonoBehaviour {
                 if (_falling)
                 {
                     _falling = false;
+
                     //Animation
                     _animState = _animStateAfterJump;
                     _changeAnimation = true;
                 }
-                transform.localPosition = p;
 
+                transform.localPosition = p;
                 break;
             
             case State.Jumping:
-
                 if (_jumpTimeActive == 0f)
                 {
                     //Animation
@@ -430,7 +419,7 @@ public class Player : MonoBehaviour {
                     _changeAnimation = true;
                 }
             
-                if(_jumpTimeActive < 1f)
+                if (_jumpTimeActive < 1f)
                 {
                     p = (1 - _jumpTimeActive) * (1 - _jumpTimeActive) * _jumpPoint0 +
                         2 * (1 - _jumpTimeActive) * _jumpTimeActive * _jumpPoint1 +
@@ -441,6 +430,7 @@ public class Player : MonoBehaviour {
                 else
                 {
                     _state = State.Normal;
+
                     //Ajustar posicion del jugador
                     p = _jumpPoint2; //Por algun motivo no se ejecuta bien
 
@@ -448,8 +438,8 @@ public class Player : MonoBehaviour {
                     _animState = _animStateAfterJump;
                     _changeAnimation = true;
                 }
+
                 transform.position = p;
-                
                 break;
             
             case State.Falling:
@@ -720,7 +710,6 @@ public class Player : MonoBehaviour {
                 return _wind;
             default:
                 return -1;
-
         }
     }
 

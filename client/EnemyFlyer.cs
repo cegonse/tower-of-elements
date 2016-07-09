@@ -90,7 +90,6 @@ public class EnemyFlyer : EnemyBase
                 transform.localScale = new Vector3(1, 1f, 1f);
             else
                 transform.localScale = new Vector3(-1, 1f, 1f);
-            Debug.Log("HEY!");
             _beggining = false;
         }
 
