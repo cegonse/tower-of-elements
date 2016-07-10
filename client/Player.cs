@@ -287,13 +287,13 @@ public class Player : MonoBehaviour {
                             _rightRay2.origin = transform.position + _vectorRight2CollisionOffset;
                             RaycastHit2D hit_right2 = Physics2D.Raycast(_rightRay2.origin, _rightRay2.direction, 0.01f);
 
-                            if (hit_right2.collider == null)
+                            if (hit_right2.collider == null || (hit_right2.collider != null && hit_right2.collider.gameObject.GetComponent<Block>() == null))
                             {
                                 //Check if there is a block over the player
                                 _upRay.origin = transform.position + Vector3.up;
                                 RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
 
-                                if (hit_up.collider == null)
+                                if (hit_up.collider == null || (hit_up.collider != null && hit_up.collider.gameObject.GetComponent<Block>() == null))
                                 {
                                     _state = State.Jumping;
                                     _playerDirection = Direction.Up;
@@ -325,13 +325,13 @@ public class Player : MonoBehaviour {
                             _leftRay2.origin = transform.position + _vectorLeft2CollisionOffset;
                             RaycastHit2D hit_left2 = Physics2D.Raycast(_leftRay2.origin, _leftRay2.direction, 0.01f);
 
-                            if (hit_left2.collider == null)
+                            if (hit_left2.collider == null || (hit_left2.collider != null && hit_left2.collider.gameObject.GetComponent<Block>() == null))
                             {
                                 //Check if there is a block over the player
                                 _upRay.origin = transform.position + Vector3.up;
                                 RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
 
-                                if (hit_up.collider == null)
+                                if (hit_up.collider == null || (hit_up.collider != null && hit_up.collider.gameObject.GetComponent<Block>() == null))
                                 {
                                     _state = State.Jumping;
                                     _playerDirection = Direction.Up;
@@ -737,8 +737,8 @@ public class Player : MonoBehaviour {
 
             if (_state == State.Grounded && _velocity.magnitude == 0)
             {
-
                 _actionRay = new Ray2D();
+                
                 if (_actionDirectionSaved == Direction.Left)
                 {
                     _actionRay.origin = new Vector3(Mathf.Round(transform.position.x - 1), Mathf.Round(transform.position.y), 0f); //transform.position + new Vector3(-0.31f, 0f, 0f);
@@ -749,7 +749,6 @@ public class Player : MonoBehaviour {
                     _actionRay.origin = new Vector3(Mathf.Round(transform.position.x + 1), Mathf.Round(transform.position.y), 0f);//transform.position + new Vector3(0.31f, 0f, 0f);
                     _actionRay.direction = Vector2.right;
                 }
-
 
                 if ((_actionDirectionSaved == Direction.Right || _actionDirectionSaved == Direction.Left))
                 {
@@ -775,8 +774,8 @@ public class Player : MonoBehaviour {
                                 for (int i_hit = 0; i_hit < hit.Length; i_hit++)
                                 {
                                     aux = hit[i_hit].collider.gameObject;
-
                                     Block goHitBlock = aux.GetComponent<Block>();
+
                                     if (goHitBlock != null && goHitBlock.IsMovable())
                                     {
                                         break;
@@ -805,7 +804,6 @@ public class Player : MonoBehaviour {
                                         }
                                     }
                                 }
-
                             }
 
                             break;
