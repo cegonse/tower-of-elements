@@ -83,58 +83,73 @@ public class EnemyBase : MonoBehaviour
         _leftRay.origin = transform.position + new Vector3(-0.46f, -0.46f, 0f);
         _rightRay.origin = transform.position + new Vector3(0.46f, 0.46f, 0f);
 
-        RaycastHit2D hit_right = Physics2D.Raycast(_rightRay.origin, _rightRay.direction, 0.9f);
-        RaycastHit2D hit_left = Physics2D.Raycast(_leftRay.origin, _leftRay.direction, 0.9f);
-        RaycastHit2D hit_down = Physics2D.Raycast(_downRay.origin, _downRay.direction, 0.9f);
-        RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.9f);
+        RaycastHit2D[] hit_right = Physics2D.RaycastAll(_rightRay.origin, _rightRay.direction, 0.9f);
+        RaycastHit2D[] hit_left = Physics2D.RaycastAll(_leftRay.origin, _leftRay.direction, 0.9f);
+        RaycastHit2D[] hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, 0.9f);
+        RaycastHit2D[] hit_up = Physics2D.RaycastAll(_upRay.origin, _upRay.direction, 0.9f);
 
         bool killThaPlayer = false;
 
-        if (hit_right.collider != null)
+        for (int i = 0; i < hit_right.Length; i++)
         {
-            GameObject goHitRight = hit_right.collider.gameObject;
-            if (goHitRight.GetComponent<Player>() != null)
+            if (hit_right[i].collider != null)
             {
-                if (goHitRight.transform.position.x - transform.position.x < 0.5)
+                GameObject goHitRight = hit_right[i].collider.gameObject;
+
+                if (goHitRight.GetComponent<Player>() != null)
                 {
-                    killThaPlayer = true;
-                }   
+                    if (goHitRight.transform.position.x - transform.position.x < 0.5)
+                    {
+                        killThaPlayer = true;
+                    }
+                }
             }
         }
 
-        if (hit_left.collider != null)
+        for (int i = 0; i < hit_left.Length; i++)
         {
-            GameObject goHitLeft = hit_left.collider.gameObject;
-            if (goHitLeft.GetComponent<Player>() != null)
+            if (hit_left[i].collider != null)
             {
-                if (transform.position.x - goHitLeft.transform.position.x < 0.5)
+                GameObject goHitLeft = hit_left[i].collider.gameObject;
+
+                if (goHitLeft.GetComponent<Player>() != null)
                 {
-                    killThaPlayer = true;
-                } 
+                    if (transform.position.x - goHitLeft.transform.position.x < 0.5)
+                    {
+                        killThaPlayer = true;
+                    }
+                }
             }
         }
 
-        if (hit_up.collider != null)
+        for (int i = 0; i < hit_up.Length; i++)
         {
-            GameObject goHitUp = hit_up.collider.gameObject;
-            if (goHitUp.GetComponent<Player>() != null)
+            if (hit_up[i].collider != null)
             {
-                if (goHitUp.transform.position.y - goHitUp.transform.position.y < 0.5)
+                GameObject goHitUp = hit_up[i].collider.gameObject;
+
+                if (goHitUp.GetComponent<Player>() != null)
                 {
-                    killThaPlayer = true;
-                } 
+                    if (goHitUp.transform.position.y - goHitUp.transform.position.y < 0.5)
+                    {
+                        killThaPlayer = true;
+                    }
+                }
             }
         }
 
-        if (hit_down.collider != null)
+        for (int i = 0; i < hit_down.Length; i++)
         {
-            GameObject goHitDown = hit_down.collider.gameObject;
-            if (goHitDown.GetComponent<Player>() != null)
+            if (hit_down[i].collider != null)
             {
-                if (transform.position.y - goHitDown.transform.position.y < 0.5)
+                GameObject goHitDown = hit_down[i].collider.gameObject;
+                if (goHitDown.GetComponent<Player>() != null)
                 {
-                    killThaPlayer = true;
-                } 
+                    if (transform.position.y - goHitDown.transform.position.y < 0.5)
+                    {
+                        killThaPlayer = true;
+                    }
+                }
             }
         }
 
@@ -142,10 +157,10 @@ public class EnemyBase : MonoBehaviour
         {
             GameObject go = _level.GetEntity("player");
             Player player = go.GetComponent<Player>();
+
             if (player)
             {
                 player.DestroyPlayer();
-                Debug.Log("Se llama a DestroyPlayer");
             }
         }
     }
