@@ -86,7 +86,6 @@ public class EnemyWalker: EnemyBase {
         if (_state != State.Jumping)
         {
             _downRay.origin = transform.position + new Vector3(-_rayDownCollisionOffset, -0.51f, 0f);
-
             RaycastHit2D hit_down = Physics2D.Raycast(_downRay.origin, _downRay.direction, _rayDownCollisionOffset*2);
 
             //Check for something on the player's Down
@@ -99,6 +98,7 @@ public class EnemyWalker: EnemyBase {
                 if (goHitDown.GetComponent<Block>() != null)
                 {
                     _state = State.Grounded;
+
                     //Adjust player position to the height of the block
                     Vector3 pDown = transform.position;
                     pDown.y = goHitDown.transform.position.y + 1;
@@ -107,10 +107,9 @@ public class EnemyWalker: EnemyBase {
                     //Check the player's Right
                     if (_enemyDirection == Direction.Right)
                     {
-
                         _rightRay1.origin = transform.position + new Vector3(_raySidesCollisionOffset, 0f, 0f);
-
                         RaycastHit2D hit_right = Physics2D.Raycast(_rightRay1.origin, _rightRay1.direction, 0.01f);
+
                         //Check if there is something on the player's Right
                         if (hit_right.collider != null)
                         {
@@ -119,14 +118,11 @@ public class EnemyWalker: EnemyBase {
                             //Check if it is a Block
                             if (goHitRight.GetComponent<Block>() != null)
                             {
-                                
-
                                 //Check if there is a block over the block which player collided with
                                 _rightRay2.origin = transform.position + new Vector3(_raySidesCollisionOffset, 1f, 0f);
-
                                 RaycastHit2D hit_right2 = Physics2D.Raycast(_rightRay2.origin, _rightRay2.direction, 0.01f);
 
-                                if(hit_right2.collider == null)
+                                if (hit_right2.collider == null)
                                 {
                                     //Check if ther is a block over the player
                                     _upRay.origin = transform.position + new Vector3(0f, 1f, 0f);
@@ -143,24 +139,30 @@ public class EnemyWalker: EnemyBase {
                                         _state = State.Normal;
                                     }
                                 }
-                                 else if(hit_right2.collider != null)
+                                else if (hit_right2.collider != null)
                                 {
-                                    _state = State.Grounded;
-                                    _targetIndex = 1;
-                                    ChangeTargetDirection();
-                                    
+                                    // If the object above the block isn't another block,
+                                    // proceed normally
+                                    if (hit_right2.collider.GetComponent<Block>() != null)
+                                    {
+                                        _state = State.Grounded;
+                                        _targetIndex = 1;
+                                        ChangeTargetDirection();
+                                    }
+                                    else
+                                    {
+                                        _state = State.Jumping;
+                                        SetJumpingValues();
+                                    }
                                 }
-
                             }
                         }
-
                     }
 
                     //Check the player's Left
                     if (_enemyDirection == Direction.Left)
                     {
                         _leftRay1.origin = transform.position + new Vector3(-_raySidesCollisionOffset, 0f, 0f);
-
                         RaycastHit2D hit_left = Physics2D.Raycast(_leftRay1.origin, _leftRay1.direction, 0.01f);
                         
                         //Check if there is something on the player's Left
@@ -171,15 +173,12 @@ public class EnemyWalker: EnemyBase {
                             //Check if it is a Block
                             if (goHitLeft.GetComponent<Block>() != null)
                             {
-
                                 //Check if there is a block over the block which player collided with
                                 _leftRay2.origin = transform.position + new Vector3(-_raySidesCollisionOffset, 1f, 0f);
-
                                 RaycastHit2D hit_left2 = Physics2D.Raycast(_leftRay2.origin, _leftRay2.direction, 0.01f);
 
                                 if(hit_left2.collider == null)
                                 {
-
                                     //Check if ther is a block over the player
                                     _upRay.origin = transform.position + new Vector3(0f, 1f, 0f);
 
@@ -193,33 +192,43 @@ public class EnemyWalker: EnemyBase {
                                     else
                                     {
                                         _state = State.Grounded;
-                                        
-                                    if(_enemyDirection == _directionToPf)
-                                        _enemyDirection = _directionToP0;
-                                    else
-                                        _enemyDirection = _directionToPf;
+
+                                        if (_enemyDirection == _directionToPf)
+                                        {
+                                            _enemyDirection = _directionToP0;
+                                        }
+                                        else
+                                        {
+                                            _enemyDirection = _directionToPf;
+                                        }
                                     }
                                 }
                                 else if (hit_left2.collider != null)
                                 {
-                                    _state = State.Grounded;
-                                    _targetIndex = 0;
-                                    ChangeTargetDirection();
+                                    // If the object above the block isn't another block,
+                                    // proceed normally
+                                    if (hit_left2.collider.GetComponent<Block>() != null)
+                                    {
+                                        _state = State.Grounded;
+                                        _targetIndex = 0;
+                                        ChangeTargetDirection();
+                                    }
+                                    else
+                                    {
+                                        _state = State.Jumping;
+                                        SetJumpingValues();
+                                    }
                                 }
-
-
                             }
                         }
 
                     }
-
-                }//Down if 2
+                }
                 else
                 {
                     _state = State.Falling;
-                   
                 }
-            }//Down if 1
+            }
             else
             {
                 _state = State.Falling;
@@ -230,20 +239,12 @@ public class EnemyWalker: EnemyBase {
 
     private void AdjustVelocity()
     {
-        
         float distance = Vector2.Distance(_target, transform.position);
         
-        // Check if we are close enough to the target
-        /*if (Vector2.Distance(_target, transform.position) < 0.5f)
-		{
-            ChangeTargetDirection();
-        }*/
-
         if(Mathf.Abs(_target.x - transform.position.x) < 0.5f)
         {
             ChangeTargetDirection();
         }
-
     }
 
     private void ChangeTargetDirection()
@@ -284,14 +285,12 @@ public class EnemyWalker: EnemyBase {
 
     private void MovingEnemy()
     {
-        
         Vector3 p = transform.position;
         
         switch(_state)
         {
             case State.Grounded:
                 _accSpeed = _minAccSpeed;
-                //p = Vector2.SmoothDamp(transform.position, _target, ref _velocity, _speed/2, _speed*2, Time.deltaTime);
 
                 if (_enemyDirection == Direction.Right)
                 {
@@ -333,19 +332,19 @@ public class EnemyWalker: EnemyBase {
                 transform.position = new Vector3(transform.position.x, p.y, 0f);
                 break;
         }
-		
-        
     }
 	
 	public override void SetEnemyData (BaseEnemyData data)
 	{
 		_walkerData = (WalkerEnemyData) data;
         _target = _walkerData.p0;
-        if(transform.position.x < _target.x)
+
+        if (transform.position.x < _target.x)
         {
             _directionToP0 = Direction.Right;
             _directionToPf = Direction.Left;
-        }else
+        }
+        else
         {
             _directionToP0 = Direction.Left;
             _directionToPf = Direction.Right;
@@ -353,5 +352,4 @@ public class EnemyWalker: EnemyBase {
 
         _enemyDirection = _directionToP0;
     }
-	
 }
