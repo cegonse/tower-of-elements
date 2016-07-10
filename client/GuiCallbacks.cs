@@ -329,10 +329,40 @@ public class GuiCallbacks : MonoBehaviour
                 winMenu.SetActive(true);
                 wmc.OnPlayerWin(gameObject, s, t);
 
-                SaveGameController.LevelProgressData lpd = new SaveGameController.LevelProgressData();
-                lpd.Id = id;
-                lpd.Score = t;
-                SaveGameController.instance.SetLevelProgress(lpd);
+                // Search the level in the level progress save file
+                bool found = false;
+                List<SaveGameController.LevelProgressData> llpd = SaveGameController.instance.GetLevelProgress();
+                SaveGameController.LevelProgressData lpd;
+
+                for (int i = 0; i < llpd.Count; i++)
+                {
+                    lpd = llpd[i];
+
+                    // If the level has been played and the player took
+                    // a longer time than now, replace the lowest time
+                    if (lpd.Id == id)
+                    {
+                        found = true;
+
+                        if (lpd.Score < t)
+                        {
+                            lpd.Score = t;
+                            SaveGameController.instance.SetLevelProgress(lpd);
+                        }
+                    }
+                }
+
+                // If this is the first time the player goes through
+                // the level, add the time
+                if (!found)
+                {
+                    lpd = new SaveGameController.LevelProgressData();
+
+                    lpd.Id = id;
+                    lpd.Score = t;
+
+                    SaveGameController.instance.SetLevelProgress(lpd);
+                }
 
                 _isOnWinMenu = true;
             }

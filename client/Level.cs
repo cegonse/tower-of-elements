@@ -282,7 +282,7 @@ public class Level
             boxColl.size = new Vector2(length, 1f);
             boxColl.offset = new Vector2((length / 2) - 0.5f, 0f);
         }
-
+        
         // --------- TEST --------- //
         // - Disabled rigidbodies on blocks
         //   to check the effect
