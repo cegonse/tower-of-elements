@@ -44,6 +44,9 @@ public class MainGUIController : MonoBehaviour {
         public GameObject[] SelectionLevelMenu;
     }
 
+    //Singleton
+    public static MainGUIController instance;
+
     //*** UI GameObjects ***
     public UI_Interface _interfaces;
 
@@ -122,11 +125,13 @@ public class MainGUIController : MonoBehaviour {
     private bool _allMoveStarted = true, _allMoveEnded = true;
 
     private Vector3 _dungeonButtonWindPos, _dungeonButtonEarthPos, _dungeonButtonFirePos, _dungeonButtonIcePos, _dungeonButtonAllPos;
-    private Vector3 _dungeonButtonWindPosOffset = new Vector3(-80, +40, 1),
-        _dungeonButtonEarthPosOffset = new Vector3(-65, -40, 1),
-        _dungeonButtonFirePosOffset = new Vector3(60, -50, 1),
-        _dungeonButtonIcePosOffset = new Vector3(85, 50, 1),
-        _dungeonButtonAllPosOffset = new Vector3(0, 80, 1);
+
+    private static float _screenFactor = Screen.height / 325f;//Screen.width/500f;
+    private Vector3 _dungeonButtonWindPosOffset = new Vector3(-80, +40, 1) * _screenFactor,
+        _dungeonButtonEarthPosOffset = new Vector3(-65, -40, 1) * _screenFactor,
+        _dungeonButtonFirePosOffset = new Vector3(60, -50, 1) * _screenFactor,
+        _dungeonButtonIcePosOffset = new Vector3(85, 50, 1) * _screenFactor,
+        _dungeonButtonAllPosOffset = new Vector3(0, 80, 1) * _screenFactor;
 
 
     //Common LevelsMenu values
@@ -135,15 +140,30 @@ public class MainGUIController : MonoBehaviour {
     private const float _levelsMenuBackButtonStartTime = 0.9f * LEVELS_MENU_INTRO_DURATION;
     private const float _levelsMenuBackButtonEndTime = 1f * LEVELS_MENU_INTRO_DURATION;
 
-    //WindLevelsMenu
-    //WindLevelButtons starting times
-    private float[] _windLevelMenuButtonsStartTime = {0.5f * LEVELS_MENU_INTRO_DURATION,
+    //Level buttons start time
+    private float[] _levelMenuButtonsStartTime = {    0.45f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.5f * LEVELS_MENU_INTRO_DURATION,
                                                       0.55f * LEVELS_MENU_INTRO_DURATION,
-                                                      0.6f * LEVELS_MENU_INTRO_DURATION};
-    //WindLevelButtons ending times
-    private float[] _windLevelMenuButtonsEndTime = {0.6f * LEVELS_MENU_INTRO_DURATION,
-                                                    0.65f * LEVELS_MENU_INTRO_DURATION,
-                                                    0.7f * LEVELS_MENU_INTRO_DURATION};
+                                                      0.6f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.65f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.7f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.75f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.8f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.85f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.9f * LEVELS_MENU_INTRO_DURATION
+                                                 };
+    //Level buttons end time
+    private float[] _levelMenuButtonsEndTime = {      0.55f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.6f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.65f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.7f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.75f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.8f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.85f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.9f * LEVELS_MENU_INTRO_DURATION,
+                                                      0.95f * LEVELS_MENU_INTRO_DURATION,
+                                                      1f * LEVELS_MENU_INTRO_DURATION
+                                                 };
 
 
 
@@ -156,12 +176,19 @@ public class MainGUIController : MonoBehaviour {
     private int _starsOnLevel = 0;
     private float _timeOnLevel = 0f;
 
-    private float TWO_STARS_MULTIPLIER = 2f;
-    private float ONE_STAR_MULTIPLIER = 3f;
+    public float TWO_STARS_MULTIPLIER = 2f;
+    public float ONE_STAR_MULTIPLIER = 3f;
 
 	// Use this for initialization
 	void Start () {
-        
+
+        //Singleton
+        if (instance == null)
+        {
+            instance = this;
+        }
+
+        //Dungeon buttons positions
         _dungeonButtonWindPos = _interfaces.SelectDungeonMenu[2].transform.position;
         _dungeonButtonEarthPos = _interfaces.SelectDungeonMenu[3].transform.position;
         _dungeonButtonIcePos = _interfaces.SelectDungeonMenu[4].transform.position;
@@ -1112,11 +1139,11 @@ public class MainGUIController : MonoBehaviour {
                         //Buttons
                         for (int i = 0; i < _interfaces.WindLevelsMenu.Length - LEVELS_MENU_BUTTON_OFFSET; i++)
                         {
-                            if (_transitionCounterTime + _windLevelMenuButtonsStartTime[i] < Time.realtimeSinceStartup)
+                            if (_transitionCounterTime + _levelMenuButtonsStartTime[i] < Time.realtimeSinceStartup)
                             {
-                                if (_transitionCounterTime + _windLevelMenuButtonsEndTime[i] >= Time.realtimeSinceStartup)
+                                if (_transitionCounterTime + _levelMenuButtonsEndTime[i] >= Time.realtimeSinceStartup)
                                 {
-                                    float scale = (Time.realtimeSinceStartup - _transitionCounterTime - _windLevelMenuButtonsStartTime[i]) * (1f / (_windLevelMenuButtonsEndTime[i] - _windLevelMenuButtonsStartTime[i]));
+                                    float scale = (Time.realtimeSinceStartup - _transitionCounterTime - _levelMenuButtonsStartTime[i]) * (1f / (_levelMenuButtonsEndTime[i] - _levelMenuButtonsStartTime[i]));
                                     _interfaces.WindLevelsMenu[i + LEVELS_MENU_BUTTON_OFFSET].transform.localScale = Vector3.one * scale;
                                 }
                                 else
@@ -1229,8 +1256,34 @@ public class MainGUIController : MonoBehaviour {
                 // things needed to make the transition.
                 if (!_onTransition)
                 {
-                    // In this case do nothing because is an auxiliar interface
-                    // and has nothing.
+                    //MainMenu
+                    _interfaces.EarthLevelsMenu[0].SetActive(true);
+
+                    //Black Image
+                    _interfaces.EarthLevelsMenu[1].SetActive(true);
+                    _interfaces.EarthLevelsMenu[1].GetComponent<Image>().color = Color.black * (_UIPreviousState != UIState.SelectionLevelMenu ? 1f : 0.5f);
+
+                    //Buttons
+                    if (_UIPreviousState != UIState.SelectionLevelMenu)
+                    {
+                        for (int i = 2; i < _interfaces.EarthLevelsMenu.Length; i++)
+                        {
+                            _interfaces.EarthLevelsMenu[i].transform.localScale = Vector3.zero;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 2; i < _interfaces.EarthLevelsMenu.Length; i++)
+                        {
+                            _interfaces.EarthLevelsMenu[i].transform.localScale = Vector3.one;
+                        }
+                    }
+
+                    //Save the time
+                    _transitionCounterTime = Time.realtimeSinceStartup;
+
+                    //Set onTransition to true!
+                    _onTransition = true;
 
                 }
                 else //During _onTransition calls
@@ -1238,7 +1291,61 @@ public class MainGUIController : MonoBehaviour {
                 // Use it to move, fade, etc. the interface objects
                 // NOTE: Must detect the end of the transition and set _onTransition variable to false
                 {
-                    //In this case nothing is needed
+                    //Black Image
+                    float alpha;
+                    if (_transitionCounterTime < Time.realtimeSinceStartup
+                        && _transitionCounterTime + _levelsMenuBlackImageEndTime >= Time.realtimeSinceStartup)
+                    {
+                        alpha = _levelsMenuBlackImageEndTime - Time.realtimeSinceStartup + _transitionCounterTime;
+                        _interfaces.EarthLevelsMenu[1].GetComponent<Image>().color = Color.black * alpha;
+                    }
+
+                    if (_UIPreviousState != UIState.SelectionLevelMenu)
+                    {
+                        //Buttons
+                        for (int i = 0; i < _interfaces.EarthLevelsMenu.Length - LEVELS_MENU_BUTTON_OFFSET; i++)
+                        {
+                            if (_transitionCounterTime + _levelMenuButtonsStartTime[i] < Time.realtimeSinceStartup)
+                            {
+                                if (_transitionCounterTime + _levelMenuButtonsEndTime[i] >= Time.realtimeSinceStartup)
+                                {
+                                    float scale = (Time.realtimeSinceStartup - _transitionCounterTime - _levelMenuButtonsStartTime[i]) * (1f / (_levelMenuButtonsEndTime[i] - _levelMenuButtonsStartTime[i]));
+                                    _interfaces.EarthLevelsMenu[i + LEVELS_MENU_BUTTON_OFFSET].transform.localScale = Vector3.one * scale;
+                                }
+                                else
+                                {
+                                    _interfaces.EarthLevelsMenu[i + LEVELS_MENU_BUTTON_OFFSET].transform.localScale = Vector3.one;
+                                }
+                            }
+
+                        }
+
+                        //BackButton
+                        if (_transitionCounterTime + _levelsMenuBackButtonStartTime < Time.realtimeSinceStartup
+                            && _transitionCounterTime + _levelsMenuBackButtonEndTime >= Time.realtimeSinceStartup)
+                        {
+                            float scale = (Time.realtimeSinceStartup - _transitionCounterTime - _levelsMenuBackButtonStartTime) * (1f / (_levelsMenuBackButtonEndTime - _levelsMenuBackButtonStartTime));
+                            _interfaces.EarthLevelsMenu[2].transform.localScale = Vector3.one * scale;
+                        }
+                    }
+
+
+                    //End of transition
+                    if (_transitionCounterTime + SELECT_DUNGEON_MENU_INTRO_DURATION <= Time.realtimeSinceStartup)
+                    {
+                        _onTransition = false;
+
+                        //BlackImage
+                        _interfaces.EarthLevelsMenu[1].SetActive(false);
+
+                        //Back Button
+                        if (_UIPreviousState != UIState.SelectionLevelMenu)
+                        {
+                            _interfaces.EarthLevelsMenu[2].transform.localScale = Vector3.one;
+                        }
+
+                    }
+
                 }
 
                 break;
@@ -1250,9 +1357,15 @@ public class MainGUIController : MonoBehaviour {
                 // things needed to make the transition.
                 if (!_onTransition)
                 {
-                    // Call the MakeUITransition function whit INIT_NEXT_TRANSITION
-                    // here to ensure the INIT transition of the UINextState is called
-                    MakeUITransition(INIT_NEXT_TRANSITION);
+                    //Black Image
+                    _interfaces.EarthLevelsMenu[1].SetActive(true);
+                    _interfaces.EarthLevelsMenu[1].GetComponent<Image>().color = Color.clear;
+
+                    //Save the time
+                    _transitionCounterTime = Time.realtimeSinceStartup;
+
+                    //Set onTransition to true!
+                    _onTransition = true;
                 }
                 else //During _onTransition calls
                 // This part is called during the transition
@@ -1261,7 +1374,30 @@ public class MainGUIController : MonoBehaviour {
                 // Usually you must call here the MakeUITransition with INIT_NEXT_TRANSITION method
                 // to Init the next transition if needed
                 {
+                    //Black Image
+                    if (_transitionCounterTime < Time.realtimeSinceStartup
+                        && _transitionCounterTime + LEVELS_MENU_OUTRO_DURATION >= Time.realtimeSinceStartup)
+                    {
+                        float alpha = (Time.realtimeSinceStartup - _transitionCounterTime) * ((_UINextState != UIState.SelectionLevelMenu ? 1f : 0.5f) / (LEVELS_MENU_OUTRO_DURATION));
+                        _interfaces.EarthLevelsMenu[1].GetComponent<Image>().color = Color.black * alpha;
+                    }
 
+                    //End of transition
+                    if (_transitionCounterTime + LEVELS_MENU_OUTRO_DURATION <= Time.realtimeSinceStartup)
+                    {
+                        _onTransition = false;
+
+                        //Black Image
+                        _interfaces.EarthLevelsMenu[1].GetComponent<Image>().color = Color.black * (_UINextState != UIState.SelectionLevelMenu ? 1f : 0.5f);
+
+                        //WindLevelsMenu
+                        if (_UINextState != UIState.SelectionLevelMenu)
+                            _interfaces.EarthLevelsMenu[0].SetActive(false);
+
+                        // Call the MakeUITransition function whit INIT_NEXT_TRANSITION
+                        // here to ensure the INIT transition of the UINextState is called
+                        MakeUITransition(INIT_NEXT_TRANSITION);
+                    }
                 }
 
                 break;
@@ -1286,8 +1422,34 @@ public class MainGUIController : MonoBehaviour {
                 // things needed to make the transition.
                 if (!_onTransition)
                 {
-                    // In this case do nothing because is an auxiliar interface
-                    // and has nothing.
+                    //MainMenu
+                    _interfaces.IceLevelsMenu[0].SetActive(true);
+
+                    //Black Image
+                    _interfaces.IceLevelsMenu[1].SetActive(true);
+                    _interfaces.IceLevelsMenu[1].GetComponent<Image>().color = Color.black * (_UIPreviousState != UIState.SelectionLevelMenu ? 1f : 0.5f);
+
+                    //Buttons
+                    if (_UIPreviousState != UIState.SelectionLevelMenu)
+                    {
+                        for (int i = 2; i < _interfaces.IceLevelsMenu.Length; i++)
+                        {
+                            _interfaces.IceLevelsMenu[i].transform.localScale = Vector3.zero;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 2; i < _interfaces.IceLevelsMenu.Length; i++)
+                        {
+                            _interfaces.IceLevelsMenu[i].transform.localScale = Vector3.one;
+                        }
+                    }
+
+                    //Save the time
+                    _transitionCounterTime = Time.realtimeSinceStartup;
+
+                    //Set onTransition to true!
+                    _onTransition = true;
 
                 }
                 else //During _onTransition calls
@@ -1295,7 +1457,61 @@ public class MainGUIController : MonoBehaviour {
                 // Use it to move, fade, etc. the interface objects
                 // NOTE: Must detect the end of the transition and set _onTransition variable to false
                 {
-                    //In this case nothing is needed
+                    //Black Image
+                    float alpha;
+                    if (_transitionCounterTime < Time.realtimeSinceStartup
+                        && _transitionCounterTime + _levelsMenuBlackImageEndTime >= Time.realtimeSinceStartup)
+                    {
+                        alpha = _levelsMenuBlackImageEndTime - Time.realtimeSinceStartup + _transitionCounterTime;
+                        _interfaces.IceLevelsMenu[1].GetComponent<Image>().color = Color.black * alpha;
+                    }
+
+                    if (_UIPreviousState != UIState.SelectionLevelMenu)
+                    {
+                        //Buttons
+                        for (int i = 0; i < _interfaces.IceLevelsMenu.Length - LEVELS_MENU_BUTTON_OFFSET; i++)
+                        {
+                            if (_transitionCounterTime + _levelMenuButtonsStartTime[i] < Time.realtimeSinceStartup)
+                            {
+                                if (_transitionCounterTime + _levelMenuButtonsEndTime[i] >= Time.realtimeSinceStartup)
+                                {
+                                    float scale = (Time.realtimeSinceStartup - _transitionCounterTime - _levelMenuButtonsStartTime[i]) * (1f / (_levelMenuButtonsEndTime[i] - _levelMenuButtonsStartTime[i]));
+                                    _interfaces.IceLevelsMenu[i + LEVELS_MENU_BUTTON_OFFSET].transform.localScale = Vector3.one * scale;
+                                }
+                                else
+                                {
+                                    _interfaces.IceLevelsMenu[i + LEVELS_MENU_BUTTON_OFFSET].transform.localScale = Vector3.one;
+                                }
+                            }
+
+                        }
+
+                        //BackButton
+                        if (_transitionCounterTime + _levelsMenuBackButtonStartTime < Time.realtimeSinceStartup
+                            && _transitionCounterTime + _levelsMenuBackButtonEndTime >= Time.realtimeSinceStartup)
+                        {
+                            float scale = (Time.realtimeSinceStartup - _transitionCounterTime - _levelsMenuBackButtonStartTime) * (1f / (_levelsMenuBackButtonEndTime - _levelsMenuBackButtonStartTime));
+                            _interfaces.IceLevelsMenu[2].transform.localScale = Vector3.one * scale;
+                        }
+                    }
+
+
+                    //End of transition
+                    if (_transitionCounterTime + SELECT_DUNGEON_MENU_INTRO_DURATION <= Time.realtimeSinceStartup)
+                    {
+                        _onTransition = false;
+
+                        //BlackImage
+                        _interfaces.IceLevelsMenu[1].SetActive(false);
+
+                        //Back Button
+                        if (_UIPreviousState != UIState.SelectionLevelMenu)
+                        {
+                            _interfaces.IceLevelsMenu[2].transform.localScale = Vector3.one;
+                        }
+
+                    }
+
                 }
 
                 break;
@@ -1307,9 +1523,15 @@ public class MainGUIController : MonoBehaviour {
                 // things needed to make the transition.
                 if (!_onTransition)
                 {
-                    // Call the MakeUITransition function whit INIT_NEXT_TRANSITION
-                    // here to ensure the INIT transition of the UINextState is called
-                    MakeUITransition(INIT_NEXT_TRANSITION);
+                    //Black Image
+                    _interfaces.IceLevelsMenu[1].SetActive(true);
+                    _interfaces.IceLevelsMenu[1].GetComponent<Image>().color = Color.clear;
+
+                    //Save the time
+                    _transitionCounterTime = Time.realtimeSinceStartup;
+
+                    //Set onTransition to true!
+                    _onTransition = true;
                 }
                 else //During _onTransition calls
                 // This part is called during the transition
@@ -1318,7 +1540,30 @@ public class MainGUIController : MonoBehaviour {
                 // Usually you must call here the MakeUITransition with INIT_NEXT_TRANSITION method
                 // to Init the next transition if needed
                 {
+                    //Black Image
+                    if (_transitionCounterTime < Time.realtimeSinceStartup
+                        && _transitionCounterTime + LEVELS_MENU_OUTRO_DURATION >= Time.realtimeSinceStartup)
+                    {
+                        float alpha = (Time.realtimeSinceStartup - _transitionCounterTime) * ((_UINextState != UIState.SelectionLevelMenu ? 1f : 0.5f) / (LEVELS_MENU_OUTRO_DURATION));
+                        _interfaces.IceLevelsMenu[1].GetComponent<Image>().color = Color.black * alpha;
+                    }
 
+                    //End of transition
+                    if (_transitionCounterTime + LEVELS_MENU_OUTRO_DURATION <= Time.realtimeSinceStartup)
+                    {
+                        _onTransition = false;
+
+                        //Black Image
+                        _interfaces.IceLevelsMenu[1].GetComponent<Image>().color = Color.black * (_UINextState != UIState.SelectionLevelMenu ? 1f : 0.5f);
+
+                        //WindLevelsMenu
+                        if (_UINextState != UIState.SelectionLevelMenu)
+                            _interfaces.IceLevelsMenu[0].SetActive(false);
+
+                        // Call the MakeUITransition function whit INIT_NEXT_TRANSITION
+                        // here to ensure the INIT transition of the UINextState is called
+                        MakeUITransition(INIT_NEXT_TRANSITION);
+                    }
                 }
 
                 break;
@@ -1343,8 +1588,34 @@ public class MainGUIController : MonoBehaviour {
                 // things needed to make the transition.
                 if (!_onTransition)
                 {
-                    // In this case do nothing because is an auxiliar interface
-                    // and has nothing.
+                    //MainMenu
+                    _interfaces.FireLevelsMenu[0].SetActive(true);
+
+                    //Black Image
+                    _interfaces.FireLevelsMenu[1].SetActive(true);
+                    _interfaces.FireLevelsMenu[1].GetComponent<Image>().color = Color.black * (_UIPreviousState != UIState.SelectionLevelMenu ? 1f : 0.5f);
+
+                    //Buttons
+                    if (_UIPreviousState != UIState.SelectionLevelMenu)
+                    {
+                        for (int i = 2; i < _interfaces.FireLevelsMenu.Length; i++)
+                        {
+                            _interfaces.FireLevelsMenu[i].transform.localScale = Vector3.zero;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 2; i < _interfaces.FireLevelsMenu.Length; i++)
+                        {
+                            _interfaces.FireLevelsMenu[i].transform.localScale = Vector3.one;
+                        }
+                    }
+
+                    //Save the time
+                    _transitionCounterTime = Time.realtimeSinceStartup;
+
+                    //Set onTransition to true!
+                    _onTransition = true;
 
                 }
                 else //During _onTransition calls
@@ -1352,7 +1623,61 @@ public class MainGUIController : MonoBehaviour {
                 // Use it to move, fade, etc. the interface objects
                 // NOTE: Must detect the end of the transition and set _onTransition variable to false
                 {
-                    //In this case nothing is needed
+                    //Black Image
+                    float alpha;
+                    if (_transitionCounterTime < Time.realtimeSinceStartup
+                        && _transitionCounterTime + _levelsMenuBlackImageEndTime >= Time.realtimeSinceStartup)
+                    {
+                        alpha = _levelsMenuBlackImageEndTime - Time.realtimeSinceStartup + _transitionCounterTime;
+                        _interfaces.FireLevelsMenu[1].GetComponent<Image>().color = Color.black * alpha;
+                    }
+
+                    if (_UIPreviousState != UIState.SelectionLevelMenu)
+                    {
+                        //Buttons
+                        for (int i = 0; i < _interfaces.FireLevelsMenu.Length - LEVELS_MENU_BUTTON_OFFSET; i++)
+                        {
+                            if (_transitionCounterTime + _levelMenuButtonsStartTime[i] < Time.realtimeSinceStartup)
+                            {
+                                if (_transitionCounterTime + _levelMenuButtonsEndTime[i] >= Time.realtimeSinceStartup)
+                                {
+                                    float scale = (Time.realtimeSinceStartup - _transitionCounterTime - _levelMenuButtonsStartTime[i]) * (1f / (_levelMenuButtonsEndTime[i] - _levelMenuButtonsStartTime[i]));
+                                    _interfaces.FireLevelsMenu[i + LEVELS_MENU_BUTTON_OFFSET].transform.localScale = Vector3.one * scale;
+                                }
+                                else
+                                {
+                                    _interfaces.FireLevelsMenu[i + LEVELS_MENU_BUTTON_OFFSET].transform.localScale = Vector3.one;
+                                }
+                            }
+
+                        }
+
+                        //BackButton
+                        if (_transitionCounterTime + _levelsMenuBackButtonStartTime < Time.realtimeSinceStartup
+                            && _transitionCounterTime + _levelsMenuBackButtonEndTime >= Time.realtimeSinceStartup)
+                        {
+                            float scale = (Time.realtimeSinceStartup - _transitionCounterTime - _levelsMenuBackButtonStartTime) * (1f / (_levelsMenuBackButtonEndTime - _levelsMenuBackButtonStartTime));
+                            _interfaces.FireLevelsMenu[2].transform.localScale = Vector3.one * scale;
+                        }
+                    }
+
+
+                    //End of transition
+                    if (_transitionCounterTime + SELECT_DUNGEON_MENU_INTRO_DURATION <= Time.realtimeSinceStartup)
+                    {
+                        _onTransition = false;
+
+                        //BlackImage
+                        _interfaces.FireLevelsMenu[1].SetActive(false);
+
+                        //Back Button
+                        if (_UIPreviousState != UIState.SelectionLevelMenu)
+                        {
+                            _interfaces.FireLevelsMenu[2].transform.localScale = Vector3.one;
+                        }
+
+                    }
+
                 }
 
                 break;
@@ -1364,9 +1689,15 @@ public class MainGUIController : MonoBehaviour {
                 // things needed to make the transition.
                 if (!_onTransition)
                 {
-                    // Call the MakeUITransition function whit INIT_NEXT_TRANSITION
-                    // here to ensure the INIT transition of the UINextState is called
-                    MakeUITransition(INIT_NEXT_TRANSITION);
+                    //Black Image
+                    _interfaces.FireLevelsMenu[1].SetActive(true);
+                    _interfaces.FireLevelsMenu[1].GetComponent<Image>().color = Color.clear;
+
+                    //Save the time
+                    _transitionCounterTime = Time.realtimeSinceStartup;
+
+                    //Set onTransition to true!
+                    _onTransition = true;
                 }
                 else //During _onTransition calls
                 // This part is called during the transition
@@ -1375,7 +1706,30 @@ public class MainGUIController : MonoBehaviour {
                 // Usually you must call here the MakeUITransition with INIT_NEXT_TRANSITION method
                 // to Init the next transition if needed
                 {
+                    //Black Image
+                    if (_transitionCounterTime < Time.realtimeSinceStartup
+                        && _transitionCounterTime + LEVELS_MENU_OUTRO_DURATION >= Time.realtimeSinceStartup)
+                    {
+                        float alpha = (Time.realtimeSinceStartup - _transitionCounterTime) * ((_UINextState != UIState.SelectionLevelMenu ? 1f : 0.5f) / (LEVELS_MENU_OUTRO_DURATION));
+                        _interfaces.FireLevelsMenu[1].GetComponent<Image>().color = Color.black * alpha;
+                    }
 
+                    //End of transition
+                    if (_transitionCounterTime + LEVELS_MENU_OUTRO_DURATION <= Time.realtimeSinceStartup)
+                    {
+                        _onTransition = false;
+
+                        //Black Image
+                        _interfaces.FireLevelsMenu[1].GetComponent<Image>().color = Color.black * (_UINextState != UIState.SelectionLevelMenu ? 1f : 0.5f);
+
+                        //WindLevelsMenu
+                        if (_UINextState != UIState.SelectionLevelMenu)
+                            _interfaces.FireLevelsMenu[0].SetActive(false);
+
+                        // Call the MakeUITransition function whit INIT_NEXT_TRANSITION
+                        // here to ensure the INIT transition of the UINextState is called
+                        MakeUITransition(INIT_NEXT_TRANSITION);
+                    }
                 }
 
                 break;
@@ -1400,8 +1754,34 @@ public class MainGUIController : MonoBehaviour {
                 // things needed to make the transition.
                 if (!_onTransition)
                 {
-                    // In this case do nothing because is an auxiliar interface
-                    // and has nothing.
+                    //MainMenu
+                    _interfaces.AllLevelsMenu[0].SetActive(true);
+
+                    //Black Image
+                    _interfaces.AllLevelsMenu[1].SetActive(true);
+                    _interfaces.AllLevelsMenu[1].GetComponent<Image>().color = Color.black * (_UIPreviousState != UIState.SelectionLevelMenu ? 1f : 0.5f);
+
+                    //Buttons
+                    if (_UIPreviousState != UIState.SelectionLevelMenu)
+                    {
+                        for (int i = 2; i < _interfaces.AllLevelsMenu.Length; i++)
+                        {
+                            _interfaces.AllLevelsMenu[i].transform.localScale = Vector3.zero;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 2; i < _interfaces.AllLevelsMenu.Length; i++)
+                        {
+                            _interfaces.AllLevelsMenu[i].transform.localScale = Vector3.one;
+                        }
+                    }
+
+                    //Save the time
+                    _transitionCounterTime = Time.realtimeSinceStartup;
+
+                    //Set onTransition to true!
+                    _onTransition = true;
 
                 }
                 else //During _onTransition calls
@@ -1409,7 +1789,61 @@ public class MainGUIController : MonoBehaviour {
                 // Use it to move, fade, etc. the interface objects
                 // NOTE: Must detect the end of the transition and set _onTransition variable to false
                 {
-                    //In this case nothing is needed
+                    //Black Image
+                    float alpha;
+                    if (_transitionCounterTime < Time.realtimeSinceStartup
+                        && _transitionCounterTime + _levelsMenuBlackImageEndTime >= Time.realtimeSinceStartup)
+                    {
+                        alpha = _levelsMenuBlackImageEndTime - Time.realtimeSinceStartup + _transitionCounterTime;
+                        _interfaces.AllLevelsMenu[1].GetComponent<Image>().color = Color.black * alpha;
+                    }
+
+                    if (_UIPreviousState != UIState.SelectionLevelMenu)
+                    {
+                        //Buttons
+                        for (int i = 0; i < _interfaces.AllLevelsMenu.Length - LEVELS_MENU_BUTTON_OFFSET; i++)
+                        {
+                            if (_transitionCounterTime + _levelMenuButtonsStartTime[i] < Time.realtimeSinceStartup)
+                            {
+                                if (_transitionCounterTime + _levelMenuButtonsEndTime[i] >= Time.realtimeSinceStartup)
+                                {
+                                    float scale = (Time.realtimeSinceStartup - _transitionCounterTime - _levelMenuButtonsStartTime[i]) * (1f / (_levelMenuButtonsEndTime[i] - _levelMenuButtonsStartTime[i]));
+                                    _interfaces.AllLevelsMenu[i + LEVELS_MENU_BUTTON_OFFSET].transform.localScale = Vector3.one * scale;
+                                }
+                                else
+                                {
+                                    _interfaces.AllLevelsMenu[i + LEVELS_MENU_BUTTON_OFFSET].transform.localScale = Vector3.one;
+                                }
+                            }
+
+                        }
+
+                        //BackButton
+                        if (_transitionCounterTime + _levelsMenuBackButtonStartTime < Time.realtimeSinceStartup
+                            && _transitionCounterTime + _levelsMenuBackButtonEndTime >= Time.realtimeSinceStartup)
+                        {
+                            float scale = (Time.realtimeSinceStartup - _transitionCounterTime - _levelsMenuBackButtonStartTime) * (1f / (_levelsMenuBackButtonEndTime - _levelsMenuBackButtonStartTime));
+                            _interfaces.AllLevelsMenu[2].transform.localScale = Vector3.one * scale;
+                        }
+                    }
+
+
+                    //End of transition
+                    if (_transitionCounterTime + SELECT_DUNGEON_MENU_INTRO_DURATION <= Time.realtimeSinceStartup)
+                    {
+                        _onTransition = false;
+
+                        //BlackImage
+                        _interfaces.AllLevelsMenu[1].SetActive(false);
+
+                        //Back Button
+                        if (_UIPreviousState != UIState.SelectionLevelMenu)
+                        {
+                            _interfaces.AllLevelsMenu[2].transform.localScale = Vector3.one;
+                        }
+
+                    }
+
                 }
 
                 break;
@@ -1421,9 +1855,15 @@ public class MainGUIController : MonoBehaviour {
                 // things needed to make the transition.
                 if (!_onTransition)
                 {
-                    // Call the MakeUITransition function whit INIT_NEXT_TRANSITION
-                    // here to ensure the INIT transition of the UINextState is called
-                    MakeUITransition(INIT_NEXT_TRANSITION);
+                    //Black Image
+                    _interfaces.AllLevelsMenu[1].SetActive(true);
+                    _interfaces.AllLevelsMenu[1].GetComponent<Image>().color = Color.clear;
+
+                    //Save the time
+                    _transitionCounterTime = Time.realtimeSinceStartup;
+
+                    //Set onTransition to true!
+                    _onTransition = true;
                 }
                 else //During _onTransition calls
                 // This part is called during the transition
@@ -1432,7 +1872,30 @@ public class MainGUIController : MonoBehaviour {
                 // Usually you must call here the MakeUITransition with INIT_NEXT_TRANSITION method
                 // to Init the next transition if needed
                 {
+                    //Black Image
+                    if (_transitionCounterTime < Time.realtimeSinceStartup
+                        && _transitionCounterTime + LEVELS_MENU_OUTRO_DURATION >= Time.realtimeSinceStartup)
+                    {
+                        float alpha = (Time.realtimeSinceStartup - _transitionCounterTime) * ((_UINextState != UIState.SelectionLevelMenu ? 1f : 0.5f) / (LEVELS_MENU_OUTRO_DURATION));
+                        _interfaces.AllLevelsMenu[1].GetComponent<Image>().color = Color.black * alpha;
+                    }
 
+                    //End of transition
+                    if (_transitionCounterTime + LEVELS_MENU_OUTRO_DURATION <= Time.realtimeSinceStartup)
+                    {
+                        _onTransition = false;
+
+                        //Black Image
+                        _interfaces.AllLevelsMenu[1].GetComponent<Image>().color = Color.black * (_UINextState != UIState.SelectionLevelMenu ? 1f : 0.5f);
+
+                        //WindLevelsMenu
+                        if (_UINextState != UIState.SelectionLevelMenu)
+                            _interfaces.AllLevelsMenu[0].SetActive(false);
+
+                        // Call the MakeUITransition function whit INIT_NEXT_TRANSITION
+                        // here to ensure the INIT transition of the UINextState is called
+                        MakeUITransition(INIT_NEXT_TRANSITION);
+                    }
                 }
 
                 break;
