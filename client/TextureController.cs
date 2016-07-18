@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TextureController
 {
-	private Dictionary<string, Texture> _textures;
+    private Dictionary<string, Texture> _textures;
     private Dictionary<string, float> _textureSizes;
 	private Dictionary<string, List<AnimationFrame> > _animations;
 	
@@ -32,8 +32,7 @@ public class TextureController
 		
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
-			string texListPath = _rcPath + Path.DirectorySeparatorChar + "texture_list.txt";
-				
+			string texListPath = _rcPath + Path.DirectorySeparatorChar + "texture_list.txt";	
 			textureList = File.ReadAllText(texListPath);
 		}
 		else
@@ -49,7 +48,7 @@ public class TextureController
 			
 			for (int i = 0; i < jsonTex.Count; i++)
 			{
-				LoadTexture(jsonTex[i]["id"].str);
+                _textures.Add(jsonTex[i]["id"].str, null);
                 _textureSizes.Add(jsonTex[i]["id"].str, jsonTex[i]["size"].n);
 			}
 		}
@@ -59,8 +58,7 @@ public class TextureController
 		
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
-			string animListPath = _rcPath + Path.DirectorySeparatorChar + "animation_list.txt";
-				
+			string animListPath = _rcPath + Path.DirectorySeparatorChar + "animation_list.txt";	
 			animationList = File.ReadAllText(animListPath);
 		}
 		else
@@ -77,9 +75,6 @@ public class TextureController
 			for (int i = 0; i < jAnim.Count; i++)
 			{
 				LoadAnimation(jAnim[i].str);
-#if UNITY_EDITOR
-                Debug.Log("Animation loaded: " + jAnim[i].str);
-#endif
             }
 		}
 	}
@@ -88,7 +83,16 @@ public class TextureController
 	{
 		if (_textures.ContainsKey(name))
 		{
-			return _textures[name];
+            if (_textures[name] == null)
+            {
+                _textures.Remove(name);
+                LoadTexture(name);
+                return _textures[name];
+            }
+            else
+            {
+                return _textures[name];
+            }
 		}
 		else
 		{

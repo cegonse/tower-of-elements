@@ -12,6 +12,7 @@ public class EnemyWalker: EnemyBase {
 
    private WalkerEnemyData _walkerData;
     private EnemyBase _enemy;
+    private GameController _gameController;
 
 	private Vector2 _target;
 	private int _targetIndex = 0;
@@ -42,7 +43,14 @@ public class EnemyWalker: EnemyBase {
     private float _accSpeed = _minAccSpeed;
     private const float _incrSpeed = 0.1f;
 
-   new void Start()
+    private float _targetScaleX = 1f;
+    private float _targetScaleY = 1f;
+    private float _scaleXvelocity = 0f;
+    private float _scaleYvelocity = 0f;
+
+    private Texture2D[] _dustParticle;
+
+    new void Start()
     {
         //Let the base.Start() method for a properly initialization
         base.Start();
@@ -66,8 +74,17 @@ public class EnemyWalker: EnemyBase {
         _leftRay2 = new Ray2D();
         _leftRay1.direction = Vector2.left;
         _leftRay2.direction = Vector2.left;
+    }
 
-        //_target = _walkerData.p1;
+    public void SetGameController(GameController gm)
+    {
+        _gameController = gm;
+
+        _dustParticle = new Texture2D[3];
+
+        _dustParticle[0] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleDust_1");
+        _dustParticle[1] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleDust_2");
+        _dustParticle[2] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleDust_3");
     }
 
     void Update()
@@ -93,10 +110,16 @@ public class EnemyWalker: EnemyBase {
             {
                 GameObject goHitDown;
                 goHitDown = hit_down.collider.gameObject;
-                    
+
                 //Check if there is a Block on player's Down
                 if (goHitDown.GetComponent<Block>() != null)
                 {
+                    if (_state == State.Falling)
+                    {
+                        // Create a falling particle
+                        CreateFallingParticles(Random.Range(6, 8));
+                    }
+
                     _state = State.Grounded;
 
                     //Adjust player position to the height of the block
@@ -237,6 +260,29 @@ public class EnemyWalker: EnemyBase {
         
     }
 
+    private void CreateFallingParticles(int count = 1)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            GameObject go = new GameObject();
+            go.transform.localScale = Vector3.one * 0.3f;
+            go.name = "Dust Particle";
+
+            Vector3 pos = transform.position;
+            pos.y -= GetComponent<BoxCollider2D>().size.y / 2f;
+            go.transform.position = pos;
+
+            int rp = Random.Range(0, 3);
+            SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+            Sprite spr = Sprite.Create(_dustParticle[rp], new Rect(0, 0, _dustParticle[rp].width, _dustParticle[rp].height),
+                        new Vector2(0.5f, 0.5f), 64f);
+            rend.sprite = spr;
+
+            DustParticle dp = go.AddComponent<DustParticle>();
+            dp.StartParticle(Vector3.up);
+        }
+    }
+
     private void AdjustVelocity()
     {
         float distance = Vector2.Distance(_target, transform.position);
@@ -255,12 +301,14 @@ public class EnemyWalker: EnemyBase {
             _target = _walkerData.p1;
             _targetIndex = 1;
             _enemyDirection = _directionToPf;
+            transform.localScale = new Vector3(-1f, 1f, 1f);
         }
         else if (_targetIndex == 1)
         {
             _target = _walkerData.p0;
             _targetIndex = 0;
             _enemyDirection = _directionToP0;
+            transform.localScale = new Vector3(1f, 1f, 1f);
         }
     }
     
@@ -286,8 +334,8 @@ public class EnemyWalker: EnemyBase {
     private void MovingEnemy()
     {
         Vector3 p = transform.position;
-        
-        switch(_state)
+
+        switch (_state)
         {
             case State.Grounded:
                 _accSpeed = _minAccSpeed;
@@ -300,6 +348,10 @@ public class EnemyWalker: EnemyBase {
                 {
                     p.x += Time.deltaTime *  -_speed;
                 }
+
+                _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1f, ref _scaleXvelocity, 0.1f);
+                _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 1f, ref _scaleYvelocity, 0.1f);
+
                 transform.position = new Vector3(p.x, transform.position.y, 0f);
                 break;
             
@@ -319,7 +371,18 @@ public class EnemyWalker: EnemyBase {
                     //Ajustar posicion del jugador
                     p = _jumpPoint2; //Por algun motivo no se ejecuta bien
                 }
-                
+
+                if (_jumpTimeActive < 0.2f)
+                {
+                    _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1.2f, ref _scaleXvelocity, 0.1f);
+                    _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 0.8f, ref _scaleYvelocity, 0.1f);
+                }
+                else
+                {
+                    _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1f, ref _scaleXvelocity, 0.1f);
+                    _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 1f, ref _scaleYvelocity, 0.1f);
+                }
+
                 transform.position = new Vector3(p.x, p.y, 0f);
                 break;
             
@@ -328,10 +391,16 @@ public class EnemyWalker: EnemyBase {
                 _velocity.y = -_speed;
                 _accSpeed += _incrSpeed;
                 _velocity.x = 0;
+
+                _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1.2f, ref _scaleXvelocity, 0.1f);
+                _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 0.8f, ref _scaleYvelocity, 0.1f);
+
                 p.y += Time.deltaTime * _velocity.y *_accSpeed;
                 transform.position = new Vector3(transform.position.x, p.y, 0f);
                 break;
         }
+
+        transform.transform.localScale = Mathf.Sign(transform.localScale.x) * _targetScaleX * Vector3.right + _targetScaleY * Vector3.up;
     }
 	
 	public override void SetEnemyData (BaseEnemyData data)

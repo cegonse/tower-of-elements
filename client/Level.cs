@@ -742,6 +742,7 @@ public class Level
                 ew.SetType(type);
                 ew.SetLevel(this);
 				ew.SetEnemyData(data);
+                ew.SetGameController(_levelController.GetGameController());
                 break;
 			
 			case EnemyType.Roamer:

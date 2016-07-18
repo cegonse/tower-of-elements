@@ -409,7 +409,15 @@ namespace IceGameEditor
                         if (!texList[i]["id"].str.Contains("Background"))
                         {
                             string[] fileNameSplit = fileName.Split('_');
-                            texType = int.Parse(fileNameSplit[1].Split('.')[0]);
+
+                            try
+                            {
+                                texType = int.Parse(fileNameSplit[1].Split('.')[0]);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(texList[i]["id"].str);
+                            }
                         }
 
                         _blocks.Add(texList[i]["id"].str, bmp);

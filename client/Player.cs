@@ -112,7 +112,14 @@ public class Player : MonoBehaviour {
     private float _startTime = 0f;
     private float _endTime = 0f;
     private int _stars = 3;
-    
+
+    private float _targetScaleX = 1f;
+    private float _targetScaleY = 1f;
+    private float _scaleXvelocity = 0f;
+    private float _scaleYvelocity = 0f;
+
+    private Texture2D[] _dustParticle;
+
     public void SetActiveLevel(Level lv)
     {
         _activeLevel = lv;
@@ -159,6 +166,12 @@ public class Player : MonoBehaviour {
         _jumpColliderSize = new Vector2(0.6f, 0.8f);
         _jumpColliderOffset = new Vector2(0.0f, -0.1f);
         _originalJumpColliderSize = _collider.size;
+
+        _dustParticle = new Texture2D[3];
+
+        _dustParticle[0] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleDust_1");
+        _dustParticle[1] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleDust_2");
+        _dustParticle[2] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleDust_3");
     }
 	
 	// Update is called once per frame
@@ -237,8 +250,6 @@ public class Player : MonoBehaviour {
 
                     if (goHitDownBlock != null)
                     {
-                        _state = State.Grounded;
-
                         //Adjust player position to the height of the block
                         Vector3 pDown = transform.position;
 
@@ -266,6 +277,14 @@ public class Player : MonoBehaviour {
 
             if (hasHitDown)
             {
+                if (_state == State.Falling)
+                {
+                    // Create a falling particle
+                    CreateFallingParticles(Random.Range(6, 8));
+                }
+
+                _state = State.Grounded;
+
                 //Check the player's Right
                 if (_playerDirection == Direction.Right)
                 {
@@ -350,6 +369,29 @@ public class Player : MonoBehaviour {
         }
     }
 
+    private void CreateFallingParticles(int count = 1)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            GameObject go = new GameObject();
+            go.transform.localScale = Vector3.one * 0.3f;
+            go.name = "Dust Particle";
+
+            Vector3 pos = transform.position;
+            pos.y -= GetComponent<BoxCollider2D>().size.y / 2f;
+            go.transform.position = pos;
+
+            int rp = Random.Range(0, 3);
+            SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+            Sprite spr = Sprite.Create(_dustParticle[rp], new Rect(0, 0, _dustParticle[rp].width, _dustParticle[rp].height),
+                        new Vector2(0.5f, 0.5f), 64f);
+            rend.sprite = spr;
+
+            DustParticle dp = go.AddComponent<DustParticle>();
+            dp.StartParticle(Vector3.up);
+        }
+    }
+
     //Adjust the velocity parameter (_velocity) in function of the real player's direction (_playerDirection), state
     // and other parameters.
     private void AdjustVelocityByParams()
@@ -415,6 +457,9 @@ public class Player : MonoBehaviour {
                     _changeAnimation = true;
                 }
 
+                _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1f, ref _scaleXvelocity, 0.1f);
+                _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 1f, ref _scaleYvelocity, 0.1f);
+
                 transform.localPosition = p;
                 break;
             
@@ -424,6 +469,17 @@ public class Player : MonoBehaviour {
                     //Animation
                     _animState = PlayerAnimState.Jump;
                     _changeAnimation = true;
+                }
+
+                if (_jumpTimeActive < 0.2f)
+                {
+                    _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 0.8f, ref _scaleXvelocity, 0.1f);
+                    _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 1.2f, ref _scaleYvelocity, 0.1f);
+                }
+                else
+                {
+                    _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1f, ref _scaleXvelocity, 0.1f);
+                    _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 1f, ref _scaleYvelocity, 0.1f);
                 }
             
                 if (_jumpTimeActive < 1f)
@@ -437,6 +493,7 @@ public class Player : MonoBehaviour {
                 else
                 {
                     _state = State.Normal;
+                    
 
                     //Ajustar posicion del jugador
                     p = _jumpPoint2; //Por algun motivo no se ejecuta bien
@@ -457,6 +514,9 @@ public class Player : MonoBehaviour {
             case State.Falling:
                 p.y += Time.deltaTime * _velocity.y * _accSpeed;
 
+                _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1.1f, ref _scaleXvelocity, 0.1f);
+                _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 0.8f, ref _scaleYvelocity, 0.1f);
+
                 if (_beginFalling)
                 {
                     //Animation
@@ -469,10 +529,6 @@ public class Player : MonoBehaviour {
                 transform.localPosition = p;
                 break;
         }
-
-        
-		
-		
     }
 
     public void AdjustCamera()
@@ -940,7 +996,8 @@ public class Player : MonoBehaviour {
                 break;
         }
 
-        
+        transform.GetChild(0).transform.localScale = transform.GetChild(0).localScale.x * _targetScaleX * Vector3.right + _targetScaleY * Vector3.up;
+
         switch (_animState)
         {
             //ACTION
