@@ -6,6 +6,9 @@ public class GameController
 	public const bool IS_EDITOR_RUNTIME = false;
     public const bool IS_DEBUG_MODE = true;
 
+    //Singleton
+    public static GameController instance;
+
 	public enum GameState
 	{
 		Init,
@@ -37,6 +40,13 @@ public class GameController
 
     public GameController()
     {
+
+        //Singleton
+        if (instance == null)
+        {
+            instance = this;
+        }
+
         _textureController = new TextureController(this);
 
         _audioController = new AudioController(this, 12);
