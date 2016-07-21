@@ -49,6 +49,7 @@ public class DustParticle : MonoBehaviour
             _rend.color = c;
 
             transform.position += _direction * _speed * Time.deltaTime;
+            _timer += Time.deltaTime;
 
             if (_timer > _decayTime)
             {

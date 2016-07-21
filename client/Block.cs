@@ -17,7 +17,7 @@ public class Block : MonoBehaviour
     private string _textureRoute;
 
     //Speed
-	private float _speed = 3f;
+	private float _speed = 4.5f;
 
     private const float _minAccSpeed = 1f;
     private float _accSpeed = _minAccSpeed;
@@ -60,13 +60,9 @@ public class Block : MonoBehaviour
         {
             if (_isMovable)
             {
-
                 CheckMovingCollisions();
-
                 AdjustVerticalSpeed();
-
                 MovingBlock();
-
             }
         }
 	}

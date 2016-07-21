@@ -657,9 +657,12 @@ public class Level
 
         tex = (Texture2D)_levelController.GetGameController().
                     GetTextureController().GetTexture("Blocks/Personaje_1");
+
         float texSize = _levelController.GetGameController().
                     GetTextureController().GetTextureSize("Blocks/Personaje_1");
+
         SpriteRenderer rend = child.AddComponent<SpriteRenderer>();
+
         Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
             new Vector2(0.5f, 0.5f), texSize);
         rend.sprite = spr;

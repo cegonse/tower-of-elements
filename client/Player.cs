@@ -117,6 +117,8 @@ public class Player : MonoBehaviour {
     private float _targetScaleY = 1f;
     private float _scaleXvelocity = 0f;
     private float _scaleYvelocity = 0f;
+    private float _targetXfalling = 0f;
+    private float _targetXvelocity = 0f;
 
     private Texture2D[] _dustParticle;
 
@@ -284,6 +286,7 @@ public class Player : MonoBehaviour {
                 }
 
                 _state = State.Grounded;
+                _targetXvelocity = -1f;
 
                 //Check the player's Right
                 if (_playerDirection == Direction.Right)
@@ -364,6 +367,22 @@ public class Player : MonoBehaviour {
             else
             {
                 _state = State.Falling;
+
+                if (_targetXvelocity == -1)
+                { 
+                    _targetXfalling = Mathf.Floor(transform.position.x);
+                    _targetXvelocity = 0f;
+
+                    if (_playerDirection == Direction.Left)
+                    {
+                        //_targetXfalling -= 0.5f;
+                    }
+                    else if (_playerDirection == Direction.Right)
+                    {
+                        _targetXfalling += 1f;
+                    }
+                }
+
                 transform.parent = null;
             }
         }
@@ -384,8 +403,9 @@ public class Player : MonoBehaviour {
             int rp = Random.Range(0, 3);
             SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
             Sprite spr = Sprite.Create(_dustParticle[rp], new Rect(0, 0, _dustParticle[rp].width, _dustParticle[rp].height),
-                        new Vector2(0.5f, 0.5f), 64f);
+                        new Vector2(0.5f, 0.5f), 128f);
             rend.sprite = spr;
+            rend.sortingOrder = 105 + i;
 
             DustParticle dp = go.AddComponent<DustParticle>();
             dp.StartParticle(Vector3.up);
@@ -513,6 +533,7 @@ public class Player : MonoBehaviour {
             
             case State.Falling:
                 p.y += Time.deltaTime * _velocity.y * _accSpeed;
+                p.x = Mathf.SmoothDamp(p.x, _targetXfalling, ref _targetXvelocity, 0.1f);
 
                 _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1.1f, ref _scaleXvelocity, 0.1f);
                 _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 0.8f, ref _scaleYvelocity, 0.1f);
@@ -791,7 +812,7 @@ public class Player : MonoBehaviour {
             _actionHappen = false;
             _actionDirectionSaved = _actionDirection;
 
-            if (_state == State.Grounded && _velocity.magnitude == 0)
+            if ((_state == State.Grounded && _velocity.magnitude == 0) || _state == State.Falling)
             {
                 _actionRay = new Ray2D();
                 
@@ -822,7 +843,7 @@ public class Player : MonoBehaviour {
                             break;
                         case PlayerActions.Wind:
                             {
-                                RaycastHit2D[] hit = Physics2D.RaycastAll(transform.position, _actionRay.direction, 0.6f);
+                                RaycastHit2D[] hit = Physics2D.RaycastAll(transform.position, _actionRay.direction, 1f);
 
                                 //Check if there is something on the player's Left or Right
                                 GameObject aux = null;

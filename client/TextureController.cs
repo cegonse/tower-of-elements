@@ -186,8 +186,8 @@ public class TextureController
 				
 				Texture2D tex = (Texture2D) GetTexture(jsonFrames[i]["texture"].str);
                 f.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), _textureSizes[jsonFrames[i]["texture"].str]);
-				
-				animation.Add(f);
+
+                animation.Add(f);
 			}
 			
 			if (jsonAnim["interval"])

@@ -36,6 +36,7 @@ public class EnemyRoamer : EnemyBase
     private const float _minAccSpeed = 1f;
     private float _accSpeed = _minAccSpeed;
     private const float _incrSpeed = 0.1f;
+    private float _speed = 2f;
 
     private int _debugItCount = 0;
 

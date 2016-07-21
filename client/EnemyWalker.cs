@@ -277,6 +277,7 @@ public class EnemyWalker: EnemyBase {
             Sprite spr = Sprite.Create(_dustParticle[rp], new Rect(0, 0, _dustParticle[rp].width, _dustParticle[rp].height),
                         new Vector2(0.5f, 0.5f), 64f);
             rend.sprite = spr;
+            rend.sortingOrder = 105 + i;
 
             DustParticle dp = go.AddComponent<DustParticle>();
             dp.StartParticle(Vector3.up);
