@@ -13,9 +13,12 @@ public class TransformSinTweener : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        transform.position = new Vector3(transform.position.x, transform.position.y + Mathf.Sin(_angle) * _altura, transform.position.z);
+        if (!GameController.instance.IsGamePaused())
+        {
+            transform.position = new Vector3(transform.position.x, transform.position.y + Mathf.Sin(_angle) * _altura, transform.position.z);
 
-        _angle += _angleSpeed;
+            _angle += _angleSpeed;
+        }
 	}
 
     public void SetParams(float init_angle, float height, float angle_speed)

@@ -805,7 +805,7 @@ public class Level
             }
             else
             {
-                Debug.Log("WARNING!! Enemy without an assigned animation: " + name);
+                Debug.Log("WARNING!! Enemy without WALKING animation: " + name);
             }
             if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_2_Anim") != null)
             {
@@ -813,7 +813,15 @@ public class Level
             }
             else
             {
-                Debug.Log("WARNING!! Enemy without an assigned animation: " + name);
+                Debug.Log("WARNING!! Enemy without TURNING animation: " + name);
+            }
+            if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_3_Anim") != null)
+            {
+                sprite_animator.AddAnimation("JUMPING", _levelController.GetGameController().GetTextureController().GetAnimation(name + "_3_Anim"));
+            }
+            else
+            {
+                Debug.Log("WARNING!! Enemy without JUMPING animation: " + name);
             }
         }
 

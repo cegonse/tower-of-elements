@@ -50,6 +50,10 @@ public class EnemyWalker: EnemyBase {
 
     private Texture2D[] _dustParticle;
 
+    //Sprite animator
+    private SpriteAnimator _spriteAnimator;
+    private bool _changeAnimation = false;
+
     new void Start()
     {
         //Let the base.Start() method for a properly initialization
@@ -74,6 +78,9 @@ public class EnemyWalker: EnemyBase {
         _leftRay2 = new Ray2D();
         _leftRay1.direction = Vector2.left;
         _leftRay2.direction = Vector2.left;
+
+        //Sprite animator
+        _spriteAnimator = GetComponent<SpriteAnimator>();
     }
 
     public void SetGameController(GameController gm)
@@ -95,6 +102,7 @@ public class EnemyWalker: EnemyBase {
             MovingEnemy();
             CheckMovingCollisions();
             AdjustVelocity();
+            AnimatingEnemyWalker();
         }
     }
 	
@@ -317,7 +325,9 @@ public class EnemyWalker: EnemyBase {
     {
         _jumpTimeActive = 0f;
         float ent_pointX = Mathf.Round(transform.position.x);
-        
+        //animation
+        _changeAnimation = true;
+
         if (_enemyDirection == Direction.Right)
         {
             _jumpPoint0 = new Vector2(transform.position.x, transform.position.y);
@@ -371,6 +381,7 @@ public class EnemyWalker: EnemyBase {
                     _state = State.Normal;
                     //Ajustar posicion del jugador
                     p = _jumpPoint2; //Por algun motivo no se ejecuta bien
+                    _changeAnimation = true;
                 }
 
                 if (_jumpTimeActive < 0.2f)
@@ -402,6 +413,36 @@ public class EnemyWalker: EnemyBase {
         }
 
         transform.transform.localScale = Mathf.Sign(transform.localScale.x) * _targetScaleX * Vector3.right + _targetScaleY * Vector3.up;
+    }
+
+    private void AnimatingEnemyWalker()
+    {
+        switch (_state)
+        {
+            case State.Grounded:
+
+                if (_changeAnimation)
+                {
+                    _spriteAnimator.SetActiveAnimation("WALKING");
+                    _changeAnimation = false;
+                }
+
+                break;
+
+            case State.Jumping:
+
+                if (_changeAnimation)
+                {
+                    _spriteAnimator.SetActiveAnimation("JUMPING");
+                    _changeAnimation = false;
+                }
+                if (_spriteAnimator.IsTheLastFrame())
+                {
+                    _spriteAnimator.SetAnimationIndex(-1);
+                }
+                                
+                break;
+        }
     }
 	
 	public override void SetEnemyData (BaseEnemyData data)
