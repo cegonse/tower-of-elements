@@ -150,6 +150,7 @@ public class GuiController {
     public void MoveCamera(bool camera)
     {
         _isCameraMoving = camera;
+
         if (camera)
         {
             _camBounds = _gameController.GetLevelController().GetActiveLevel().GetBounds();
@@ -158,34 +159,27 @@ public class GuiController {
             float y = (_camBounds[3] + _camBounds[1]) / 2f;
             float width = (Mathf.Abs(_camBounds[2]) + Mathf.Abs(_camBounds[0]));
             float height = (Mathf.Abs(_camBounds[3]) + Mathf.Abs(_camBounds[1]));
-            if (width > height)
+
+            float levelAspect = height / width;
+            float cameraAspect = (float)Screen.height / (float)Screen.width;
+
+            if (levelAspect < cameraAspect)
             {
-                if(width % 2 == 0)
-                {
-                    _cameraLerp = (((float)Screen.height / (float)Screen.width) * width) / 2f;
-                    _cameraToGo = new Vector3(x, y, -10f);
-                }
-                else
-                {
-                    _cameraLerp = (((float)Screen.height / (float)Screen.width) * width) / 2f;
-                    _cameraToGo = new Vector3(x - 0.5f, y, -10f);
-                }
+                _cameraLerp = (cameraAspect * width) / 2f;
             }
             else
             {
                 _cameraLerp = height / 2;
             }
-            //_gameController.GetCamera().GetComponent<Camera>().orthographicSize = (Mathf.Abs(_camBounds[2]) + Mathf.Abs(_camBounds[0])) * 0.25f;
-            //_gameController.GetCamera().GetComponent<Camera>().orthographicSize = Mathf.Abs(_camBounds[2]) + Mathf.Abs(_camBounds[0]);
-            //_gameController.GetCamera().transform.position = new Vector3(x, y+1, -10f);
-            //_cameraToGo = new Vector3(x, y, -10f);
+
+            _cameraToGo = new Vector3(x, y, -10f);
         }
         else
         {
             _cameraLerp = 3.5f;
         }
+
         _lerpTime = 0f;
-        
     }
 	
 	public void OnDebugPreviousLevel()

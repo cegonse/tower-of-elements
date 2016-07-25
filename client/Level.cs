@@ -39,6 +39,7 @@ public class Level
 	public void LoadLevel()
     {
 		string data = "";
+        GameObject goPlayer = null;
 	
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
@@ -109,8 +110,8 @@ public class Level
                     float radius = light["radius"].n;
                 }
 
-                GameObject go_player = CreatePlayer(x, y, ice, fire, earth, wind);
-                AddEntity(go_player, go_player.name);
+                goPlayer = CreatePlayer(x, y, ice, fire, earth, wind);
+                AddEntity(goPlayer, goPlayer.name);
             }
 
             List<JSONObject> jsonBlocks = json["blocks"].list;
@@ -246,17 +247,13 @@ public class Level
                     int maxy = (int)jsonBounds["maxy"].n;
 
                     SetBounds(minx, miny, maxx, maxy);
+                    goPlayer.GetComponent<Player>().SetLevelBounds(minx, miny, maxx, maxy);
                 }
                 else
                 {
                     Debug.LogError("Level " + _name + " doesn't have bounds. Defaulting to zero.");
                 }
             }
-
-            /*{
-                GameObject go = CreateBackground(0, -3, "Blocks/Backgrounds/Triggers/WindTrigger_Background", 99);
-                AddEntity(go, go.name);
-            }*/
         }
     }
 	

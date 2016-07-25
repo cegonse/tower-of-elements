@@ -122,6 +122,11 @@ public class Player : MonoBehaviour {
 
     private Texture2D[] _dustParticle;
 
+    private float _boundX = 0f;
+    private float _boundY = 0f;
+    private float _boundH = 0f;
+    private float _boundW = 0f;
+
     public void SetActiveLevel(Level lv)
     {
         _activeLevel = lv;
@@ -552,10 +557,25 @@ public class Player : MonoBehaviour {
         }
     }
 
+    public void SetLevelBounds(float x, float y, float w, float h)
+    {
+        _boundX = (w + x) / 2f;
+        _boundY = (h + y) / 2f;
+        _boundW = (Mathf.Abs(x) + Mathf.Abs(w));
+        _boundH = (Mathf.Abs(y) + Mathf.Abs(h));
+    }
+
     public void AdjustCamera()
     {
         Vector3 camPos = _gameController.GetCamera().transform.position;
-        camPos = Vector3.SmoothDamp(camPos, transform.position+new Vector3(0f,0f,-1f), ref _cameraVelocity, _cameraDampingTime);
+        Vector3 offset = new Vector3(0f, 0f, -1f);
+
+        float height = 3.5f;
+        float width = height * (float)Screen.height / (float)Screen.width;
+
+        float hoff = camPos.y - _boundH * 0.5f;
+
+        camPos = Vector3.SmoothDamp(camPos, transform.position + offset, ref _cameraVelocity, _cameraDampingTime);
 
         _gameController.GetCamera().transform.position = camPos;
     }
@@ -920,6 +940,9 @@ public class Player : MonoBehaviour {
                 //AnimationObject
                 GameObject go = new GameObject("AnimationObject_" + type.ToString());
                 go.transform.position = _actionRay.origin;
+
+                SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+                rend.sortingOrder = 107;
 
                 AnimationObject animObj = go.AddComponent<AnimationObject>();
                 animObj.SetParams(_activeLevel, "Actions/" + type.ToString() + "Action/" + type.ToString() + "Action_1_Anim");

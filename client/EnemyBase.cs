@@ -98,7 +98,7 @@ public class EnemyBase : MonoBehaviour
 
                 if (goHitRight.GetComponent<Player>() != null)
                 {
-                    if (goHitRight.transform.position.x - transform.position.x < 0.5)
+                    if (Mathf.Abs(transform.position.x - goHitRight.transform.position.x) < 0.5f)
                     {
                         killThaPlayer = true;
                     }
@@ -114,7 +114,7 @@ public class EnemyBase : MonoBehaviour
 
                 if (goHitLeft.GetComponent<Player>() != null)
                 {
-                    if (transform.position.x - goHitLeft.transform.position.x < 0.5)
+                    if (Mathf.Abs(transform.position.x - goHitLeft.transform.position.x) < 0.5f)
                     {
                         killThaPlayer = true;
                     }
@@ -130,7 +130,7 @@ public class EnemyBase : MonoBehaviour
 
                 if (goHitUp.GetComponent<Player>() != null)
                 {
-                    if (goHitUp.transform.position.y - goHitUp.transform.position.y < 0.5)
+                    if (Mathf.Abs(transform.position.y - goHitUp.transform.position.y) < 0.5f)
                     {
                         killThaPlayer = true;
                     }
@@ -145,7 +145,7 @@ public class EnemyBase : MonoBehaviour
                 GameObject goHitDown = hit_down[i].collider.gameObject;
                 if (goHitDown.GetComponent<Player>() != null)
                 {
-                    if (transform.position.y - goHitDown.transform.position.y < 0.5)
+                    if (Mathf.Abs(transform.position.y - goHitDown.transform.position.y) < 0.5f)
                     {
                         killThaPlayer = true;
                     }

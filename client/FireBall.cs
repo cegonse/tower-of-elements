@@ -34,7 +34,6 @@ public class FireBall : MonoBehaviour
             CheckMovingCollisions();
             MovingFireBall();
         }
-
 	}
     
     private void CheckMovingCollisions()
@@ -43,11 +42,13 @@ public class FireBall : MonoBehaviour
 		{
 			_rightRay.direction = Vector2.right;
 			_rightRay.origin = transform.position + new Vector3(0.51f, 0f, 0f);
+
 			RaycastHit2D hit_right = Physics2D.Raycast(_rightRay.origin, _rightRay.direction, 0.01f);
 
 			if (hit_right.collider != null)
 			{
 				GameObject goHit = hit_right.collider.gameObject;
+
 				//Check if it is a Block
 				Block goHitBlock = goHit.GetComponent<Block>();
 				
@@ -55,32 +56,34 @@ public class FireBall : MonoBehaviour
 				{
 					if(goHitBlock.GetBlockType() == BlockType.Ice)
 					{
-						
                         goHitBlock.Destroy(_actionDirection);
 					}
+
 					_activeLevel.RemoveEntity(this.name);
 				}
 			}
-
 		}
-		else if(_actionDirection == Direction.Left)
+		else if (_actionDirection == Direction.Left)
 		{
 			_leftRay.direction = Vector2.left;
 			_leftRay.origin = transform.position + new Vector3(-0.51f, 0f, 0f);
+
 			RaycastHit2D hit_left = Physics2D.Raycast(_leftRay.origin, _leftRay.direction, 0.01f);
 
 			if (hit_left.collider != null)
 			{
 				GameObject goHit = hit_left.collider.gameObject;
+
 				//Check if it is a Block
 				Block goHitBlock = goHit.GetComponent<Block>();
 				
 				if (goHitBlock != null)
 				{
-					if(goHitBlock.GetBlockType() == BlockType.Ice)
+					if (goHitBlock.GetBlockType() == BlockType.Ice)
 					{
                         goHitBlock.Destroy(_actionDirection);
 					}
+
                     _activeLevel.RemoveEntity(this.name);
 				}
 			}
@@ -94,7 +97,8 @@ public class FireBall : MonoBehaviour
 		transform.position = p;
     }
 	
-	public void SetActiveLevel(Level lv){
+	public void SetActiveLevel(Level lv)
+    {
 		_activeLevel = lv;
 	}
 	
