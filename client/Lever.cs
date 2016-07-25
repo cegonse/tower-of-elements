@@ -37,7 +37,7 @@ public class Lever : EnemyBase {
 
     public void MoveDoor()
     {
-        if (_moving)
+        if (_moving && !GameController.instance.IsGamePaused())
         {
             if (Vector2.Distance(new Vector2(_door.transform.position.x, _door.transform.position.y), _target) > 0.01)
             {
