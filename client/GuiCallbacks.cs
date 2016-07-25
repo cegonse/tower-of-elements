@@ -344,7 +344,7 @@ public class GuiCallbacks : MonoBehaviour
                     {
                         found = true;
 
-                        if (lpd.Score < t)
+                        if (lpd.Score > t)
                         {
                             lpd.Score = t;
                             SaveGameController.instance.SetLevelProgress(lpd);

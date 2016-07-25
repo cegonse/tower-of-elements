@@ -48,6 +48,10 @@ public class EnemyWalker: EnemyBase {
     private float _scaleXvelocity = 0f;
     private float _scaleYvelocity = 0f;
 
+    //Stop before jumping
+    private float _stopBeforeJumpBase = 0f;
+    private float _STOP_BEFORE_JUM_TIME = 0.2f;
+
     private Texture2D[] _dustParticle;
 
     //Sprite animator
@@ -340,6 +344,9 @@ public class EnemyWalker: EnemyBase {
             _jumpPoint1 = new Vector2(ent_pointX-0.5f, transform.position.y+1.5f);
             _jumpPoint2 = new Vector2(ent_pointX-1f, transform.position.y+1f);
         }
+
+        //Stop before jump
+        _stopBeforeJumpBase = Time.realtimeSinceStartup;
     }
 
     private void MovingEnemy()
@@ -368,34 +375,36 @@ public class EnemyWalker: EnemyBase {
             
             case State.Jumping:
 
-                if(_jumpTimeActive < 1f)
+                if (Time.realtimeSinceStartup - _stopBeforeJumpBase > _STOP_BEFORE_JUM_TIME)
                 {
-                    p = (1 - _jumpTimeActive) * (1 - _jumpTimeActive) * _jumpPoint0 +
-                        2 * (1 - _jumpTimeActive) * _jumpTimeActive * _jumpPoint1 +
-                        _jumpTimeActive * _jumpTimeActive * _jumpPoint2;
-    
-                    _jumpTimeActive += Time.deltaTime /_jumpTime;
-                }
-                else
-                {
-                    _state = State.Normal;
-                    //Ajustar posicion del jugador
-                    p = _jumpPoint2; //Por algun motivo no se ejecuta bien
-                    _changeAnimation = true;
-                }
+                    if (_jumpTimeActive < 1f)
+                    {
+                        p = (1 - _jumpTimeActive) * (1 - _jumpTimeActive) * _jumpPoint0 +
+                            2 * (1 - _jumpTimeActive) * _jumpTimeActive * _jumpPoint1 +
+                            _jumpTimeActive * _jumpTimeActive * _jumpPoint2;
 
-                if (_jumpTimeActive < 0.2f)
-                {
-                    _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1.2f, ref _scaleXvelocity, 0.1f);
-                    _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 0.8f, ref _scaleYvelocity, 0.1f);
-                }
-                else
-                {
-                    _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1f, ref _scaleXvelocity, 0.1f);
-                    _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 1f, ref _scaleYvelocity, 0.1f);
-                }
+                        _jumpTimeActive += Time.deltaTime / _jumpTime;
+                    }
+                    else
+                    {
+                        _state = State.Normal;
+                        //Ajustar posicion del jugador
+                        p = _jumpPoint2; //Por algun motivo no se ejecuta bien
+                        _changeAnimation = true;
+                    }
 
-                transform.position = new Vector3(p.x, p.y, 0f);
+                    if (_jumpTimeActive < 0.2f)
+                    {
+                        _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1.2f, ref _scaleXvelocity, 0.1f);
+                        _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 0.8f, ref _scaleYvelocity, 0.1f);
+                    }
+                    else
+                    {
+                        _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1f, ref _scaleXvelocity, 0.1f);
+                        _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 1f, ref _scaleYvelocity, 0.1f);
+                    }
+                    transform.position = new Vector3(p.x, p.y, 0f);
+                }
                 break;
             
             case State.Falling:
