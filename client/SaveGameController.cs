@@ -217,7 +217,7 @@ public class SaveGameController : MonoBehaviour
 
             jlist.Add(jfield);
         }
-        Debug.Log(json.Print());
+        
         File.WriteAllText(_path, Cypher(json.Print()));
         
         #if UNITY_WEBGL
@@ -237,7 +237,7 @@ public class SaveGameController : MonoBehaviour
             if (!string.IsNullOrEmpty(jsonSave))
             {
                 save = new JSONObject(Cypher(jsonSave));
-                Debug.Log(Cypher(jsonSave));
+                
                 if (save != null)
                 {
                     _language = (SystemLanguage)save["language"].n;

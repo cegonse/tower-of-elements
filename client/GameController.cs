@@ -17,6 +17,15 @@ public class GameController
 		Playing
 	}
 
+    public enum SongType
+    {
+        Dungeon,
+        Ice,
+        Fire,
+        Wind,
+        Earth
+    }
+
     private TextureController _textureController;
     private LevelController _levelController;
     private GuiController _guiController;
@@ -30,6 +39,7 @@ public class GameController
     private bool _isGamePaused = false;
 
     private AudioClip _inGameMusic;
+    private AudioClip _iceLevelMusic;
     private AudioClip _winMusic;
 
     private AudioClip _torchSfx;
@@ -53,6 +63,7 @@ public class GameController
 
         // Load music and SFX
         _inGameMusic = (AudioClip)Resources.Load("Music/IG_1");
+        _iceLevelMusic = (AudioClip)Resources.Load("Music/IG_3");
 
         _torchSfx = (AudioClip)Resources.Load("SFX/Torch");
         _iceBurnSfx = (AudioClip)Resources.Load("SFX/IceBurn");
@@ -76,6 +87,34 @@ public class GameController
         _levelController = new LevelController(this);
         _guiController = new GuiController(this);
 		_debugMenuController = new DebugMenuController(this);
+    }
+
+    public AudioClip GetCachedSong(SongType type)
+    {
+        AudioClip result = null;
+
+        if (type == SongType.Dungeon)
+        {
+            result = _inGameMusic;
+        }
+        else if (type == SongType.Ice)
+        {
+            result = _iceLevelMusic;
+        }
+        else if (type == SongType.Fire)
+        {
+            result = _inGameMusic;
+        }
+        else if (type == SongType.Wind)
+        {
+            result = _inGameMusic;
+        }
+        else if (type == SongType.Earth)
+        {
+            result = _inGameMusic;
+        }
+
+        return result;
     }
 
     public void OnUpdate()

@@ -559,24 +559,42 @@ public class Player : MonoBehaviour {
 
     public void SetLevelBounds(float x, float y, float w, float h)
     {
-        _boundX = (w + x) / 2f;
-        _boundY = (h + y) / 2f;
-        _boundW = (Mathf.Abs(x) + Mathf.Abs(w));
-        _boundH = (Mathf.Abs(y) + Mathf.Abs(h));
+        _boundX = x;
+        _boundY = y;
+        _boundW = w;
+        _boundH = h;
     }
 
     public void AdjustCamera()
     {
         Vector3 camPos = _gameController.GetCamera().transform.position;
-        Vector3 offset = new Vector3(0f, 0f, -1f);
+        Vector3 offset = transform.position - Vector3.forward;
 
-        float height = 3.5f;
-        float width = height * (float)Screen.height / (float)Screen.width;
+        float height = 3f;
+        float width = height * ((float)Screen.width / (float)Screen.height);
+        float maxH = _boundH - height;
+        float minH = _boundY + height;
+        float maxW = _boundW - width;
+        float minW = _boundX + width;
+        
+        if (offset.y > maxH)
+        {
+            offset.y = maxH;
+        }
+        else if (offset.y < minH)
+        {
+            offset.y = minH;
+        }
+        else if (offset.x < minW)
+        {
+            offset.x = minW;
+        }
+        else if (offset.x > maxW)
+        {
+            offset.x = maxW;
+        }
 
-        float hoff = camPos.y - _boundH * 0.5f;
-
-        camPos = Vector3.SmoothDamp(camPos, transform.position + offset, ref _cameraVelocity, _cameraDampingTime);
-
+        camPos = Vector3.SmoothDamp(camPos, offset, ref _cameraVelocity, _cameraDampingTime);
         _gameController.GetCamera().transform.position = camPos;
     }
     

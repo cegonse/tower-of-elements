@@ -58,14 +58,7 @@ public class Level
             _publicName = json["public_name"].str;
             _difficulty = (int)json["difficulty"].n;
             _illuminated = json["illuminated"].n == 1;
-
             string songName = json["song"].str;
-
-            if (!string.IsNullOrEmpty(songName))
-            {
-                _song = Resources.Load("Music/" + songName) as AudioClip;
-            }
-
             JSONObject door = json["door"];
 
             if (door)

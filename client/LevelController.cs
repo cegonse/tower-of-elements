@@ -6,6 +6,7 @@ public class LevelController
 	private GameController _gameController;
 	private Dictionary<string, Level> _levels;
 	private Level _activeLevel;
+    private string _lastLevel = "";
     
 	public LevelController(GameController gameController)
 	{
@@ -111,8 +112,33 @@ public class LevelController
 		_activeLevel = _levels[level];
 
         _gameController.GetAudioController().PauseChannel(0);
+
+        // Set appropriate music
+        if (level.Contains("0_"))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Dungeon));
+        }
+        else if (level.Contains("1_"))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Wind));
+        }
+        else if (level.Contains("2_"))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Ice));
+        }
+        else if (level.Contains("3_"))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Fire));
+        }
+        else if (level.Contains("4_"))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Earth));
+        }
+
+        _gameController.GetAudioController().PlayChannel(0);
         _gameController.GetAudioController().StopChannel(1, true);
 
+        _lastLevel = level;
 		_activeLevel.LoadLevel();
 	}
 	
