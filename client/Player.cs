@@ -585,7 +585,8 @@ public class Player : MonoBehaviour {
         {
             offset.y = minH;
         }
-        else if (offset.x < minW)
+
+        if (offset.x < minW)
         {
             offset.x = minW;
         }

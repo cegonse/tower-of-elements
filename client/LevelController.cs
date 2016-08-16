@@ -116,23 +116,59 @@ public class LevelController
         // Set appropriate music
         if (level.Contains("0_"))
         {
-            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Dungeon));
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Tutorial));
         }
-        else if (level.Contains("1_"))
+        else if (level.Contains("1_") && (level.Contains("_01") || level.Contains("_02") || level.Contains("_03")))
         {
-            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Wind));
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Wind1));
         }
-        else if (level.Contains("2_"))
+        else if (level.Contains("1_") && (level.Contains("_04") || level.Contains("_05") || level.Contains("_06")))
         {
-            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Ice));
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Wind2));
+        }
+        else if (level.Contains("1_") && (level.Contains("_07") || level.Contains("_08") || level.Contains("_09") || level.Contains("_10")))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Wind3));
+        }
+        else if (level.Contains("2_") && (level.Contains("_01") || level.Contains("_02") || level.Contains("_03")))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Ice1));
+        }
+        else if (level.Contains("2_") && (level.Contains("_04") || level.Contains("_05") || level.Contains("_06")))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Ice2));
+        }
+        else if (level.Contains("2_") && (level.Contains("_07") || level.Contains("_08") || level.Contains("_09") || level.Contains("_10")))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Ice3));
+        }
+        else if (level.Contains("3_") && (level.Contains("_01") || level.Contains("_02") || level.Contains("_03")))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Fire1));
+        }
+        else if (level.Contains("3_") && (level.Contains("_04") || level.Contains("_05") || level.Contains("_06")))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Fire2));
+        }
+        else if (level.Contains("3_") && (level.Contains("_07") || level.Contains("_08") || level.Contains("_09") || level.Contains("_10")))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Fire3));
         }
         else if (level.Contains("3_"))
         {
-            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Fire));
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Fire1));
         }
-        else if (level.Contains("4_"))
+        else if (level.Contains("4_") && (level.Contains("_01") || level.Contains("_02") || level.Contains("_03")))
         {
-            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Earth));
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Earth1));
+        }
+        else if (level.Contains("4_") && (level.Contains("_04") || level.Contains("_05") || level.Contains("_06") || level.Contains("_07")))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Earth2));
+        }
+        else if (level.Contains("4_") && (level.Contains("_08") || level.Contains("_09") || level.Contains("_10")))
+        {
+            _gameController.GetAudioController().SetClipToChannel(0, _gameController.GetCachedSong(GameController.SongType.Earth3));
         }
 
         _gameController.GetAudioController().PlayChannel(0);

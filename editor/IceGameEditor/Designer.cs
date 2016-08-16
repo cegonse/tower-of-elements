@@ -148,7 +148,7 @@ namespace IceGameEditor
                     (1+_xSize) * 32 + panel.AutoScrollPosition.X, 0,
                     (1+_xSize) * 32 + panel.AutoScrollPosition.X, _ySize * 64);
 
-                // Draw all background layers in order (painter's algorithm)
+                // Draw all background layers in order
                 List<KeyValuePair<int, bool>> layers = _main.GetLayerList().ToList();
                 layers.Sort((first, next) =>
                 {

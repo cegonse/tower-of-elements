@@ -465,6 +465,7 @@ public class Level
 
         // Create the sprite renderer and set the texture and layer data
 		SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+        Debug.Log(texture);
 		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), texSize);
 		rend.sprite = spr;
 		rend.sortingOrder = layer;

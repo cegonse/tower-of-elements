@@ -12,7 +12,6 @@ public enum BlockType : int
 public class Block : MonoBehaviour
 {
     //Level
-
     private Level _activeLevel;
     private string _textureRoute;
 
@@ -26,6 +25,7 @@ public class Block : MonoBehaviour
 	private bool _isMovable = false;
 	private BlockType _type;
     private State _state = State.Normal;
+
     //velocity
     private Vector2 _velocity;
 
@@ -38,20 +38,30 @@ public class Block : MonoBehaviour
     private Ray2D _downRay;
     private Ray2D _rightRay;
     private Ray2D _leftRay;
+
+    private Texture2D[] _dustParticle;
 	
 	void Start()
 	{
         //Down Ray
         _downRay = new Ray2D();
         _downRay.direction = Vector2.right;
+
         //Right Ray
         _rightRay = new Ray2D();
         _rightRay.direction = Vector2.right;
+
         //Left Ray
         _leftRay = new Ray2D();
         _leftRay.direction = Vector2.left;
+
         //Velocity
         _velocity = new Vector2(0, -_speed);
+
+        _dustParticle = new Texture2D[3];
+        _dustParticle[0] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_1");
+        _dustParticle[1] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_2");
+        _dustParticle[2] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_3");
     }
 	
 	void Update()
@@ -70,9 +80,8 @@ public class Block : MonoBehaviour
     private void CheckMovingCollisions()
     {
         //*************************************************
-        //Check if there is a block under the current block
+        // Check if there is a block under the current block
         //*************************************************
-
         float ymax = -Mathf.Infinity;
         GameObject goHitDown = null;
         GameObject blockDown = null;
@@ -80,15 +89,17 @@ public class Block : MonoBehaviour
 
         _downRay.origin = transform.position + new Vector3(-0.45f, -0.51f, 0);
         hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, _length - 0.1f);
-        //Go through all the colliders of the raycast
+
+        // Go through all the colliders of the raycast
         for (int i_down = 0; i_down < hit_down.Length; i_down++)
         {
             goHitDown = hit_down[i_down].collider.gameObject;
 
             Block blockComponent = goHitDown.GetComponent<Block>();
             Player playerComponent = goHitDown.GetComponent<Player>();
-            //Check if it is a block or a player and if it is over the other objects.
-            //If it is over the other objects means that it is the block
+
+            // Check if it is a block or a player and if it is over the other objects.
+            // If it is over the other objects means that it is the block
             // that we must save to adjust our position.y
             if ((blockComponent != null || playerComponent != null) && ymax <= goHitDown.transform.position.y)
             {
@@ -101,31 +112,30 @@ public class Block : MonoBehaviour
         }
 
         //*************************************************
-        //  Go ahead if there is a block under this block
+        // Go ahead if there is a block under this block
         //*************************************************
         if (blockDown != null)
-        {
-            _state = State.Grounded;
-                    
-            //Ajustar posicion del bloque
+        {    
+            // Ajustar posicion del bloque
             Vector3 pDown = transform.position;
             pDown.y = blockDown.transform.position.y + 1;
             transform.position = pDown;
                    
-            //Left-Right
+            // Left-Right
             if (_velocity.x > 0)
             {
-                _rightRay.origin = transform.position + new Vector3(_length-0.49f, 0f, 0f);
-                        
+                _rightRay.origin = transform.position + new Vector3(_length-0.49f, 0f, 0f);        
                 RaycastHit2D hit_right = Physics2D.Raycast(_rightRay.origin, _rightRay.direction, 0.01f);
 
                 if (hit_right.collider != null)
                 {
                     GameObject goHitRight = hit_right.collider.gameObject;
+
                     if (goHitRight.GetComponent<Block>() != null)
                     {
                         _velocity.x = 0;
-                        //Ajustar posicion del bloque
+
+                        // Ajustar posicion del bloque
                         Vector3 pRight = transform.position;
                         pRight.x = goHitRight.transform.position.x - _length;
                         transform.position = pRight;
@@ -140,7 +150,7 @@ public class Block : MonoBehaviour
                     _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(3);
                 }
             }
-            else if(_velocity.x < 0)
+            else if (_velocity.x < 0)
             {
                 _leftRay.origin = transform.position + new Vector3(-0.51f, 0f, 0f);
                 RaycastHit2D hit_left = Physics2D.Raycast(_leftRay.origin, _leftRay.direction, 0.01f);
@@ -148,11 +158,12 @@ public class Block : MonoBehaviour
                 if (hit_left.collider != null)
                 {
                     GameObject goHitLeft = hit_left.collider.gameObject;
+
                     if (goHitLeft.GetComponent<Block>() != null)
                     {
                         _velocity.x = 0;
 
-                        //Ajustar posicion del bloque
+                        // Ajustar posicion del bloque
                         Vector3 pLeft = transform.position;
                         pLeft.x = goHitLeft.transform.position.x + goHitLeft.GetComponent<Block>().GetLength();
                         transform.position = pLeft;
@@ -167,34 +178,67 @@ public class Block : MonoBehaviour
                     _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(3);
                 }
             }
-        }//Down if 1
+            else
+            {
+                // Do the efects related to the ice touching the floor
+                if (_state == State.Falling)
+                {
+                    OnIceDrop();
+                }
+            }
+
+            _state = State.Grounded;
+        }
         else
         {
             _state = State.Falling;
             _activeLevel.GetLevelController().GetGameController().GetAudioController().StopChannel(3);
         }
-        
+    }
+
+    private void OnIceDrop()
+    {
+        CreateFallingParticles(4);
+    }
+
+    private void CreateFallingParticles(int count = 1)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            GameObject go = new GameObject();
+            go.transform.localScale = Vector3.one * 1f;
+            go.name = "Dust Particle";
+
+            Vector3 pos = transform.position;
+            pos.y -= GetComponent<BoxCollider2D>().size.y / 2f;
+            go.transform.position = pos;
+
+            int rp = Random.Range(0, 3);
+            SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+            Sprite spr = Sprite.Create(_dustParticle[rp], new Rect(0, 0, _dustParticle[rp].width, _dustParticle[rp].height),
+                        new Vector2(0.5f, 0.5f), 128f);
+            rend.sprite = spr;
+            rend.sortingOrder = 105 + i;
+
+            DustParticle dp = go.AddComponent<DustParticle>();
+            dp.StartParticle(Vector3.up);
+        }
     }
 
     private void AdjustVerticalSpeed()
     {
-        
         switch(_state)
         {
             case State.Grounded:
-                
                 _velocity.y = 0;
                 _accSpeed = _minAccSpeed;
                 break;
-            
             case State.Falling:
-                
                 _velocity.y = -_speed;
                 _velocity.x = 0;
                 _accSpeed += _incrSpeed;
                 break;
-        }
-        
+        } 
     }
     
     private void MovingBlock()
@@ -204,10 +248,8 @@ public class Block : MonoBehaviour
         switch(_state)
         {
             case State.Grounded:
-            
                 p.x += Time.deltaTime * _velocity.x;
                 break;
-            
             case State.Falling:
                 p.x = Mathf.Round(p.x);
                 p.y += Time.deltaTime * _velocity.y * _accSpeed;
@@ -250,7 +292,6 @@ public class Block : MonoBehaviour
     public void SetLength(float l)
     {
         _length = l;
-        
     }
 
     public float GetLength()
@@ -276,7 +317,6 @@ public class Block : MonoBehaviour
 	
 	public void Break()
 	{
-		
 	}
 
     public void SetTextureRoute(string tex_route)
@@ -295,7 +335,6 @@ public class Block : MonoBehaviour
 
         if (_length > 1)
         {
-
             Transform[] child_transforms = gameObject.GetComponentsInChildren<Transform>();
             float x_max = child_transforms[child_transforms.Length - 1].position.x;
             GameObject go_to_delete = child_transforms[child_transforms.Length - 1].gameObject;
@@ -327,19 +366,19 @@ public class Block : MonoBehaviour
                     break;
                 }
             }
+
             GameObject.Destroy(go_to_delete);
-            //_activeLevel.RemoveEntity(go_to_delete2.name);
             SetLength(_length - 1);
 
             SpriteRenderer rend = go_to_change.GetComponent<SpriteRenderer>();
             Sprite spr = go_to_change.GetComponent<Sprite>();
 
-            //Get the main identificator on the string --> i.e. "Ice","RBasaltA", "Crate"
+            // Get the main identificator on the string --> i.e. "Ice","RBasaltA", "Crate"
             string tex_route = _textureRoute.Split('_')[0];
-            //Create right corner
 
-            //Get the texture
+            // Get the texture
             Texture2D tex = null;
+
             if (_length != 1)
             {
                 tex_route = tex_route + "_15";
@@ -354,10 +393,13 @@ public class Block : MonoBehaviour
 
             spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
                 new Vector2(0.5f, 0.5f), 256f);
+
             rend.sprite = spr;
-            //Adding value to sorting layer
+
+            // Add value to sorting layer
             rend.sortingOrder = 105;
-            //Adding the SpriteAnimator component
+
+            //Add the SpriteAnimator component
             if (_activeLevel.GetLevelController().GetGameController().GetTextureController().GetAnimation(tex_route + "_Anim") != null)
             {
                 Destroy(go_to_change.GetComponent<SpriteAnimator>());
@@ -371,7 +413,7 @@ public class Block : MonoBehaviour
                 sa.AddAnimation("STANDING",_activeLevel.GetLevelController().GetGameController().GetTextureController().GetAnimation(tex_route + "_Anim"));
             }
 
-            //Change the parent collider
+            // Change the parent collider
             if (dir == Direction.Right)
             {
                 transform.position = new Vector3(transform.position.x + 1f, transform.position.y, transform.position.z);

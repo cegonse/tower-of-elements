@@ -19,11 +19,19 @@ public class GameController
 
     public enum SongType
     {
-        Dungeon,
-        Ice,
-        Fire,
-        Wind,
-        Earth
+        Tutorial,
+        Ice1,
+        Ice2,
+        Ice3,
+        Fire1,
+        Fire2,
+        Fire3,
+        Wind1,
+        Wind2,
+        Wind3,
+        Earth1,
+        Earth2,
+        Earth3
     }
 
     private TextureController _textureController;
@@ -38,8 +46,24 @@ public class GameController
 	private string _targetLevel;
     private bool _isGamePaused = false;
 
-    private AudioClip _inGameMusic;
-    private AudioClip _iceLevelMusic;
+    private AudioClip _tutorialMusic;
+
+    private AudioClip _wind1Music;
+    private AudioClip _wind2Music;
+    private AudioClip _wind3Music;
+
+    private AudioClip _ice1Music;
+    private AudioClip _ice2Music;
+    private AudioClip _ice3Music;
+
+    private AudioClip _rock1Music;
+    private AudioClip _rock2Music;
+    private AudioClip _rock3Music;
+
+    private AudioClip _fire1Music;
+    private AudioClip _fire2Music;
+    private AudioClip _fire3Music;
+
     private AudioClip _winMusic;
 
     private AudioClip _torchSfx;
@@ -62,8 +86,23 @@ public class GameController
         _audioController = new AudioController(this, 12);
 
         // Load music and SFX
-        _inGameMusic = (AudioClip)Resources.Load("Music/IG_1");
-        _iceLevelMusic = (AudioClip)Resources.Load("Music/IG_3");
+        _tutorialMusic = (AudioClip)Resources.Load("Music/IG_1");
+
+        _ice1Music = (AudioClip)Resources.Load("Music/Ice_1");
+        _ice2Music = (AudioClip)Resources.Load("Music/Ice_2");
+        _ice3Music = (AudioClip)Resources.Load("Music/Ice_3");
+
+        _fire1Music = (AudioClip)Resources.Load("Music/Fire_1");
+        _fire2Music = (AudioClip)Resources.Load("Music/Fire_2");
+        _fire3Music = (AudioClip)Resources.Load("Music/Fire_3");
+
+        _wind1Music = (AudioClip)Resources.Load("Music/Wind_1");
+        _wind2Music = (AudioClip)Resources.Load("Music/Wind_2");
+        _wind3Music = (AudioClip)Resources.Load("Music/Wind_3");
+
+        _rock1Music = (AudioClip)Resources.Load("Music/Rock_1");
+        _rock2Music = (AudioClip)Resources.Load("Music/Rock_2");
+        _rock3Music = (AudioClip)Resources.Load("Music/Rock_3");
 
         _torchSfx = (AudioClip)Resources.Load("SFX/Torch");
         _iceBurnSfx = (AudioClip)Resources.Load("SFX/IceBurn");
@@ -72,7 +111,7 @@ public class GameController
         _iceDropSfx = (AudioClip)Resources.Load("SFX/IceDrop");
 
         // Set the audio channels
-        _audioController.SetClipToChannel(0, _inGameMusic);
+        _audioController.SetClipToChannel(0, _tutorialMusic);
         _audioController.SetLoopChannel(0, true);
 
         _audioController.SetClipToChannel(1, _iceBurnSfx);
@@ -93,25 +132,57 @@ public class GameController
     {
         AudioClip result = null;
 
-        if (type == SongType.Dungeon)
+        if (type == SongType.Tutorial)
         {
-            result = _inGameMusic;
+            result = _tutorialMusic;
         }
-        else if (type == SongType.Ice)
+        else if (type == SongType.Ice1)
         {
-            result = _iceLevelMusic;
+            result = _ice1Music;
         }
-        else if (type == SongType.Fire)
+        else if (type == SongType.Ice2)
         {
-            result = _inGameMusic;
+            result = _ice2Music;
         }
-        else if (type == SongType.Wind)
+        else if (type == SongType.Ice3)
         {
-            result = _inGameMusic;
+            result = _ice3Music;
         }
-        else if (type == SongType.Earth)
+        else if (type == SongType.Fire1)
         {
-            result = _inGameMusic;
+            result = _fire1Music;
+        }
+        else if (type == SongType.Fire2)
+        {
+            result = _fire2Music;
+        }
+        else if (type == SongType.Fire3)
+        {
+            result = _fire3Music;
+        }
+        else if (type == SongType.Wind1)
+        {
+            result = _wind1Music;
+        }
+        else if (type == SongType.Wind2)
+        {
+            result = _wind2Music;
+        }
+        else if (type == SongType.Wind3)
+        {
+            result = _wind3Music;
+        }
+        else if (type == SongType.Earth1)
+        {
+            result = _rock1Music;
+        }
+        else if (type == SongType.Earth2)
+        {
+            result = _rock2Music;
+        }
+        else if (type == SongType.Earth3)
+        {
+            result = _rock3Music;
         }
 
         return result;
