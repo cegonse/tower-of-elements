@@ -50,7 +50,7 @@ public class Door : MonoBehaviour
         #if UNITY_EDITOR
         Debug.Log("Loading next level");
         #endif
-
+        
         p.OnLevelFinished();
         _playerHit = true;
     }

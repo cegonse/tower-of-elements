@@ -116,10 +116,7 @@ public class GameController
 
         _audioController.SetClipToChannel(1, _iceBurnSfx);
         _audioController.SetClipToChannel(2, _iceCreateSfx);
-
         _audioController.SetClipToChannel(3, _iceDragSfx);
-        _audioController.SetLoopChannel(3, true);
-
         _audioController.SetClipToChannel(4, _iceDropSfx);
         _audioController.SetClipToChannel(5, _torchSfx);
 

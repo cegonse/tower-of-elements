@@ -17,7 +17,9 @@ public class AnimationObject : MonoBehaviour {
         }
         else
         {
+#if UNITY_EDITOR
             Debug.LogError("ERROR in AnimationObject, no animation is defined. Destroying object.");
+#endif
             GameObject.Destroy(gameObject);
         }
 

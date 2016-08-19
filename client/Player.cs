@@ -127,6 +127,11 @@ public class Player : MonoBehaviour {
     private float _boundH = 0f;
     private float _boundW = 0f;
 
+    private float _cameraScreenShakeTimer = 0f;
+    private float _cameraScreenShakeMaxTime = 0f;
+    private float _screenShakeIntensity = 0.1f;
+    private bool _doCameraScreenShake;
+
     public void SetActiveLevel(Level lv)
     {
         _activeLevel = lv;
@@ -596,9 +601,29 @@ public class Player : MonoBehaviour {
         }
 
         camPos = Vector3.SmoothDamp(camPos, offset, ref _cameraVelocity, _cameraDampingTime);
+
+        if (_doCameraScreenShake)
+        {
+            camPos += Random.onUnitSphere * _screenShakeIntensity;
+            _cameraScreenShakeTimer += Time.deltaTime;
+
+            if (_cameraScreenShakeTimer > _cameraScreenShakeMaxTime)
+            {
+                _doCameraScreenShake = false;
+            }
+        }
+
         _gameController.GetCamera().transform.position = camPos;
     }
-    
+
+    public void DoScreenShake(float duration, float intensity)
+    {
+        _cameraScreenShakeTimer = 0f;
+        _cameraScreenShakeMaxTime = duration;
+        _screenShakeIntensity = intensity;
+        _doCameraScreenShake = true;
+    }
+
     //Adjust the jumping values in funtion of the desired player's direction (_targetDirection)
     private void SetJumpingValues()
     {
@@ -1048,14 +1073,11 @@ public class Player : MonoBehaviour {
         switch (_animationDirection)
         {
             case Direction.Right:
-
                 transform.GetChild(0).localScale = new Vector3(1f, 1f, 1f);
-
                 break;
+
             case Direction.Left:
-
                 transform.GetChild(0).localScale = new Vector3(-1f, 1f, 1f);
-
                 break;
         }
 
@@ -1071,10 +1093,12 @@ public class Player : MonoBehaviour {
                     _changeAnimation = false;
                     _canMove = false;
                 }
+
                 if (sprite_animator.GetAnimationIndex() == 3)
                 {
                     MakeTheActionHappen();
                 }
+
                 if (sprite_animator.IsTheLastFrame())
                 {
                     _animState = _animStateAfterJump;
@@ -1090,6 +1114,7 @@ public class Player : MonoBehaviour {
                     _changeAnimation = false;
                     _canMove = true;
                 }
+
                 if (sprite_animator.IsTheLastFrame())
                 {
                     _animState = PlayerAnimState.Move;
@@ -1104,6 +1129,7 @@ public class Player : MonoBehaviour {
                     _changeAnimation = false;
                     _canMove = false;
                 }
+
                 if (sprite_animator.IsTheLastFrame())
                 {
                     OnPlayerDestroyed();
@@ -1117,6 +1143,7 @@ public class Player : MonoBehaviour {
                     _changeAnimation = false;
                     _canMove = false;
                 }
+
                 if (sprite_animator.IsTheLastFrame())
                 {
                     _animState = PlayerAnimState.IdleTurned;
@@ -1186,6 +1213,7 @@ public class Player : MonoBehaviour {
             if (_targetDirection != Direction.None)
             {
                 _actionDirection = _targetDirection;
+
                 if (_animState != PlayerAnimState.Action)
                 {
                     //ANIMATION

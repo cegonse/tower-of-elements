@@ -40,6 +40,10 @@ public class Block : MonoBehaviour
     private Ray2D _leftRay;
 
     private Texture2D[] _dustParticle;
+    private Texture2D[] _sparkParticle;
+    private float _traveledDistance = 0f;
+    private float _waitPerDragParticle = 0.03f;
+    private float _waitDragParticleTimer = 0f;
 	
 	void Start()
 	{
@@ -62,6 +66,9 @@ public class Block : MonoBehaviour
         _dustParticle[0] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_1");
         _dustParticle[1] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_2");
         _dustParticle[2] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_3");
+
+        _sparkParticle = new Texture2D[1];
+        _sparkParticle[0] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleIce/ParticleIce");
     }
 	
 	void Update()
@@ -105,6 +112,7 @@ public class Block : MonoBehaviour
             {
                 //Save the maximum Y
                 ymax = goHitDown.transform.position.y;
+
                 //Save the block is down
                 blockDown = goHitDown;
             }
@@ -120,6 +128,15 @@ public class Block : MonoBehaviour
             Vector3 pDown = transform.position;
             pDown.y = blockDown.transform.position.y + 1;
             transform.position = pDown;
+
+            if (blockDown.GetComponent<Block>() != null && blockDown.GetComponent<Block>().IsPlatform())
+            {
+                transform.parent = blockDown.transform;
+            }
+            else
+            {
+                transform.parent = null;
+            }
                    
             // Left-Right
             if (_velocity.x > 0)
@@ -140,8 +157,7 @@ public class Block : MonoBehaviour
                         pRight.x = goHitRight.transform.position.x - _length;
                         transform.position = pRight;
 
-                        _activeLevel.GetLevelController().GetGameController().GetAudioController().StopChannel(3);
-                        _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(4);
+                        OnIceHitRight();
                     }
                 }
                 else
@@ -168,8 +184,7 @@ public class Block : MonoBehaviour
                         pLeft.x = goHitLeft.transform.position.x + goHitLeft.GetComponent<Block>().GetLength();
                         transform.position = pLeft;
 
-                        _activeLevel.GetLevelController().GetGameController().GetAudioController().StopChannel(3);
-                        _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(4);
+                        OnIceHitLeft();
                     }
                 }
                 else
@@ -198,22 +213,158 @@ public class Block : MonoBehaviour
 
     private void OnIceDrop()
     {
-        CreateFallingParticles(4);
+        for (int l = 0; l < _length; l++)
+        {
+            CreateFallingParticles(Random.Range(4, 6), Vector3.up, l);
+        }
+
+        _activeLevel.GetLevelController().GetGameController().GetAudioController().StopChannel(3);
+        _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(4);
+        
+        if (Mathf.Abs(_traveledDistance) > 1.5f)
+        {
+            if (_length == 1)
+            {
+                _activeLevel.GetPlayer().DoScreenShake(0.2f, 0.05f);
+            }
+            else
+            {
+                _activeLevel.GetPlayer().DoScreenShake(0.3f, 0.1f);
+            }
+        }
+
+        _traveledDistance = 0f;
     }
 
-    private void CreateFallingParticles(int count = 1)
+    private void OnIceHitRight()
+    {
+        CreateFallingParticles(Random.Range(4, 6), Vector3.left, 0);
+
+        _activeLevel.GetLevelController().GetGameController().GetAudioController().StopChannel(3);
+        _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(4);
+
+        if (Mathf.Abs(_traveledDistance) > 1.5f)
+        {
+            if (_length == 1)
+            {
+                _activeLevel.GetPlayer().DoScreenShake(0.2f, 0.05f);
+            }
+            else
+            {
+                _activeLevel.GetPlayer().DoScreenShake(0.3f, 0.1f);
+            }
+        }
+
+        _traveledDistance = 0f;
+    }
+
+    private void OnIceHitLeft()
+    {
+        CreateFallingParticles(Random.Range(4,6), Vector3.right, 0);
+
+        _activeLevel.GetLevelController().GetGameController().GetAudioController().StopChannel(3);
+        _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(4);
+
+        if (Mathf.Abs(_traveledDistance) > 1.5f)
+        {
+            if (_length == 1)
+            {
+                _activeLevel.GetPlayer().DoScreenShake(0.2f, 0.05f);
+            }
+            else
+            {
+                _activeLevel.GetPlayer().DoScreenShake(0.3f, 0.1f);
+            }
+        }
+
+        _traveledDistance = 0f;
+    }
+
+    private void OnIceDragLeft()
+    {
+        _waitDragParticleTimer += Time.deltaTime;
+
+        if (_waitDragParticleTimer > _waitPerDragParticle)
+        {
+            CreateDragParticles(4, Vector3.right);
+            _waitDragParticleTimer = 0f;
+        }
+    }
+
+    private void OnIceDragRight()
+    {
+        _waitDragParticleTimer += Time.deltaTime;
+
+        if (_waitDragParticleTimer > _waitPerDragParticle)
+        {
+            CreateDragParticles(4, Vector3.left);
+            _waitDragParticleTimer = 0f;
+        }
+    }
+
+    private void CreateDragParticles(int count, Vector3 dir)
     {
         for (int i = 0; i < count; i++)
         {
             GameObject go = new GameObject();
-            go.transform.localScale = Vector3.one * 1f;
+            go.name = "Spark Particle";
+
+            if (dir == Vector3.left)
+            {
+                Vector3 pos = transform.position;
+                pos.y -= 0.5f;
+                pos.x -= Random.Range(0.5f, 0.1f);
+                go.transform.position = pos;
+            }
+            else if (dir == Vector3.right)
+            {
+                Vector3 pos = transform.position;
+                pos.y -= 0.5f;
+                pos.x += _length - Random.Range(0.5f, 1f);
+                go.transform.position = pos;
+            }
+            
+            SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+            Sprite spr = Sprite.Create(_sparkParticle[0], new Rect(0, 0, _sparkParticle[0].width, _sparkParticle[0].height),
+                        new Vector2(0.5f, 0.5f), 512f);
+            rend.sprite = spr;
+            rend.sortingOrder = 105 + i;
+
+            SparkParticle sp = go.AddComponent<SparkParticle>();
+            sp.StartParticle(dir);
+        }
+    }
+
+    private void CreateFallingParticles(int count, Vector3 dir, int offset)
+    {
+        int l = 0;
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject go = new GameObject();
             go.name = "Dust Particle";
 
-            Vector3 pos = transform.position;
-            pos.y -= GetComponent<BoxCollider2D>().size.y / 2f;
-            go.transform.position = pos;
+            if (dir == Vector3.up)
+            {
+                Vector3 pos = transform.position;
+                pos.y -= GetComponent<BoxCollider2D>().size.y / 2f;
+                pos.x += offset;
+                go.transform.position = pos;
+            }
+            else if (dir == Vector3.left)
+            {
+                Vector3 pos = transform.position;
+                pos.x += _length - 0.5f;
+                go.transform.position = pos;
+            }
+            else if (dir == Vector3.right)
+            {
+                Vector3 pos = transform.position;
+                pos.x -= 0.5f;
+                go.transform.position = pos;
+            }
 
-            int rp = Random.Range(0, 3);
+            int rp = Random.Range(0, _dustParticle.Length);
             SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
             Sprite spr = Sprite.Create(_dustParticle[rp], new Rect(0, 0, _dustParticle[rp].width, _dustParticle[rp].height),
                         new Vector2(0.5f, 0.5f), 128f);
@@ -221,7 +372,7 @@ public class Block : MonoBehaviour
             rend.sortingOrder = 105 + i;
 
             DustParticle dp = go.AddComponent<DustParticle>();
-            dp.StartParticle(Vector3.up);
+            dp.StartParticle(dir);
         }
     }
 
@@ -233,6 +384,7 @@ public class Block : MonoBehaviour
                 _velocity.y = 0;
                 _accSpeed = _minAccSpeed;
                 break;
+
             case State.Falling:
                 _velocity.y = -_speed;
                 _velocity.x = 0;
@@ -245,14 +397,30 @@ public class Block : MonoBehaviour
     {
         Vector3 p = transform.position;
         
-        switch(_state)
+        switch (_state)
         {
             case State.Grounded:
                 p.x += Time.deltaTime * _velocity.x;
+
+                if (_velocity.x != 0f)
+                {
+                    _traveledDistance += Time.deltaTime * _velocity.x;
+                    
+                    if (_velocity.x > 0f)
+                    {
+                        OnIceDragRight();
+                    }
+                    else if (_velocity.x < 0f)
+                    {
+                        OnIceDragLeft();
+                    }
+                }
+
                 break;
             case State.Falling:
                 p.x = Mathf.Round(p.x);
                 p.y += Time.deltaTime * _velocity.y * _accSpeed;
+                _traveledDistance += Time.deltaTime * _velocity.y * _accSpeed;
                 break;
         }
         

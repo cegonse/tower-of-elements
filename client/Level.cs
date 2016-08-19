@@ -23,6 +23,7 @@ public class Level
     private int[] _camBounds = new int[4];
 	private string _targetLevel;
     private bool _foundTorch = false;
+    private Player _player;
 
 	public Level(LevelController levelController, string name)
 	{
@@ -463,9 +464,17 @@ public class Level
 		Texture2D tex = (Texture2D) _levelController.GetGameController().GetTextureController().GetTexture(texture);
         float texSize = _levelController.GetGameController().GetTextureController().GetTextureSize(texture);
 
+#if UNITY_EDITOR
+        if (tex == null)
+        {
+            Debug.LogError("MISSING TEXTURE! \"" + texture + "\" doesn't exist and is used as a background.");
+            UnityEditor.EditorApplication.isPaused = true;
+        }
+#endif
+
         // Create the sprite renderer and set the texture and layer data
-		SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
-        Debug.Log(texture);
+        SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+        
 		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), texSize);
 		rend.sprite = spr;
 		rend.sortingOrder = layer;
@@ -704,9 +713,15 @@ public class Level
         alphaTweener.EndAlpha = 0f;
         alphaTweener.TweenTime = 1f;
 
+        _player = p;
         return go;
     }
 	
+    public Player GetPlayer()
+    {
+        return _player;
+    }
+
 	public GameObject CreateEnemy(EnemyType type, int x, int y, string name, BaseEnemyData data)
 	{
 		GameObject go = new GameObject(x.ToString() + "_" + y.ToString() + "_" + name + "_enemy");
@@ -796,7 +811,9 @@ public class Level
             }
             else
             {
+#if UNITY_EDITOR
                 Debug.Log("WARNING!! Enemy without WALKING animation: " + name);
+#endif
             }
             if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_2_Anim") != null)
             {
@@ -804,7 +821,9 @@ public class Level
             }
             else
             {
+#if UNITY_EDITOR
                 Debug.Log("WARNING!! Enemy without TURNING animation: " + name);
+#endif
             }
             if (_levelController.GetGameController().GetTextureController().GetAnimation(name + "_3_Anim") != null)
             {
@@ -812,7 +831,9 @@ public class Level
             }
             else
             {
+#if UNITY_EDITOR
                 Debug.Log("WARNING!! Enemy without JUMPING animation: " + name);
+#endif
             }
         }
 
