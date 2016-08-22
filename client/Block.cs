@@ -71,7 +71,7 @@ public class Block : MonoBehaviour
         _sparkParticle[0] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleIce/ParticleIce");
     }
 	
-	void Update()
+	void FixedUpdate()
 	{
         if (!_activeLevel.GetLevelController().GetGameController().IsGamePaused())
         {
