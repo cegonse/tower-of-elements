@@ -74,8 +74,11 @@ public class GameController
 
     public GameController()
     {
+        // Set physics settings
+        Time.maximumDeltaTime = 0.02f; // 50 Hz
+        Time.fixedDeltaTime = 0.016f; // 60 Hz
 
-        //Singleton
+        // Singleton
         if (instance == null)
         {
             instance = this;

@@ -328,7 +328,7 @@ public class Block : MonoBehaviour
             Sprite spr = Sprite.Create(_sparkParticle[0], new Rect(0, 0, _sparkParticle[0].width, _sparkParticle[0].height),
                         new Vector2(0.5f, 0.5f), 512f);
             rend.sprite = spr;
-            rend.sortingOrder = 105 + i;
+            rend.sortingOrder = 106 + i;
 
             SparkParticle sp = go.AddComponent<SparkParticle>();
             sp.StartParticle(dir);
