@@ -26,13 +26,13 @@ public class EnemyBase : MonoBehaviour
 	protected Level _level;
     private BaseEnemyData _data;
 
-    //State
+    // State
     protected EnemyState _state = EnemyState.WALKING;
 
-    //Speed
+    // Speed
     protected float _speed = 3f;
 
-    //velocity
+    // Velocity
     protected Vector2 _velocity = new Vector2(0f, 0f);
 	
 	private Ray2D _downRay;
@@ -155,8 +155,7 @@ public class EnemyBase : MonoBehaviour
 
         if (killThaPlayer)
         {
-            GameObject go = _level.GetEntity("player");
-            Player player = go.GetComponent<Player>();
+            Player player = _level.GetPlayer();
 
             if (player)
             {

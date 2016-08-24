@@ -25,16 +25,15 @@ public enum State : int
 
 public class Main : MonoBehaviour
 {
-
     private GameController _gameController;
     private GuiCallbacks _guiCallbacks;
+
     /*
 	  Este método se llama cuando
 	  se inicia el juego.
 	*/
     void Start()
     {
-
         _gameController = new GameController();
         
         GameObject canvas_prefab = Resources.Load<GameObject>("GUI/Canvas");
@@ -54,6 +53,7 @@ public class Main : MonoBehaviour
             {
                 Debug.LogError("Missing texture on GUI!!! -> " + path);
             }
+
 			Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
 			new Vector2(0.5f, 0.5f), 256f);
 			imagesInCanvas[i].sprite = spr;
@@ -93,7 +93,6 @@ public class Main : MonoBehaviour
 	*/
     void LateUpdate()
     {
-
     }
     
     /*
@@ -104,7 +103,6 @@ public class Main : MonoBehaviour
 	*/
     void OnApplicationPause()
     {
-
     }
 
     /*
@@ -113,7 +111,6 @@ public class Main : MonoBehaviour
 	*/
     void OnApplicationQuit()
     {
-
     }
 
 }

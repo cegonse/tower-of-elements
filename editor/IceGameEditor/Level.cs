@@ -5,7 +5,8 @@ public enum BlockType : int
 {
     Rock = 0,
     Ice,
-    Crate
+    Crate,
+    Death
 }
 
 public struct Vector2

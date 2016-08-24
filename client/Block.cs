@@ -6,7 +6,8 @@ public enum BlockType : int
 {
 	Rock,
     Ice,
-    Crate
+    Crate,
+    Death
 }
 
 public class Block : MonoBehaviour
@@ -22,23 +23,25 @@ public class Block : MonoBehaviour
     private float _accSpeed = _minAccSpeed;
     private const float _incrSpeed = 0.1f;
 
+    // Block state
 	private bool _isMovable = false;
 	private BlockType _type;
     private State _state = State.Normal;
 
-    //velocity
+    // Velocity
     private Vector2 _velocity;
 
-    //Length
+    // Length
     private float _length = 1;
     private bool _vertical = false;
     private bool _isPlatform = false;
-    //Rays
-
+    
+    // Rays
     private Ray2D _downRay;
     private Ray2D _rightRay;
     private Ray2D _leftRay;
 
+    // Particle related
     private Texture2D[] _dustParticle;
     private Texture2D[] _sparkParticle;
     private float _traveledDistance = 0f;
@@ -47,21 +50,22 @@ public class Block : MonoBehaviour
 	
 	void Start()
 	{
-        //Down Ray
+        // Down Ray
         _downRay = new Ray2D();
         _downRay.direction = Vector2.right;
 
-        //Right Ray
+        // Right Ray
         _rightRay = new Ray2D();
         _rightRay.direction = Vector2.right;
 
-        //Left Ray
+        // Left Ray
         _leftRay = new Ray2D();
         _leftRay.direction = Vector2.left;
 
-        //Velocity
+        // Velocity
         _velocity = new Vector2(0, -_speed);
 
+        // Instantiate particles
         _dustParticle = new Texture2D[3];
         _dustParticle[0] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_1");
         _dustParticle[1] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_2");
@@ -110,10 +114,10 @@ public class Block : MonoBehaviour
             // that we must save to adjust our position.y
             if ((blockComponent != null || playerComponent != null) && ymax <= goHitDown.transform.position.y)
             {
-                //Save the maximum Y
+                // Save the maximum Y
                 ymax = goHitDown.transform.position.y;
 
-                //Save the block is down
+                // Save the block is down
                 blockDown = goHitDown;
             }
 
@@ -129,68 +133,85 @@ public class Block : MonoBehaviour
             pDown.y = blockDown.transform.position.y + 1;
             transform.position = pDown;
 
-            if (blockDown.GetComponent<Block>() != null && blockDown.GetComponent<Block>().IsPlatform())
+            Block blockDownComp = blockDown.GetComponent<Block>();
+
+            if (blockDownComp != null)
             {
-                transform.parent = blockDown.transform;
-            }
-            else
-            {
-                transform.parent = null;
+                if (blockDownComp.IsPlatform())
+                {
+                    transform.parent = blockDown.transform;
+                }
+                else
+                {
+                    transform.parent = null;
+                }
             }
                    
             // Left-Right
             if (_velocity.x > 0)
             {
-                _rightRay.origin = transform.position + new Vector3(_length-0.49f, 0f, 0f);        
-                RaycastHit2D hit_right = Physics2D.Raycast(_rightRay.origin, _rightRay.direction, 0.01f);
+                _rightRay.origin = transform.position + new Vector3(_length - 0.49f, 0f, 0f);        
+                RaycastHit2D[] hitRightAll = Physics2D.RaycastAll(_rightRay.origin, _rightRay.direction, 0.01f);
 
-                if (hit_right.collider != null)
+                foreach (RaycastHit2D hit_right in hitRightAll)
                 {
-                    GameObject goHitRight = hit_right.collider.gameObject;
-
-                    if (goHitRight.GetComponent<Block>() != null)
+                    // Check if the element that has been hit is
+                    // a block. In that case, stop and quit the loop.
+                    if (hit_right.collider != null)
                     {
-                        _velocity.x = 0;
+                        GameObject goHitRight = hit_right.collider.gameObject;
 
-                        // Ajustar posicion del bloque
-                        Vector3 pRight = transform.position;
-                        pRight.x = goHitRight.transform.position.x - _length;
-                        transform.position = pRight;
+                        if (goHitRight.GetComponent<Block>() != null)
+                        {
+                            _velocity.x = 0;
 
-                        OnIceHitRight();
+                            // Adjust block position
+                            Vector3 pRight = transform.position;
+                            pRight.x = goHitRight.transform.position.x - _length;
+                            transform.position = pRight;
+
+                            OnIceHitRight();
+                            break;
+                        }
                     }
-                }
-                else
-                {
-                    _velocity.x = _speed;
-                    _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(3);
+                    else
+                    {
+                        _velocity.x = _speed;
+                        _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(3);
+                    }
                 }
             }
             else if (_velocity.x < 0)
             {
                 _leftRay.origin = transform.position + new Vector3(-0.51f, 0f, 0f);
-                RaycastHit2D hit_left = Physics2D.Raycast(_leftRay.origin, _leftRay.direction, 0.01f);
+                RaycastHit2D[] hitLeftAll = Physics2D.RaycastAll(_leftRay.origin, _leftRay.direction, 0.01f);
 
-                if (hit_left.collider != null)
+                foreach (RaycastHit2D hit_left in hitLeftAll)
                 {
-                    GameObject goHitLeft = hit_left.collider.gameObject;
-
-                    if (goHitLeft.GetComponent<Block>() != null)
+                    // Check if the element that has been hit is
+                    // a block. In that case, stop and quit the loop.
+                    if (hit_left.collider != null)
                     {
-                        _velocity.x = 0;
+                        GameObject goHitLeft = hit_left.collider.gameObject;
 
-                        // Ajustar posicion del bloque
-                        Vector3 pLeft = transform.position;
-                        pLeft.x = goHitLeft.transform.position.x + goHitLeft.GetComponent<Block>().GetLength();
-                        transform.position = pLeft;
+                        if (goHitLeft.GetComponent<Block>() != null)
+                        {
+                            _velocity.x = 0;
 
-                        OnIceHitLeft();
+                            // Adjust block position
+                            Vector3 pLeft = transform.position;
+                            pLeft.x = goHitLeft.transform.position.x + goHitLeft.GetComponent<Block>().GetLength();
+                            transform.position = pLeft;
+
+                            OnIceHitLeft();
+                            break;
+                        }
                     }
-                }
-                else
-                {
-                    _velocity.x = -_speed;
-                    _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(3);
+                    else
+                    {
+                        _velocity.x = -_speed;
+                        _activeLevel.GetLevelController().GetGameController().GetAudioController().PlayChannel(3);
+                    }
                 }
             }
             else
@@ -415,8 +436,8 @@ public class Block : MonoBehaviour
                         OnIceDragLeft();
                     }
                 }
-
                 break;
+
             case State.Falling:
                 p.x = Mathf.Round(p.x);
                 p.y += Time.deltaTime * _velocity.y * _accSpeed;
