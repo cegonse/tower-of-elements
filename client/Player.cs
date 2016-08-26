@@ -139,6 +139,10 @@ public class Player : MonoBehaviour {
     private float _screenShakeIntensity = 0.1f;
     private bool _doCameraScreenShake;
 
+    // Jumping wait timers
+    private float _jumpWaitTimer = 0f;
+    private float _jumpWaitTime = 0.15f;
+
     public void SetActiveLevel(Level lv)
     {
         _activeLevel = lv;
@@ -352,18 +356,24 @@ public class Player : MonoBehaviour {
 
                                     if (hit_up.collider == null || (hit_up.collider != null && hit_up.collider.gameObject.GetComponent<Block>() == null))
                                     {
-                                        _state = State.Jumping;
-                                        _playerDirection = Direction.Up;
-                                        SetJumpingValues();
+                                        _jumpWaitTimer += Time.deltaTime;
+
+                                        if (_jumpWaitTimer > _jumpWaitTime)
+                                        {
+                                            _playerDirection = Direction.Up;
+                                            _jumpWaitTimer = 0f;
+                                            SetJumpingValues();
+
+                                            _state = State.Jumping;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-
                 // Check the player's Left
-                if (_playerDirection == Direction.Left)
+                else if (_playerDirection == Direction.Left)
                 {
                     _leftRay1.origin = transform.position + _vectorLeft1CollisionOffset;
                     RaycastHit2D hit_left = Physics2D.Raycast(_leftRay1.origin, _leftRay1.direction, 0.01f);
@@ -400,14 +410,25 @@ public class Player : MonoBehaviour {
 
                                     if (hit_up.collider == null || (hit_up.collider != null && hit_up.collider.gameObject.GetComponent<Block>() == null))
                                     {
-                                        _state = State.Jumping;
-                                        _playerDirection = Direction.Up;
-                                        SetJumpingValues();
+                                        _jumpWaitTimer += Time.deltaTime;
+
+                                        if (_jumpWaitTimer > _jumpWaitTime)
+                                        {
+                                            _playerDirection = Direction.Up;
+                                            SetJumpingValues();
+                                            _jumpWaitTimer = 0f;
+
+                                            _state = State.Jumping;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                }
+                else
+                {
+                    _jumpWaitTimer = 0f;
                 }
 
                 // Check if the player has to die
