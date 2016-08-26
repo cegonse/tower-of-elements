@@ -12,6 +12,13 @@ public enum EntityType
 
 public class Level
 {
+    private enum State
+    {
+        WaitingGuiCallbacks,
+        WaitingEye,
+        Idle
+    }
+
 	private string _name, _publicName;
 	private int _difficulty;
 	private Dictionary<string, GameObject> _entities;
@@ -25,12 +32,18 @@ public class Level
     private bool _foundTorch = false;
     private Player _player;
 
+    private float _startWaitTimer = 0f;
+    private float _startWaitTime = 2f;
+    private State _state = State.WaitingGuiCallbacks;
+
+    private GuiCallbacks _guiCallbacks;
+
 	public Level(LevelController levelController, string name)
 	{
 		_levelController = levelController;
 		_name = name;
 		_entities = new Dictionary<string, GameObject>();
-	}
+    }
 	
 	public void AddEntity(GameObject go, string name)
 	{
@@ -273,14 +286,6 @@ public class Level
             boxColl.size = new Vector2(length, 1f);
             boxColl.offset = new Vector2((length / 2) - 0.5f, 0f);
         }
-        
-        // --------- TEST --------- //
-        // - Disabled rigidbodies on blocks
-        //   to check the effect
-        //
-        //Rigidbody2D r = go.AddComponent<Rigidbody2D>();
-        //r.isKinematic = true;
-        // --------- TEST --------- //
 
         Block b = go.AddComponent<Block>();
         b.SetType(type);
@@ -600,11 +605,6 @@ public class Level
 		BoxCollider2D col = go.AddComponent<BoxCollider2D>();
 		col.size = new Vector2(0.1f, 1f);
 
-        // ---------TEST-------- - //
-        //Rigidbody2D r = go.AddComponent<Rigidbody2D>();
-		//r.isKinematic = true;
-        // ---------TEST-------- - //
-
         Door d = go.AddComponent<Door>();
 		d.SetActiveLevel(this);
 		
@@ -635,11 +635,6 @@ public class Level
 
         BoxCollider2D col = go.AddComponent<BoxCollider2D>();
 		col.size = new Vector2(0.6f , 1.0f);
-
-        // ---------TEST-------- - //
-        //Rigidbody2D r = go.AddComponent<Rigidbody2D>();
-        //r.isKinematic = true;
-        // ---------TEST-------- - //
 
         Player p = go.AddComponent<Player>();
 		p.SetActiveLevel(this);
@@ -861,7 +856,36 @@ public class Level
 	
 	public void OnUpdate()
 	{
-		
+        if (_state == State.WaitingGuiCallbacks)
+        {
+            _guiCallbacks = GameObject.Find("GuiCallbacks").GetComponent<GuiCallbacks>();
+
+            if (_guiCallbacks != null)
+            {
+                if (_name.Contains("0_01") || _name.Contains("0_02"))
+                {
+                    _guiCallbacks.DisableEye();
+                    _state = State.Idle;
+                }
+                else
+                {
+                    _guiCallbacks.OnEye(true);
+                    _guiCallbacks.DisableEye();
+                    _state = State.WaitingEye;
+                }
+            }
+        }
+        else if (_state == State.WaitingEye)
+        {
+            _startWaitTimer += Time.deltaTime;
+
+            if (_startWaitTimer > _startWaitTime)
+            {
+                _guiCallbacks.OnEye(true);
+                _guiCallbacks.EnableEye();
+                _state = State.Idle;
+            }
+        }
 	}
 	
 	//gets and Sets

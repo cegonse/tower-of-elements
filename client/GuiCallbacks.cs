@@ -15,26 +15,27 @@ public class GuiCallbacks : MonoBehaviour
     private bool _isOnWinMenu = false;
     private bool _wantsToContinue = false;
 
-    GameObject settings;
-    GameObject fire;
-    GameObject water;
-    GameObject earth;
-    GameObject wind;
-    GameObject skills;
-    GameObject right;
-    GameObject left;
-
+    private GameObject _settings;
+    private GameObject _fire;
+    private GameObject _water;
+    private GameObject _earth;
+    private GameObject _wind;
+    private GameObject _skills;
+    private GameObject _right;
+    private GameObject _left;
+    private GameObject _eye;
 
     void Start()
     {
-        settings = GameObject.Find("Settings"); 
-        fire = GameObject.Find("Fire");
-        water = GameObject.Find("Water");
-        earth = GameObject.Find("Earth");
-        wind = GameObject.Find("Wind");
-        skills = GameObject.Find("Skills_Background");
-        right = GameObject.Find("Right");
-        left = GameObject.Find("Left");
+        _settings = GameObject.Find("Settings"); 
+        _fire = GameObject.Find("Fire");
+        _water = GameObject.Find("Water");
+        _earth = GameObject.Find("Earth");
+        _wind = GameObject.Find("Wind");
+        _skills = GameObject.Find("Skills_Background");
+        _right = GameObject.Find("Right");
+        _left = GameObject.Find("Left");
+        _eye = GameObject.Find("Eye");
     }
 
     public void SetGameController(GameController gc)
@@ -82,6 +83,16 @@ public class GuiCallbacks : MonoBehaviour
         }
     }
 
+    public void DisableEye()
+    {
+        _eye.SetActive(false);
+    }
+
+    public void EnableEye()
+    {
+        _eye.SetActive(true);
+    }
+
     public void Click(UnityEngine.UI.Image img)
     {
         GameObject go = img.gameObject;
@@ -116,40 +127,9 @@ public class GuiCallbacks : MonoBehaviour
                 break;
 
             case "Eye":
-                 if (_pause == false)
-                 {
-                    //Time.timeScale = 0;
-                    _isCameraMoving = true;
-                    _pause = true;
-
-                    settings.GetComponent<Button>().interactable = false;
-                    fire.SetActive(false);
-                    water.SetActive(false);
-                    wind.SetActive(false);
-                    earth.SetActive(false);
-                    skills.SetActive(false);
-                    right.SetActive(false);
-                    left.SetActive(false);
+                {
+                    OnEye();
                 }
-                 else
-                 {
-                    //Time.timeScale = 1;
-                    _isCameraMoving = false;
-                    _gameController.GetCamera().GetComponent<Camera>().orthographicSize = 3.5f;
-                    _pause = false;
-
-                    settings.GetComponent<Button>().interactable = true;
-                    fire.SetActive(true);
-                    water.SetActive(true);
-                    wind.SetActive(true);
-                    earth.SetActive(true);
-                    skills.SetActive(true);
-                    right.SetActive(true);
-                    left.SetActive(true);
-                }
-
-                _gameController.SetGamePaused(_pause);
-                _gameController.GetGuiController().MoveCamera(_pause);
                 break;
 
             case "Settings":
@@ -219,6 +199,54 @@ public class GuiCallbacks : MonoBehaviour
                 }
                 break;
         }
+    }
+
+    public void OnEye(bool forced = false)
+    {
+        if (_pause == false)
+        {
+            //Time.timeScale = 0;
+            _isCameraMoving = true;
+            _pause = true;
+
+            _settings.GetComponent<Button>().interactable = false;
+            _fire.SetActive(false);
+            _water.SetActive(false);
+            _wind.SetActive(false);
+            _earth.SetActive(false);
+            _skills.SetActive(false);
+            _right.SetActive(false);
+            _left.SetActive(false);
+
+            if (forced)
+            {
+                _eye.SetActive(false);
+            }
+        }
+        else
+        {
+            //Time.timeScale = 1;
+            _isCameraMoving = false;
+            _gameController.GetCamera().GetComponent<Camera>().orthographicSize = 3.5f;
+            _pause = false;
+
+            _settings.GetComponent<Button>().interactable = true;
+            _fire.SetActive(true);
+            _water.SetActive(true);
+            _wind.SetActive(true);
+            _earth.SetActive(true);
+            _skills.SetActive(true);
+            _right.SetActive(true);
+            _left.SetActive(true);
+
+            if (forced)
+            {
+                _eye.SetActive(true);
+            }
+        }
+
+        _gameController.SetGamePaused(_pause);
+        _gameController.GetGuiController().MoveCamera(_pause);
     }
 
     private void HideDeathMenu()
