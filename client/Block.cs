@@ -121,6 +121,11 @@ public class Block : MonoBehaviour
                 blockDown = goHitDown;
             }
 
+            // Kill the player if it is a death block
+            if (playerComponent != null && _type == BlockType.Death)
+            {
+                playerComponent.DestroyPlayer();
+            }
         }
 
         //*************************************************

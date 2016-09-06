@@ -661,7 +661,7 @@ public class Level
         Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
             new Vector2(0.5f, 0.5f), texSize);
         rend.sprite = spr;
-		rend.sortingOrder = 100;
+		rend.sortingOrder = 118;
 
         SpriteAnimator sprite_animator = child.AddComponent<SpriteAnimator>();
         sprite_animator.SetActiveLevel(this);
@@ -778,7 +778,7 @@ public class Level
                 new Vector2(0.5f, 0.5f), texSize);
 
             rend.sprite = spr;
-            rend.sortingOrder = 105;
+            rend.sortingOrder = 119;
 
             Lever lv = go.GetComponent<Lever>();
             lv.SetSprites("Blocks/Lever/Lever_1_Frame_1", "Blocks/Lever/Lever_1_Frame_2");

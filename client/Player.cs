@@ -126,6 +126,7 @@ public class Player : MonoBehaviour {
 
     // Dust particles
     private Texture2D[] _dustParticle;
+    private Texture2D[] _iceParticle;
 
     // Camera fixed to map bounds
     private float _boundX = 0f;
@@ -142,6 +143,8 @@ public class Player : MonoBehaviour {
     // Jumping wait timers
     private float _jumpWaitTimer = 0f;
     private float _jumpWaitTime = 0.15f;
+
+    private GameObject _animationGo;
 
     public void SetActiveLevel(Level lv)
     {
@@ -196,6 +199,12 @@ public class Player : MonoBehaviour {
         _dustParticle[0] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleDust_1");
         _dustParticle[1] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleDust_2");
         _dustParticle[2] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleDust_3");
+
+        _iceParticle = new Texture2D[3];
+
+        _iceParticle[0] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_1");
+        _iceParticle[1] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_2");
+        _iceParticle[2] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_3");
     }
 	
 	// Update is called once per frame
@@ -480,6 +489,52 @@ public class Player : MonoBehaviour {
 
             DustParticle dp = go.AddComponent<DustParticle>();
             dp.StartParticle(Vector3.up);
+        }
+    }
+
+    private void CreateWindParticles(bool front = true)
+    {
+        if (front)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                GameObject go = new GameObject();
+                go.transform.localScale = Vector3.one * 0.5f;
+                go.name = "Dust Particle";
+
+                Vector3 pos = transform.position;
+
+                pos.y += 0.1f;
+
+                if (_actionDirection == Direction.Right)
+                {
+                    pos.x += GetComponent<BoxCollider2D>().size.y * 0.5f - 0.2f;
+                }
+                else if (_actionDirection == Direction.Left)
+                {
+                    pos.x -= GetComponent<BoxCollider2D>().size.y * 0.5f - 0.2f;
+                }
+
+                go.transform.position = pos;
+
+                int rp = Random.Range(0, 3);
+                SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+                Sprite spr = Sprite.Create(_iceParticle[rp], new Rect(0, 0, _iceParticle[rp].width, _iceParticle[rp].height),
+                            new Vector2(0.5f, 0.5f), 128f);
+                rend.sprite = spr;
+                rend.sortingOrder = 105 + i;
+
+                DustParticle dp = go.AddComponent<DustParticle>();
+
+                if (_actionDirection == Direction.Right)
+                {
+                    dp.StartParticle(Vector3.right);
+                }
+                else if (_actionDirection == Direction.Left)
+                {
+                    dp.StartParticle(Vector3.left);
+                }
+            }
         }
     }
 
@@ -967,6 +1022,9 @@ public class Player : MonoBehaviour {
                             break;
                         case PlayerActions.Wind:
                             {
+                                // Play the wind animation
+                                CreateWindParticles();
+
                                 RaycastHit2D[] hit = Physics2D.RaycastAll(transform.position, _actionRay.direction, 1f);
 
                                 // Check if there is something on the player's Left or Right
@@ -1040,13 +1098,13 @@ public class Player : MonoBehaviour {
                 _changeAnimation = true;
 
                 // AnimationObject
-                GameObject go = new GameObject("AnimationObject_" + type.ToString());
-                go.transform.position = _actionRay.origin;
+                _animationGo = new GameObject("AnimationObject_" + type.ToString());
+                _animationGo.transform.position = _actionRay.origin;
 
-                SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+                SpriteRenderer rend = _animationGo.AddComponent<SpriteRenderer>();
                 rend.sortingOrder = 107;
 
-                AnimationObject animObj = go.AddComponent<AnimationObject>();
+                AnimationObject animObj = _animationGo.AddComponent<AnimationObject>();
                 animObj.SetParams(_activeLevel, "Actions/" + type.ToString() + "Action/" + type.ToString() + "Action_1_Anim");
             }
         }
@@ -1114,7 +1172,7 @@ public class Player : MonoBehaviour {
                 int rockIndex = Random.Range(1, 4);
 
                 goToPut = _activeLevel.CreateBlock(BlockType.Rock, (int)_actionRay.origin.x,
-                                            (int)transform.position.y, "Blocks/Stone/Stone_" + rockIndex.ToString());
+                                            (int)_animationGo.transform.position.y, "Blocks/Stone/Stone_" + rockIndex.ToString());
 
                 _activeLevel.AddEntity(goToPut, goToPut.name);
 
