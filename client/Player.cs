@@ -95,6 +95,12 @@ public class Player : MonoBehaviour {
     private Level _activeLevel;
     private GameController _gameController;
 
+    // Wind and lever button switch
+    private UnityEngine.UI.Button _windButton;
+    private Texture2D _windTexture;
+    private Texture2D _leverTexture;
+    private Sprite _windSprite;
+    private Sprite _leverSprite;
 
     // AnimState
     private PlayerAnimState _animState = PlayerAnimState.IdleFront;
@@ -127,6 +133,7 @@ public class Player : MonoBehaviour {
     // Dust particles
     private Texture2D[] _dustParticle;
     private Texture2D[] _iceParticle;
+    private Texture2D[] _fireParticle;
 
     // Camera fixed to map bounds
     private float _boundX = 0f;
@@ -205,11 +212,30 @@ public class Player : MonoBehaviour {
         _iceParticle[0] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_1");
         _iceParticle[1] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_2");
         _iceParticle[2] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_3");
+
+        _fireParticle = new Texture2D[2];
+
+        _fireParticle[0] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleFire/ParticleFire_1");
+        _fireParticle[1] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleFire/ParticleFire_2");
+
+        _windTexture = (Texture2D)_gameController.GetTextureController().GetTexture("GUI/Wind");
+        _leverTexture = (Texture2D)_gameController.GetTextureController().GetTexture("Blocks/Lever/Lever_1_Frame_2");
+
+        _windSprite = Sprite.Create(_windTexture, new Rect(0, 0, _windTexture.width, _windTexture.height),
+                        new Vector2(0.5f, 0.5f), 128f);
+
+        _leverSprite = Sprite.Create(_leverTexture, new Rect(0, 0, _leverTexture.width, _leverTexture.height),
+                        new Vector2(0.5f, 0.5f), 128f);
     }
 	
 	// Update is called once per frame
 	void Update ()
     {
+        if (_windButton == null)
+        {
+            _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
+        }
+
         if (!_gameController.IsGamePaused())
         {
             if (!_isDying && !_isOnDoor)
@@ -337,15 +363,16 @@ public class Player : MonoBehaviour {
                     if (hit_right.collider != null)
                     {
                         GameObject goHitRight = hit_right.collider.gameObject;
+                        Block goHitRightBlock = goHitRight.GetComponent<Block>();
 
                         // Check if it is a Block
-                        if (goHitRight.GetComponent<Block>() != null)
+                        if (goHitRightBlock != null)
                         {
                             // Adjust player's real direction
                             _playerDirection = Direction.None;
 
                             // Check if it is a death block
-                            if (goHitRight.GetComponent<Block>().GetBlockType() == BlockType.Death)
+                            if (goHitRightBlock.GetBlockType() == BlockType.Death)
                             {
                                 deathBlock = true;
                             }
@@ -379,6 +406,30 @@ public class Player : MonoBehaviour {
                                 }
                             }
                         }
+
+                        // Check if it is a lever
+                        if (_windButton == null)
+                        {
+                            _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
+                        }
+
+                        if (goHitRight.GetComponent<Lever>() != null)
+                        {
+                            _windButton.image.sprite = _leverSprite;
+                        }
+                        else
+                        {
+                            _windButton.image.sprite = _windSprite;
+                        }
+                    }
+                    else
+                    {
+                        if (_windButton == null)
+                        {
+                            _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
+                        }
+
+                        _windButton.image.sprite = _windSprite;
                     }
                 }
                 // Check the player's Left
@@ -433,6 +484,30 @@ public class Player : MonoBehaviour {
                                 }
                             }
                         }
+
+                        // Check if it is a lever
+                        if (_windButton == null)
+                        {
+                            _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
+                        }
+
+                        if (goHitLeft.GetComponent<Lever>() != null)
+                        {
+                            _windButton.image.sprite = _leverSprite;
+                        }
+                        else
+                        {
+                            _windButton.image.sprite = _windSprite;
+                        }
+                    }
+                    else
+                    {
+                        if (_windButton == null)
+                        {
+                            _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
+                        }
+
+                        _windButton.image.sprite = _windSprite;
                     }
                 }
                 else
@@ -496,11 +571,11 @@ public class Player : MonoBehaviour {
     {
         if (front)
         {
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 10; i++)
             {
                 GameObject go = new GameObject();
-                go.transform.localScale = Vector3.one * 0.5f;
-                go.name = "Dust Particle";
+                go.transform.localScale = Vector3.one * 0.6f;
+                go.name = "Wind Particle";
 
                 Vector3 pos = transform.position;
 
@@ -520,6 +595,52 @@ public class Player : MonoBehaviour {
                 int rp = Random.Range(0, 3);
                 SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
                 Sprite spr = Sprite.Create(_iceParticle[rp], new Rect(0, 0, _iceParticle[rp].width, _iceParticle[rp].height),
+                            new Vector2(0.5f, 0.5f), 128f);
+                rend.sprite = spr;
+                rend.sortingOrder = 105 + i;
+
+                DustParticle dp = go.AddComponent<DustParticle>();
+
+                if (_actionDirection == Direction.Right)
+                {
+                    dp.StartParticle(Vector3.right);
+                }
+                else if (_actionDirection == Direction.Left)
+                {
+                    dp.StartParticle(Vector3.left);
+                }
+            }
+        }
+    }
+
+    private void CreateFireParticles(bool front = true)
+    {
+        if (front)
+        {
+            for (int i = 0; i < 25; i++)
+            {
+                GameObject go = new GameObject();
+                go.transform.localScale = Vector3.one * 0.3f;
+                go.name = "Fire Particle";
+
+                Vector3 pos = transform.position;
+
+                pos.y += 0.1f;
+
+                if (_actionDirection == Direction.Right)
+                {
+                    pos.x += GetComponent<BoxCollider2D>().size.y * 0.5f - 0.2f;
+                }
+                else if (_actionDirection == Direction.Left)
+                {
+                    pos.x -= GetComponent<BoxCollider2D>().size.y * 0.5f - 0.2f;
+                }
+
+                go.transform.position = pos;
+
+                int rp = Random.Range(0, 2);
+                SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+                Sprite spr = Sprite.Create(_fireParticle[rp], new Rect(0, 0, _fireParticle[rp].width, _fireParticle[rp].height),
                             new Vector2(0.5f, 0.5f), 128f);
                 rend.sprite = spr;
                 rend.sortingOrder = 105 + i;
@@ -1069,6 +1190,8 @@ public class Player : MonoBehaviour {
 
                         case PlayerActions.Fire:
 
+                            CreateFireParticles();
+
                             if (_fire > 0 || GameController.IS_DEBUG_MODE)
                             {
                                 _actionHappen = true;
@@ -1118,7 +1241,7 @@ public class Player : MonoBehaviour {
         {
             case PlayerActions.Ice:
                  goToPut = _activeLevel.CreateBlock(BlockType.Ice, (int)_actionRay.origin.x,
-                                            (int)transform.position.y, "Blocks/Ice/Ice_1");
+                                            (int)_animationGo.transform.position.y, "Blocks/Ice/Ice_1");
 
                  _activeLevel.AddEntity(goToPut, goToPut.name);
                  SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
@@ -1212,7 +1335,14 @@ public class Player : MonoBehaviour {
                     _canMove = false;
                 }
 
-                if (sprite_animator.GetAnimationIndex() == 3)
+                if (_action == PlayerActions.Ice)
+                {
+                    if (sprite_animator.GetAnimationIndex() == 3)
+                    {
+                        MakeTheActionHappen();
+                    }
+                }
+                else
                 {
                     MakeTheActionHappen();
                 }

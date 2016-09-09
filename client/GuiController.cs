@@ -12,6 +12,7 @@ public class GuiController {
     private float _cameraLerp;
     private float _lerpTime;
 
+    private float _lastJoyX = 0f;
 	
     public GuiController(GameController gc)
     {
@@ -21,24 +22,6 @@ public class GuiController {
 
     public void OnUpdate()
     {
-        if (Application.platform != RuntimePlatform.Android)
-        {
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                this.MovePlayerRight();
-            }
-
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                this.MovePlayerLeft();
-            }
-
-            if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.A))
-            {
-                this.StopPlayer();
-            }
-        }
-
         if (_isCameraMoving)
         {
             _lerpTime += 0.01f;

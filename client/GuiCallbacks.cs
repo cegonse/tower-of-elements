@@ -25,6 +25,8 @@ public class GuiCallbacks : MonoBehaviour
     private GameObject _left;
     private GameObject _eye;
 
+    private float _lastJoyX = 0f;
+
     void Start()
     {
         _settings = GameObject.Find("Settings"); 
@@ -36,6 +38,114 @@ public class GuiCallbacks : MonoBehaviour
         _right = GameObject.Find("Right");
         _left = GameObject.Find("Left");
         _eye = GameObject.Find("Eye");
+    }
+
+    public void Update()
+    {
+        if (_wind == null)
+        {
+            _wind = GameObject.Find("Wind");
+        }
+
+        if (Application.platform != RuntimePlatform.Android)
+        {
+            if (!_isOnDeathMenu || !_isOnWinMenu)
+            {
+                if (Input.GetKeyDown(KeyCode.RightArrow))
+                {
+                    _gameController.GetGuiController().MovePlayerRight();
+                }
+
+                if (Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    _gameController.GetGuiController().MovePlayerLeft();
+                }
+
+                if (Input.GetKeyUp(KeyCode.RightArrow) || Input.GetKeyUp(KeyCode.LeftArrow))
+                {
+                    _gameController.GetGuiController().StopPlayer();
+                }
+
+                if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.A))
+                {
+                    _gameController.GetGuiController().DoAction(PlayerActions.Wind);
+                }
+
+                if (Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.S))
+                {
+                    _gameController.GetGuiController().DoAction(PlayerActions.Ice);
+                }
+
+                if (Input.GetKeyDown(KeyCode.JoystickButton2) || Input.GetKeyDown(KeyCode.D))
+                {
+                    _gameController.GetGuiController().DoAction(PlayerActions.Fire);
+                }
+
+                if (Input.GetKeyDown(KeyCode.JoystickButton3) || Input.GetKeyDown(KeyCode.F))
+                {
+                    _gameController.GetGuiController().DoAction(PlayerActions.Earth);
+                }
+
+                if (Input.GetKeyDown(KeyCode.JoystickButton6) || Input.GetKeyDown(KeyCode.E))
+                {
+                    if (_eye.activeSelf)
+                    {
+                        OnEye();
+                    }
+                }
+
+                if (Input.GetKeyDown(KeyCode.JoystickButton7) || Input.GetKeyDown(KeyCode.R))
+                {
+                    _gameController.GetGuiController().ResetLevel();
+                }
+
+                float x = Input.GetAxis("Horizontal");
+
+                if (x == 1f && _lastJoyX == 0f)
+                {
+                    _gameController.GetGuiController().MovePlayerRight();
+                }
+                else if (x == -1f && _lastJoyX == 0f)
+                {
+                    _gameController.GetGuiController().MovePlayerLeft();
+                }
+                else if (x == 0f && _lastJoyX != 0f)
+                {
+                    _gameController.GetGuiController().StopPlayer();
+                }
+
+                _lastJoyX = x;
+            }
+            
+            if (_isOnDeathMenu)
+            {
+                if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.A))
+                {
+                    _wantsToReset = true;
+                    HideDeathMenu();
+                }
+            }
+
+            if (_isOnWinMenu)
+            {
+                if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.A))
+                {
+                    _wantsToContinue = true;
+                    HideWinMenu();
+                }
+
+                if (Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.S))
+                {
+                    _wantsToReset = true;
+                    HideWinMenu();
+                }
+            }
+        }
+    }
+
+    public GameObject GetWindButton()
+    {
+        return _wind;
     }
 
     public void SetGameController(GameController gc)

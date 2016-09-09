@@ -889,6 +889,10 @@ public class Level
 	}
 	
 	//gets and Sets
+    public GuiCallbacks GetGuiCallbacks()
+    {
+        return _guiCallbacks;
+    }
 	
 	public Dictionary<string, GameObject> GetEntities()
 	{
