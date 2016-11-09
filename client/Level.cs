@@ -16,6 +16,7 @@ public class Level
     {
         WaitingGuiCallbacks,
         WaitingEye,
+        WaitingContinue,
         Idle
     }
 
@@ -33,10 +34,18 @@ public class Level
     private Player _player;
 
     private float _startWaitTimer = 0f;
-    private float _startWaitTime = 2f;
+    private float _startWaitTime = 0.3f;
     private State _state = State.WaitingGuiCallbacks;
 
     private GuiCallbacks _guiCallbacks;
+    private bool _hasLoaded = false;
+
+    private int _fireUses;
+    private int _windUses;
+    private int _iceUses;
+    private int _earthUses;
+
+    private GameObject _backgroundParent;
 
 	public Level(LevelController levelController, string name)
 	{
@@ -54,6 +63,7 @@ public class Level
     {
 		string data = "";
         GameObject goPlayer = null;
+        _foundTorch = false;
 	
 		if (GameController.IS_EDITOR_RUNTIME)
 		{
@@ -101,10 +111,10 @@ public class Level
                 int x = (int)player["x"].n;
                 int y = (int)player["y"].n;
 
-                int ice = (int)player["ice"].n;
-                int fire = (int)player["fire"].n;
-                int earth = (int)player["earth"].n;
-                int wind = (int)player["wind"].n;
+                _iceUses = (int)player["ice"].n;
+                _fireUses = (int)player["fire"].n;
+                _earthUses = (int)player["earth"].n;
+                _windUses = (int)player["wind"].n;
 
                 JSONObject light = player["light"];
 
@@ -117,7 +127,7 @@ public class Level
                     float radius = light["radius"].n;
                 }
 
-                goPlayer = CreatePlayer(x, y, ice, fire, earth, wind);
+                goPlayer = CreatePlayer(x, y, _iceUses, _fireUses, _earthUses, _windUses);
                 AddEntity(goPlayer, goPlayer.name);
             }
 
@@ -144,6 +154,11 @@ public class Level
             }
 
             // Background loading
+            _backgroundParent = new GameObject();
+            _backgroundParent.name = "Backgrounds";
+            _backgroundParent.transform.position = Vector3.zero;
+            AddEntity(_backgroundParent, "BackgroundParent");
+
             if (json["backgrounds"] != null)
             {
                 List<JSONObject> jsonBgs = json["backgrounds"].list;
@@ -261,6 +276,8 @@ public class Level
                     Debug.LogError("Level " + _name + " doesn't have bounds. Defaulting to zero.");
                 }
             }
+
+            _hasLoaded = true;
         }
     }
 	
@@ -270,12 +287,18 @@ public class Level
         AddEntity(go, go.name);
 	}
 
-    public GameObject CreateBlock(BlockType type, int x, int y, string texture, float length = 1, bool vertical = false, int sortingOrder = 105)
+    public GameObject CreateBlock(BlockType type, int x, int y, string texture, float length = 1, bool vertical = false, int sortingOrder = 125)
     {
         GameObject go = new GameObject("_" + x.ToString() + "_" + y.ToString() + "_" + Random.Range(0, 5000).ToString() + "_blockEntity");
         go.transform.position = new Vector3(x, y, 0);
 
+        if (type != BlockType.Ice || !texture.Contains("Platform"))
+        {
+            go.isStatic = true;
+        }
+
         BoxCollider2D boxColl = go.AddComponent<BoxCollider2D>();
+
         if (vertical)
         {
             boxColl.size = new Vector2(1f, length);
@@ -303,19 +326,28 @@ public class Level
 
                     tex = (Texture2D)_levelController.GetGameController().
                                 GetTextureController().GetTexture(texture);
+
                     if (tex == null)
                     {
                         Debug.Log("Falta textura: " + texture);
                     }
+
                     float texSize = _levelController.GetGameController().
                     GetTextureController().GetTextureSize(texture);
 
                     SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
                     Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
                         new Vector2(0.5f, 0.5f), texSize);
+
                     rend.sprite = spr;
+
                     //Adding value to sorting layer
                     rend.sortingOrder = sortingOrder;
+
+                    if (type == BlockType.Ice || texture.Contains("Stone"))
+                    {
+                        rend.sortingOrder = 116;
+                    }
 
                     //Adding the SpriteAnimator component
                     SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
@@ -347,6 +379,7 @@ public class Level
                     //Create child object and add it to 'go' object
                     GameObject go_child = new GameObject("child_0_" + go.name);
                     go_child.transform.parent = go.transform;
+
                     //Make the child stay at the right position
                     if (vertical)
                     {
@@ -366,6 +399,11 @@ public class Level
 
                     //Adding value to sorting layer
                     rend.sortingOrder = sortingOrder;
+
+                    if (type == BlockType.Ice || texture.Contains("Stone"))
+                    {
+                        rend.sortingOrder = 116;
+                    }
 
                     //SpriteAnimator
                     SpriteAnimator sprite_animator = go_child.AddComponent<SpriteAnimator>();
@@ -387,6 +425,7 @@ public class Level
                         //Create child object and add it to 'go' object
                         go_child = new GameObject("child_0_" + go.name);
                         go_child.transform.parent = go.transform;
+
                         //Make the child stay at the right position
                         if (vertical)
                         {
@@ -406,6 +445,10 @@ public class Level
 
                         //Adding value to sorting layer
                         rend.sortingOrder = sortingOrder;
+                        if (type == BlockType.Ice || type == BlockType.Rock)
+                        {
+                            rend.sortingOrder = 116;
+                        }
                         //Adding the SpriteAnimator component
                         sprite_animator = go_child.AddComponent<SpriteAnimator>();
                         sprite_animator.SetActiveLevel(this);
@@ -446,6 +489,10 @@ public class Level
 
                     //Adding value to sorting layer
                     rend.sortingOrder = sortingOrder;
+                    if (type == BlockType.Ice || texture.Contains("Stone"))
+                    {
+                        rend.sortingOrder = 116;
+                    }
                     //Adding the SpriteAnimator component
                     sprite_animator = go_child.AddComponent<SpriteAnimator>();
                     sprite_animator.SetActiveLevel(this);
@@ -462,8 +509,10 @@ public class Level
 	public GameObject CreateBackground(int x, int y, string texture, int layer)
 	{
         // Instantiate background tile GameObject and set it to its position
-		GameObject go = new GameObject("_" + x.ToString() + "_" + y.ToString() + "_" + Random.Range(0, 5000).ToString()+ "_backgroundEntity");
+		GameObject go = new GameObject("_" + x.ToString() + "_" + y.ToString() + "_" + layer + "_backgroundEntity");
 		go.transform.position = new Vector3(x, y, 0);
+        go.isStatic = true;
+        go.transform.parent = _backgroundParent.transform;
 		
         // Fetch the texture from the controller and get its size
 		Texture2D tex = (Texture2D) _levelController.GetGameController().GetTextureController().GetTexture(texture);
@@ -496,31 +545,186 @@ public class Level
         // This only is handled if the background is a trigger block
         if (texture.Contains("Trigger"))
         {
-            TriggerBlock tgb = null;
             GameObject ttl = GameObject.Find("TriggerTextLabel");
-            ttl.GetComponent<InGameTextController>().SetGameController(_levelController.GetGameController());
+            GameObject tti = GameObject.Find("TriggerTutorialImage");
+            TriggerBlock tgb = null;
 
-            // Wind trigger block handler
-            // Trigger block is hardcoded depending on the trigger type
+            tgb = go.AddComponent<TriggerBlock>();
+
             if (texture.Contains("WindTrigger"))
             {
-                tgb = go.AddComponent<TriggerBlock>();
+                ttl.GetComponent<InGameTextController>().SetGameController(_levelController.GetGameController());
                 tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Wind, ttl);
             }
             else if (texture.Contains("IceTrigger"))
             {
-                tgb = go.AddComponent<TriggerBlock>();
+                ttl.GetComponent<InGameTextController>().SetGameController(_levelController.GetGameController());
                 tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Ice, ttl);
             }
             else if (texture.Contains("FireTrigger"))
             {
-                tgb = go.AddComponent<TriggerBlock>();
+                ttl.GetComponent<InGameTextController>().SetGameController(_levelController.GetGameController());
                 tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Fire, ttl);
             }
             else if (texture.Contains("EarthTrigger"))
             {
-                tgb = go.AddComponent<TriggerBlock>();
+                ttl.GetComponent<InGameTextController>().SetGameController(_levelController.GetGameController());
                 tgb.SetTriggerData(TriggerBlock.TriggerBlockType.Earth, ttl);
+            }
+            else if (texture.Contains("EyeTotem"))
+            {
+                string tgTex = "GUI/TriggerTutorialImageEye";
+
+                if (SaveGameController.instance.GetActiveLanguage() == SystemLanguage.English ||
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Spanish &&
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Catalan)
+                {
+                    if (GameController.IS_MOBILE_RUNTIME)
+                    {
+                        tgTex = "GUI/TriggerTutorialImageEye_English_Mobile";
+                    }
+                    else
+                    {
+                        tgTex = "GUI/TriggerTutorialImageEye_English";
+                    }
+                }
+                else
+                {
+                    if (GameController.IS_MOBILE_RUNTIME)
+                    {
+                        tgTex = "GUI/TriggerTutorialImageEye_Mobile";
+                    }
+                }
+
+                tgb.SetTriggerData(TriggerBlock.TriggerBlockType.TotemEye, tti);
+
+                Sprite totemSpr = Sprite.Create((Texture2D)_levelController.GetGameController().GetTextureController().GetTexture(tgTex),
+                                           new Rect(0, 0, 1024, 512), new Vector2(0.5f, 0.5f), 100f);
+                tti.GetComponent<UnityEngine.UI.Image>().sprite = totemSpr;
+            }
+            else if (texture.Contains("WindTotem"))
+            {
+                string tgTex = "GUI/TriggerTutorialImageWind";
+
+                if (SaveGameController.instance.GetActiveLanguage() == SystemLanguage.English ||
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Spanish &&
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Catalan)
+                {
+                    if (GameController.IS_MOBILE_RUNTIME)
+                    {
+                        tgTex = "GUI/TriggerTutorialImageWind_English_Mobile";
+                    }
+                    else
+                    {
+                        tgTex = "GUI/TriggerTutorialImageWind_English";
+                    }
+                }
+                else
+                {
+                    if (GameController.IS_MOBILE_RUNTIME)
+                    {
+                        tgTex = "GUI/TriggerTutorialImageWind_Mobile";
+                    }
+                }
+
+                tgb.SetTriggerData(TriggerBlock.TriggerBlockType.TotemWind, tti);
+
+                Sprite totemSpr = Sprite.Create((Texture2D)_levelController.GetGameController().GetTextureController().GetTexture(tgTex),
+                                           new Rect(0, 0, 1024, 512), new Vector2(0.5f, 0.5f), 100f);
+                tti.GetComponent<UnityEngine.UI.Image>().sprite = totemSpr;
+            }
+            else if (texture.Contains("FireTotem"))
+            {
+                string tgTex = "GUI/TriggerTutorialImageFire";
+
+                if (SaveGameController.instance.GetActiveLanguage() == SystemLanguage.English ||
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Spanish &&
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Catalan)
+                {
+                    if (GameController.IS_MOBILE_RUNTIME)
+                    {
+                        tgTex = "GUI/TriggerTutorialImageFire_English_Mobile";
+                    }
+                    else
+                    {
+                        tgTex = "GUI/TriggerTutorialImageFire_English";
+                    }
+                }
+                else
+                {
+                    if (GameController.IS_MOBILE_RUNTIME)
+                    {
+                        tgTex = "GUI/TriggerTutorialImageFire_Mobile";
+                    }
+                }
+
+                tgb.SetTriggerData(TriggerBlock.TriggerBlockType.TotemFire, tti);
+
+                Sprite totemSpr = Sprite.Create((Texture2D)_levelController.GetGameController().GetTextureController().GetTexture(tgTex),
+                                           new Rect(0, 0, 1024, 512), new Vector2(0.5f, 0.5f), 100f);
+                tti.GetComponent<UnityEngine.UI.Image>().sprite = totemSpr;
+            }
+            else if (texture.Contains("IceTotem"))
+            {
+                string tgTex = "GUI/TriggerTutorialImageIce";
+
+                if (SaveGameController.instance.GetActiveLanguage() == SystemLanguage.English ||
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Spanish &&
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Catalan)
+                {
+                    if (GameController.IS_MOBILE_RUNTIME)
+                    {
+                        tgTex = "GUI/TriggerTutorialImageIce_English_Mobile";
+                    }
+                    else
+                    {
+                        tgTex = "GUI/TriggerTutorialImageIce_English";
+                    }
+                }
+                else
+                {
+                    if (GameController.IS_MOBILE_RUNTIME)
+                    {
+                        tgTex = "GUI/TriggerTutorialImageIce_Mobile";
+                    }
+                }
+
+                tgb.SetTriggerData(TriggerBlock.TriggerBlockType.TotemIce, tti);
+
+                Sprite totemSpr = Sprite.Create((Texture2D)_levelController.GetGameController().GetTextureController().GetTexture(tgTex),
+                                           new Rect(0, 0, 1024, 512), new Vector2(0.5f, 0.5f), 100f);
+                tti.GetComponent<UnityEngine.UI.Image>().sprite = totemSpr;
+            }
+            else if (texture.Contains("EarthTotem"))
+            {
+                string tgTex = "GUI/TriggerTutorialImageRock";
+
+                if (SaveGameController.instance.GetActiveLanguage() == SystemLanguage.English ||
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Spanish &&
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Catalan)
+                {
+                    if (GameController.IS_MOBILE_RUNTIME)
+                    {
+                        tgTex = "GUI/TriggerTutorialImageRock_English_Mobile";
+                    }
+                    else
+                    {
+                        tgTex = "GUI/TriggerTutorialImageRock_English";
+                    }
+                }
+                else
+                {
+                    if (GameController.IS_MOBILE_RUNTIME)
+                    {
+                        tgTex = "GUI/TriggerTutorialImageRock_Mobile";
+                    }
+                }
+
+                tgb.SetTriggerData(TriggerBlock.TriggerBlockType.TotemEarth, tti);
+
+                Sprite totemSpr = Sprite.Create((Texture2D)_levelController.GetGameController().GetTextureController().GetTexture(tgTex),
+                                           new Rect(0, 0, 1024, 512), new Vector2(0.5f, 0.5f), 100f);
+                tti.GetComponent<UnityEngine.UI.Image>().sprite = totemSpr;
             }
             else
             {
@@ -530,18 +734,18 @@ public class Level
             if (tgb != null)
             {
                 tgb.SetGameController(_levelController.GetGameController());
-
-                if (!GameController.IS_DEBUG_MODE)
-                {
-                    rend.enabled = false;
-                }
-
-                BoxCollider2D boxColl = go.AddComponent<BoxCollider2D>();
-                boxColl.size = Vector2.one;
-                boxColl.offset = Vector2.zero;
-
-                go.name += "_Trigger";
             }
+
+            if (!GameController.IS_DEBUG_MODE)
+            {
+                rend.enabled = false;
+            }
+
+            BoxCollider2D boxColl = go.AddComponent<BoxCollider2D>();
+            boxColl.size = Vector2.one;
+            boxColl.offset = Vector2.zero;
+
+            go.name += "_Trigger";
         }
 
         // Audio control, set the appropiate sound effect to the channels if
@@ -557,7 +761,7 @@ public class Level
 	
 	public GameObject CreateFireBall(float x, float y, Direction dir)
 	{
-		GameObject go = new GameObject("FireBall_"+ Random.Range(0, 5000).ToString());
+		GameObject go = new GameObject("FireBall_" + x + "_" + y + "_" + Random.Range(0, 5000).ToString());
 		go.transform.position = new Vector3(x, y, 0);
 		
 		go.AddComponent<BoxCollider2D>();
@@ -573,6 +777,7 @@ public class Level
         FireBall fb = go.AddComponent<FireBall>();
 		fb.SetActiveLevel(this);
 		fb.SetDirection(dir);
+        fb.SetGameController(_levelController.GetGameController());
 		
 		Texture2D tex = null;
 		
@@ -584,10 +789,11 @@ public class Level
 		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
 			new Vector2(0.5f, 0.5f), texSize);
 		rend.sprite = spr;
-		rend.sortingOrder = 110;
+		rend.sortingOrder = 125;
 
         SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
         sprite_animator.SetActiveLevel(this);
+
 		if (_levelController.GetGameController().GetTextureController().GetAnimation("Blocks/Fireball/Fireball_1_Anim") != null)
 		{
             sprite_animator.AddAnimation("STANDING", _levelController.GetGameController().GetTextureController().GetAnimation("Blocks/Fireball/Fireball_1_Anim"));
@@ -614,12 +820,32 @@ public class Level
 		}
 		
 		Texture2D tex = null;
-		
-		tex = (Texture2D) _levelController.GetGameController().
-					GetTextureController().GetTexture("Blocks/Door_1");
-        float texSize = _levelController.GetGameController().
-                    GetTextureController().GetTextureSize("Blocks/Door_1");
-		SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+        float texSize = 256;
+        string textureName = "Blocks/Door_1";
+
+        if (_name.Contains("1_"))
+        {
+            //textureName = "Blocks/DoorWind_1";
+        }
+        else if (_name.Contains("2_"))
+        {
+            textureName = "Blocks/DoorWater_1";
+        }
+        else if (_name.Contains("3_"))
+        {
+            textureName = "Blocks/DoorFire_1";
+        }
+        else if (_name.Contains("4_"))
+        {
+            textureName = "Blocks/DoorEarth_1";
+        }
+
+        tex = (Texture2D)_levelController.GetGameController().
+                        GetTextureController().GetTexture(textureName);
+        texSize = _levelController.GetGameController().
+                    GetTextureController().GetTextureSize(textureName);
+
+        SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
 		Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
             new Vector2(0.5f, 0.5f), texSize);
 		rend.sprite = spr;
@@ -639,7 +865,6 @@ public class Level
         Player p = go.AddComponent<Player>();
 		p.SetActiveLevel(this);
 		p.SetGameController(_levelController.GetGameController());
-		p.SetActions(ice, fire, wind, earth);
 
         GameObject child = new GameObject("player_child");
         child.transform.position = new Vector3(x, y, 0);
@@ -661,7 +886,7 @@ public class Level
         Sprite spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
             new Vector2(0.5f, 0.5f), texSize);
         rend.sprite = spr;
-		rend.sortingOrder = 118;
+		rend.sortingOrder = 117;
 
         SpriteAnimator sprite_animator = child.AddComponent<SpriteAnimator>();
         sprite_animator.SetActiveLevel(this);
@@ -709,6 +934,7 @@ public class Level
         alphaTweener.TweenTime = 1f;
 
         _player = p;
+
         return go;
     }
 	
@@ -778,11 +1004,67 @@ public class Level
                 new Vector2(0.5f, 0.5f), texSize);
 
             rend.sprite = spr;
-            rend.sortingOrder = 119;
+            rend.sortingOrder = 103;
 
             Lever lv = go.GetComponent<Lever>();
-            lv.SetSprites("Blocks/Lever/Lever_1_Frame_1", "Blocks/Lever/Lever_1_Frame_2");
+            lv.SetSprites("Blocks/Lever/Lever_1_Frame_1", "Blocks/Lever/Lever_1_Frame_6");
 
+            // Add tooltip
+            GameObject tp = new GameObject();
+            tp.transform.position = go.transform.position + Vector3.up * 0.5f;
+
+            SpriteRenderer tpRend = tp.AddComponent<SpriteRenderer>();
+            tpRend.sortingOrder = 300;
+
+            string tpTexString = "GUI/LeverPressA_Spanish";
+
+            if (SaveGameController.instance.GetActiveLanguage() == SystemLanguage.English ||
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Spanish &&
+                    SaveGameController.instance.GetActiveLanguage() != SystemLanguage.Catalan)
+            {
+                if (GameController.IS_MOBILE_RUNTIME)
+                {
+                    tpTexString = "GUI/LeverTapHere_English";
+                }
+                else
+                {
+                    if (!_levelController.GetGameController().HasJoystick())
+                    {
+                        tpTexString = "GUI/LeverPressF";
+                    }
+                    else
+                    {
+                        tpTexString = "GUI/LeverPressA";
+                    }
+                }
+            }
+            else
+            {
+                if (GameController.IS_MOBILE_RUNTIME)
+                {
+                    tpTexString = "GUI/LeverTapHere";
+                }
+                else
+                {
+                    if (!_levelController.GetGameController().HasJoystick())
+                    {
+                        tpTexString = "GUI/LeverPressF_Spanish";
+                    }
+                }
+            }
+
+            Texture2D tpTex = (Texture2D)_levelController.GetGameController().
+                GetTextureController().GetTexture(tpTexString);
+            float tpTexSize = _levelController.GetGameController().
+                        GetTextureController().GetTextureSize(tpTexString);
+
+            Sprite tpSpr = Sprite.Create(tpTex, new Rect(0, 0, tpTex.width, tpTex.height),
+                new Vector2(0.5f, 0.5f), tpTexSize);
+
+            tpRend.sprite = tpSpr;
+
+            lv.SetTooltip(tp);
+            AddEntity(tp, "LeverTooltip_" + x + "_" + y);
         }
         else
         {
@@ -795,7 +1077,7 @@ public class Level
                 new Vector2(0.5f, 0.5f), texSize);
 
             rend.sprite = spr;
-            rend.sortingOrder = 103;
+            rend.sortingOrder = 119;
 
 
             SpriteAnimator sprite_animator = go.AddComponent<SpriteAnimator>();
@@ -858,9 +1140,10 @@ public class Level
 	{
         if (_state == State.WaitingGuiCallbacks)
         {
+            _levelController.GetGameController().GetGuiController().HideDialog("MenuStartMenuUI");
             _guiCallbacks = GameObject.Find("GuiCallbacks").GetComponent<GuiCallbacks>();
 
-            if (_guiCallbacks != null)
+            if (_guiCallbacks != null && _guiCallbacks.IsReady())
             {
                 if (_name.Contains("0_01") || _name.Contains("0_02"))
                 {
@@ -881,8 +1164,72 @@ public class Level
 
             if (_startWaitTimer > _startWaitTime)
             {
+                _levelController.GetGameController().GetGuiController().ShowDialog("MenuStartMenuUI");
+
+                // Show level uses
+                if (_windUses != 0)
+                {
+                    GameObject.Find("MenuStartMenuUI/WindIcon").GetComponent<UnityEngine.UI.Image>().enabled = true;
+                    GameObject.Find("MenuStartMenuUI/StartWindUses").GetComponent<UnityEngine.UI.Text>().enabled = true;
+                    GameObject.Find("MenuStartMenuUI/StartWindUses").GetComponent<UnityEngine.UI.Text>().text = _windUses.ToString();
+                }
+                else
+                {
+                    GameObject.Find("MenuStartMenuUI/WindIcon").GetComponent<UnityEngine.UI.Image>().enabled = false;
+                    GameObject.Find("MenuStartMenuUI/StartWindUses").GetComponent<UnityEngine.UI.Text>().enabled = false;
+                }
+
+                if (_fireUses != 0)
+                {
+                    GameObject.Find("MenuStartMenuUI/FireIcon").GetComponent<UnityEngine.UI.Image>().enabled = true;
+                    GameObject.Find("MenuStartMenuUI/StartFireUses").GetComponent<UnityEngine.UI.Text>().enabled = true;
+                    GameObject.Find("MenuStartMenuUI/StartFireUses").GetComponent<UnityEngine.UI.Text>().text = _fireUses.ToString();
+                }
+                else
+                {
+                    GameObject.Find("MenuStartMenuUI/FireIcon").GetComponent<UnityEngine.UI.Image>().enabled = false;
+                    GameObject.Find("MenuStartMenuUI/StartFireUses").GetComponent<UnityEngine.UI.Text>().enabled = false;
+                }
+
+                if (_iceUses != 0)
+                {
+                    GameObject.Find("MenuStartMenuUI/WaterIcon").GetComponent<UnityEngine.UI.Image>().enabled = true;
+                    GameObject.Find("MenuStartMenuUI/StartWaterUses").GetComponent<UnityEngine.UI.Text>().enabled = true;
+                    GameObject.Find("MenuStartMenuUI/StartWaterUses").GetComponent<UnityEngine.UI.Text>().text = _iceUses.ToString();
+                }
+                else
+                {
+                    GameObject.Find("MenuStartMenuUI/WaterIcon").GetComponent<UnityEngine.UI.Image>().enabled = false;
+                    GameObject.Find("MenuStartMenuUI/StartWaterUses").GetComponent<UnityEngine.UI.Text>().enabled = false;
+                }
+
+                if (_earthUses != 0)
+                {
+                    GameObject.Find("MenuStartMenuUI/EarthIcon").GetComponent<UnityEngine.UI.Image>().enabled = true;
+                    GameObject.Find("MenuStartMenuUI/StartEarthUses").GetComponent<UnityEngine.UI.Text>().enabled = true;
+                    GameObject.Find("MenuStartMenuUI/StartEarthUses").GetComponent<UnityEngine.UI.Text>().text = _earthUses.ToString();
+                }
+                else
+                {
+                    GameObject.Find("MenuStartMenuUI/EarthIcon").GetComponent<UnityEngine.UI.Image>().enabled = false;
+                    GameObject.Find("MenuStartMenuUI/StartEarthUses").GetComponent<UnityEngine.UI.Text>().enabled = false;
+                }
+
+                _state = State.WaitingContinue;
+            }
+        }
+        else if (_state == State.WaitingContinue)
+        {
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.Joystick1Button0))
+            {
+                _levelController.GetGameController().GetGuiController().HideDialog("MenuStartMenuUI");
                 _guiCallbacks.OnEye(true);
                 _guiCallbacks.EnableEye();
+                _levelController.GetGameController().GetCamera().transform.localPosition = Vector3.zero + Vector3.back;
+
+                // Set player uses
+                GetEntity("player").GetComponent<Player>().SetActions(_iceUses, _fireUses, _windUses, _earthUses);
+
                 _state = State.Idle;
             }
         }

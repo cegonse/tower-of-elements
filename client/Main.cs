@@ -27,6 +27,7 @@ public class Main : MonoBehaviour
 {
     private GameController _gameController;
     private GuiCallbacks _guiCallbacks;
+    private GameObject _canvas;
 
     /*
 	  Este método se llama cuando
@@ -34,15 +35,79 @@ public class Main : MonoBehaviour
 	*/
     void Start()
     {
-        _gameController = new GameController();
-        
-        GameObject canvas_prefab = Resources.Load<GameObject>("GUI/Canvas");
-        GameObject canvas = GameObject.Instantiate(canvas_prefab);
+        _gameController = new GameController(this);
 
-        _guiCallbacks = canvas.GetComponentInChildren<GuiCallbacks>();
+        GameObject canvas_prefab = null;
+
+        if (GameController.IS_MOBILE_RUNTIME)
+        {
+            if (GameController.IS_DEMO_MODE)
+            {
+                canvas_prefab = Resources.Load<GameObject>("GUI/MobileDemoCanvas");
+            }
+            else
+            {
+                canvas_prefab = Resources.Load<GameObject>("GUI/MobileCanvas");
+            }
+        }
+        else
+        {
+            if (GameController.IS_DEMO_MODE)
+            {
+                canvas_prefab = Resources.Load<GameObject>("GUI/DemoCanvas");
+            }
+            else
+            {
+                canvas_prefab = Resources.Load<GameObject>("GUI/Canvas");
+            }
+        }
+
+        _canvas = GameObject.Instantiate(canvas_prefab);
+
+        if (!GameController.IS_MOBILE_RUNTIME)
+        {
+            if (_gameController.HasJoystick())
+            {
+                GameObject.Find("Fire/KeyS").SetActive(false);
+                GameObject.Find("Water/KeyD").SetActive(false);
+                GameObject.Find("Wind/KeyF").SetActive(false);
+                GameObject.Find("Earth/KeyA").SetActive(false);
+                GameObject.Find("Eye/KeyE").SetActive(false);
+                GameObject.Find("WinResetButton/KeyR").SetActive(false);
+
+                GameObject.Find("MenuStartMenuUI/KeyA").SetActive(false);
+                GameObject.Find("MenuEyeMenuUI/KeyE").SetActive(false);
+
+                GameObject.Find("DeathText/KeyA").SetActive(false);
+                GameObject.Find("DeathResetButton/KeyA").SetActive(false);
+
+                GameObject.Find("WinResetButton/KeyS").SetActive(false);
+                GameObject.Find("WinNextButton/KeyA").SetActive(false);
+            }
+            else
+            {
+                GameObject.Find("Fire/ButtonB").SetActive(false);
+                GameObject.Find("Water/ButtonX").SetActive(false);
+                GameObject.Find("Wind/ButtonA").SetActive(false);
+                GameObject.Find("Earth/ButtonY").SetActive(false);
+                GameObject.Find("Eye/Back").SetActive(false);
+                GameObject.Find("WinResetButton/Start").SetActive(false);
+
+                GameObject.Find("MenuStartMenuUI/ButtonA").SetActive(false);
+                GameObject.Find("MenuEyeMenuUI/Back").SetActive(false);
+
+                GameObject.Find("DeathText/ButtonA").SetActive(false);
+                GameObject.Find("DeathResetButton/ButtonA").SetActive(false);
+
+                GameObject.Find("WinResetButton/ButtonB").SetActive(false);
+                GameObject.Find("WinNextButton/ButtonA").SetActive(false);
+            }
+        }
+
+        _guiCallbacks = _canvas.GetComponentInChildren<GuiCallbacks>();
         _guiCallbacks.SetGameController(_gameController);
 
-        Image[] imagesInCanvas = canvas.GetComponentsInChildren<Image>();
+        Image[] imagesInCanvas = _canvas.GetComponentsInChildren<Image>();
 
         for (int i = 0; i < imagesInCanvas.Length; i++)
         {
@@ -75,6 +140,14 @@ public class Main : MonoBehaviour
         GameObject winMenuUi = GameObject.Find("WinMenuUI");
         _gameController.GetGuiController().RegisterDialog("WinMenuUI", winMenuUi);
         winMenuUi.SetActive(false);
+
+        GameObject startLevelUi = GameObject.Find("MenuStartMenuUI");
+        _gameController.GetGuiController().RegisterDialog("MenuStartMenuUI", startLevelUi);
+        startLevelUi.SetActive(false);
+
+        GameObject eyeMenuUi = GameObject.Find("MenuEyeMenuUI");
+        _gameController.GetGuiController().RegisterDialog("MenuEyeMenuUI", eyeMenuUi);
+        eyeMenuUi.SetActive(false);
     }
 
     /*
@@ -103,6 +176,7 @@ public class Main : MonoBehaviour
 	*/
     void OnApplicationPause()
     {
+        _gameController.OnApplicationPause();
     }
 
     /*
@@ -111,7 +185,12 @@ public class Main : MonoBehaviour
 	*/
     void OnApplicationQuit()
     {
+        _gameController.OnApplicationQuit();
     }
 
+    public GameObject GetCanvas()
+    {
+        return _canvas;
+    }
 }
 

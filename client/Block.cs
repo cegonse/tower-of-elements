@@ -43,10 +43,11 @@ public class Block : MonoBehaviour
 
     // Particle related
     private Texture2D[] _dustParticle;
-    private Texture2D[] _sparkParticle;
     private float _traveledDistance = 0f;
     private float _waitPerDragParticle = 0.03f;
     private float _waitDragParticleTimer = 0f;
+
+    private ParticleContainer _particleController;
 	
 	void Start()
 	{
@@ -71,8 +72,7 @@ public class Block : MonoBehaviour
         _dustParticle[1] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_2");
         _dustParticle[2] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleDust/ParticleIcedDust_3");
 
-        _sparkParticle = new Texture2D[1];
-        _sparkParticle[0] = (Texture2D)_activeLevel.GetLevelController().GetGameController().GetTextureController().GetTexture("Particles/ParticleIce/ParticleIce");
+        _particleController = _activeLevel.GetLevelController().GetGameController().GetParticleController();
     }
 	
 	void FixedUpdate()
@@ -149,6 +149,25 @@ public class Block : MonoBehaviour
                 else
                 {
                     transform.parent = null;
+                    Transform previous = blockDown.transform.parent;
+
+                    if (_type == BlockType.Ice)
+                    {
+                        while (previous != null)
+                        {
+                            if (previous.parent == null)
+                            {
+                                Block previousBlock = previous.gameObject.GetComponent<Block>();
+
+                                if (previousBlock != null && previousBlock.IsPlatform())
+                                {
+                                    transform.parent = blockDown.transform;
+                                }
+                            }
+
+                            previous = previous.parent;
+                        }
+                    }
                 }
             }
                    
@@ -169,6 +188,12 @@ public class Block : MonoBehaviour
                         if (goHitRight.GetComponent<Block>() != null)
                         {
                             _velocity.x = 0;
+
+                            if (transform.parent != null && transform.parent.GetComponent<Block>() != null &&
+                                transform.parent.GetComponent<Block>().IsPlatform())
+                            {
+                                transform.parent = null;
+                            }
 
                             // Adjust block position
                             Vector3 pRight = transform.position;
@@ -203,6 +228,12 @@ public class Block : MonoBehaviour
                         {
                             _velocity.x = 0;
 
+                            if (transform.parent != null && transform.parent.GetComponent<Block>() != null &&
+                                transform.parent.GetComponent<Block>().IsPlatform())
+                            {
+                                transform.parent = null;
+                            }
+
                             // Adjust block position
                             Vector3 pLeft = transform.position;
                             pLeft.x = goHitLeft.transform.position.x + goHitLeft.GetComponent<Block>().GetLength();
@@ -221,6 +252,67 @@ public class Block : MonoBehaviour
             }
             else
             {
+                // Check left and right to find if there is a block
+                // and the ice should be unparented if the ice
+                // block is moving horizontally.
+                if (_type == BlockType.Ice)
+                {
+                    _rightRay.origin = transform.position + new Vector3(_length - 0.49f, 0f, 0f);
+                    RaycastHit2D[] hitRightAll = Physics2D.RaycastAll(_rightRay.origin, _rightRay.direction, 0.01f);
+
+                    foreach (RaycastHit2D hit_right in hitRightAll)
+                    {
+                        // Check if the element that has been hit is
+                        // a block. In that case, stop and quit the loop.
+                        if (hit_right.collider != null)
+                        {
+                            GameObject goHitRight = hit_right.collider.gameObject;
+
+                            if (goHitRight.GetComponent<Block>())
+                            {
+                                if (transform.parent != null && transform.parent.GetComponent<Block>() != null &&
+                                    transform.parent.GetComponent<Block>().IsPlatform())
+                                {
+                                    // Fix for column parented ice blocks
+                                    if (transform.childCount == 0 ||
+                                        (transform.childCount > 0 && !transform.GetChild(0).GetComponent<Block>()))
+                                    {
+                                        transform.parent = null;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    _leftRay.origin = transform.position + new Vector3(-0.51f, 0f, 0f);
+                    RaycastHit2D[] hitLeftAll = Physics2D.RaycastAll(_leftRay.origin, _leftRay.direction, 0.01f);
+
+                    foreach (RaycastHit2D hit_left in hitLeftAll)
+                    {
+                        // Check if the element that has been hit is
+                        // a block. In that case, stop and quit the loop.
+                        if (hit_left.collider != null)
+                        {
+                            GameObject goHitLeft = hit_left.collider.gameObject;
+
+                            if (goHitLeft.GetComponent<Block>() != null &&
+                                _velocity.x != 0f)
+                            {
+                                if (transform.parent != null && transform.parent.GetComponent<Block>() != null &&
+                                    transform.parent.GetComponent<Block>().IsPlatform())
+                                {
+                                    // Fix for column parented ice blocks
+                                    if (transform.childCount == 0 ||
+                                        (transform.childCount > 0 && !transform.GetChild(0).GetComponent<Block>()))
+                                    {
+                                        transform.parent = null;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Do the efects related to the ice touching the floor
                 if (_state == State.Falling)
                 {
@@ -332,8 +424,7 @@ public class Block : MonoBehaviour
     {
         for (int i = 0; i < count; i++)
         {
-            GameObject go = new GameObject();
-            go.name = "Spark Particle";
+            GameObject go = _particleController.GetSparkParticle();
 
             if (dir == Vector3.left)
             {
@@ -349,15 +440,8 @@ public class Block : MonoBehaviour
                 pos.x += _length - Random.Range(0.5f, 1f);
                 go.transform.position = pos;
             }
-            
-            SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
-            Sprite spr = Sprite.Create(_sparkParticle[0], new Rect(0, 0, _sparkParticle[0].width, _sparkParticle[0].height),
-                        new Vector2(0.5f, 0.5f), 512f);
-            rend.sprite = spr;
-            rend.sortingOrder = 106 + i;
 
-            SparkParticle sp = go.AddComponent<SparkParticle>();
-            sp.StartParticle(dir);
+            go.GetComponent<SparkParticle>().StartParticle(dir, _particleController);
         }
     }
 
@@ -616,10 +700,17 @@ public class Block : MonoBehaviour
             BoxCollider2D boxColl2 = gameObject.GetComponent<BoxCollider2D>();
             boxColl2.size = new Vector2(_length, 1f);
             boxColl2.offset = new Vector2((_length / 2) - 0.5f, 0f);
-
         }
         else
         {
+            if (transform.childCount > 0)
+            {
+                if (transform.GetChild(0).GetComponent<Block>())
+                {
+                    transform.GetChild(0).parent = null;
+                }
+            }
+
             _activeLevel.RemoveEntity(gameObject.name);
         }
     }

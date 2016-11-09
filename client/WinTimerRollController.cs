@@ -41,7 +41,7 @@ public class WinTimerRollController : MonoBehaviour
         {
             _timer += Time.deltaTime;
 
-            if (_timer > 0.05f)
+            if (_timer > 0.02f)
             {
                 int min = Random.Range(0, 9);
                 int s1 = Random.Range(0, 9);

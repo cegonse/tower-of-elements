@@ -74,9 +74,11 @@ public class GuiController {
     public void MovePlayerRight()
     {
         GameObject go = _gameController.GetLevelController().GetActiveLevel().GetEntity("player");
+
         if (go)
         {
             Player pl = go.GetComponent<Player>();
+
             if (pl)
             {
                 pl.SetTargetDirection(Direction.Right);
@@ -87,9 +89,11 @@ public class GuiController {
     public void MovePlayerLeft()
     {
         GameObject go = _gameController.GetLevelController().GetActiveLevel().GetEntity("player");
+
         if (go)
         {
             Player pl = go.GetComponent<Player>();
+
             if (pl)
             {
                 pl.SetTargetDirection(Direction.Left);
@@ -100,9 +104,11 @@ public class GuiController {
     public void StopPlayer()
     {
         GameObject go = _gameController.GetLevelController().GetActiveLevel().GetEntity("player");
+
         if (go)
         {
             Player pl = go.GetComponent<Player>();
+
             if (pl)
             {
                 pl.SetTargetDirection(Direction.None);
@@ -110,9 +116,25 @@ public class GuiController {
         }
     }
     
+    public void SetSpeedAtteniuation(float att)
+    {
+        GameObject go = _gameController.GetLevelController().GetActiveLevel().GetEntity("player");
+
+        if (go)
+        {
+            Player pl = go.GetComponent<Player>();
+
+            if (pl)
+            {
+                pl.SetSpeedAttenuation(att);
+            }
+        }
+    }
+
     public void DoAction(PlayerActions type)
     {
         GameObject go = _gameController.GetLevelController().GetActiveLevel().GetEntity("player");
+
         if (go)
         {
             Player pl = go.GetComponent<Player>();

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ public class TextureController
 	
 	private GameController _gameController;
     private string _rcPath;
+    private int _memoryUsage = 0;
 	
 	public TextureController(GameController game)
 	{
@@ -50,6 +52,11 @@ public class TextureController
 			{
                 _textures.Add(jsonTex[i]["id"].str, null);
                 _textureSizes.Add(jsonTex[i]["id"].str, jsonTex[i]["size"].n);
+
+                if (_textureSizes[jsonTex[i]["id"].str] == 128 && !jsonTex[i]["id"].str.Contains("Shade"))
+                {
+                    _textureSizes[jsonTex[i]["id"].str] -= 4;
+                }
 			}
 		}
 		
@@ -65,8 +72,23 @@ public class TextureController
 		{
 			animationList = (Resources.Load("animation_list") as TextAsset).text;
 		}
-		
-		JSONObject jsonAnim = new JSONObject(animationList);
+
+        // Override texture list loading
+        if (!GameController.IS_EDITOR_RUNTIME)
+        {
+            JSONObject overrideList = new JSONObject((Resources.Load("overwrite_texture_list") as TextAsset).text);
+
+            for (int i = 0; i < overrideList.Count; i++)
+            {
+                if (_textureSizes.ContainsKey(overrideList[i]["id"].str))
+                {
+                    _textureSizes[overrideList[i]["id"].str] = (int)overrideList[i]["size"].n;
+                }
+            }
+        }
+
+        // Load animations
+        JSONObject jsonAnim = new JSONObject(animationList);
 		
 		if (jsonAnim)
 		{
@@ -100,6 +122,11 @@ public class TextureController
 		}
 	}
 
+    public List<string> GetTextureList()
+    {
+        return _textures.Keys.ToList();
+    }
+
     public float GetTextureSize(string name)
     {
         if (_textureSizes.ContainsKey(name))
@@ -128,9 +155,14 @@ public class TextureController
 		else
 		{
 			tex = Resources.Load("Textures/" + name) as Texture;
-		}
-		
-		if (tex == null)
+        }
+
+        #if UNITY_EDITOR
+        _memoryUsage += (tex.width * tex.height * 4) / 1000000;
+        Debug.Log("VRAM Usage: " + _memoryUsage + " MB / " + SystemInfo.graphicsMemorySize + " MB");
+        #endif
+
+        if (tex == null)
 		{
 			Debug.LogError("FAILED TO LOAD TEXTURE " + name + "!!");
 			return false;
@@ -140,7 +172,7 @@ public class TextureController
 			_textures.Add(name, tex);
 			return true;
 		}
-	}
+    }
 	
 	public void LoadAnimation(string name)
 	{
@@ -182,10 +214,13 @@ public class TextureController
 				AnimationFrame f = new AnimationFrame();
 				
 				string ttnStr = jsonFrames[i]["time"].str.Replace(',','.');
-				f.timeToNext = float.Parse(ttnStr);
+                string texName = jsonFrames[i]["texture"].str;
+
+                f.timeToNext = float.Parse(ttnStr);
 				
-				Texture2D tex = (Texture2D) GetTexture(jsonFrames[i]["texture"].str);
-                f.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), _textureSizes[jsonFrames[i]["texture"].str]);
+				Texture2D tex = (Texture2D) GetTexture(texName);
+
+                f.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), _textureSizes[texName]);
 
                 animation.Add(f);
 			}
@@ -222,6 +257,7 @@ public class TextureController
 		if (_textures.ContainsKey(name))
 		{
 			Resources.UnloadAsset(_textures[name]);
+            _textures[name] = null;
 		}
 	}
 }

@@ -15,11 +15,18 @@ public class DustParticle : MonoBehaviour
     private Vector3 _direction;
     private float _timer = 0f;
     private SpriteRenderer _rend;
+    private UnityEngine.UI.Image _image;
     private float _alphaDelta;
 
-    public void StartParticle(Vector3 direction)
+    public void StartParticle(Vector3 direction, bool rock = false, float decay = 0.8f, float speed = 3f, bool star = false)
     {
         float offset = Random.Range(-0.8f, 0.8f);
+
+        if (rock)
+        {
+            offset = 0f;
+        }
+
         _direction = direction;
 
         if (direction == Vector3.up)
@@ -32,9 +39,27 @@ public class DustParticle : MonoBehaviour
         }
 
         _direction.Normalize();
-        _speed = Random.Range(1f, 3f);
-        _decayTime = Random.Range(0.5f, 0.8f);
+        _speed = Random.Range(1f, speed);
+
+        if (star)
+        {
+            _speed = speed;
+        }
+
+        _decayTime = Random.Range(0.5f, decay);
+
+        if (star)
+        {
+            _decayTime = decay;
+        }
+
         _rend = GetComponent<SpriteRenderer>();
+
+        if (_rend == null)
+        {
+            _image = GetComponent<UnityEngine.UI.Image>();
+        }
+
         _alphaDelta = 1f / _decayTime;
 
         _state = State.Moving;
@@ -44,9 +69,18 @@ public class DustParticle : MonoBehaviour
     {
 	    if (_state == State.Moving)
         {
-            Color c = _rend.color;
-            c.a -= _alphaDelta * Time.deltaTime * _speed;
-            _rend.color = c;
+            if (_rend != null)
+            {
+                Color c = _rend.color;
+                c.a -= _alphaDelta * Time.deltaTime * _speed;
+                _rend.color = c;
+            }
+            else
+            {
+                Color c = _image.color;
+                c.a -= _alphaDelta * Time.deltaTime;
+                _image.color = c;
+            }
 
             transform.position += _direction * _speed * Time.deltaTime;
             _timer += Time.deltaTime;

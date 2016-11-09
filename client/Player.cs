@@ -28,6 +28,7 @@ public enum PlayerAnimState : int
 public class Player : MonoBehaviour {
 
     private float _speed = 3f;
+    private float _speedAtteniuation = 1f;
     
     private int _ice = 0;
     private int _wind = 0;
@@ -101,6 +102,8 @@ public class Player : MonoBehaviour {
     private Texture2D _leverTexture;
     private Sprite _windSprite;
     private Sprite _leverSprite;
+    private bool _hadWindUsesBefore = false;
+    private float _leverDetectionDistance = 0.7f;
 
     // AnimState
     private PlayerAnimState _animState = PlayerAnimState.IdleFront;
@@ -149,9 +152,16 @@ public class Player : MonoBehaviour {
 
     // Jumping wait timers
     private float _jumpWaitTimer = 0f;
-    private float _jumpWaitTime = 0.15f;
+    private float _jumpWaitTime = 0.18f;
 
     private GameObject _animationGo;
+
+
+
+    public void SetSpeedAttenuation(float att)
+    {
+        _speedAtteniuation = att;
+    }
 
     public void SetActiveLevel(Level lv)
     {
@@ -233,7 +243,10 @@ public class Player : MonoBehaviour {
     {
         if (_windButton == null)
         {
-            _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
+            if (_gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().IsReady())
+            {
+                _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
+            }
         }
 
         if (!_gameController.IsGamePaused())
@@ -245,10 +258,10 @@ public class Player : MonoBehaviour {
                 AdjustVelocityByParams();
                 MovingPlayer();
             }
-
-            AdjustCamera();
+            
             AnimatingPlayer();
             CheckLevelFinished();
+            AdjustCamera();
         }
     }
 
@@ -265,14 +278,15 @@ public class Player : MonoBehaviour {
                 _gameController.GetAudioController().SetChannelVolume(0, 1f);
 
                 // Play winning music
-                //...
+                _gameController.GetAudioController().SetChannelVolume(15, 1f);
+                _gameController.GetAudioController().PlayChannel(15);
 
                 _fadeOutMusic = false;
             }
             else
             {
-                // Fade in 1 sec
-                vol -= Time.deltaTime;
+                // Fade in 0.5 sec
+                vol -= Time.deltaTime * 2f;
                 _gameController.GetAudioController().SetChannelVolume(0, vol);
             }
         }
@@ -288,11 +302,84 @@ public class Player : MonoBehaviour {
     // Check all collisions on the player's way to find the real player's direction
     private void CheckMovingCollisions()
     {
-        bool hasHitDown = false;
-        bool deathBlock = false;
-        transform.parent = null;
+        //*************************************************************************************************
+        //Check if the player collides with a death block
+        bool playerDies = false;
 
         if (_state != State.Jumping)
+        {
+            //UP
+            RaycastHit2D[] checkingDeathBlocksUP = Physics2D.RaycastAll(transform.position + Vector3.up * 0.3f + Vector3.left * 0.5f, Vector2.right, 1f);
+            
+            for (int i = 0; i < checkingDeathBlocksUP.Length; i++)
+            {
+                if (checkingDeathBlocksUP[i].collider != null)
+                {
+                    Block deathBlock = checkingDeathBlocksUP[i].collider.gameObject.GetComponent<Block>();
+
+                    if (deathBlock != null && deathBlock.GetBlockType() == BlockType.Death)
+                    {
+                        this.DestroyPlayer();
+                        playerDies = true;
+                    }
+                }
+            }
+
+            //DOWN
+            RaycastHit2D[] checkingDeathBlocksDOWN = Physics2D.RaycastAll(transform.position + Vector3.down * 0.3f + Vector3.left * 0.5f, Vector2.right, 1f);
+
+            for (int i = 0; i < checkingDeathBlocksDOWN.Length; i++)
+            {
+                if (checkingDeathBlocksDOWN[i].collider != null)
+                {
+                    Block deathBlock = checkingDeathBlocksDOWN[i].collider.gameObject.GetComponent<Block>();
+                    if (deathBlock != null && deathBlock.GetBlockType() == BlockType.Death)
+                    {
+                        this.DestroyPlayer();
+                        playerDies = true;
+                    }
+                }
+            }
+
+            //RIGHT
+            RaycastHit2D[] checkingDeathBlocksRIGHT = Physics2D.RaycastAll(transform.position + Vector3.right * 0.5f, Vector2.right, 0.01f);
+
+            for (int i = 0; i < checkingDeathBlocksRIGHT.Length; i++)
+            {
+                if (checkingDeathBlocksRIGHT[i].collider != null)
+                {
+                    Block deathBlock = checkingDeathBlocksRIGHT[i].collider.gameObject.GetComponent<Block>();
+                    if (deathBlock != null && deathBlock.GetBlockType() == BlockType.Death)
+                    {
+                        this.DestroyPlayer();
+                        playerDies = true;
+                    }
+                }
+            }
+
+            //LEFT
+            RaycastHit2D[] checkingDeathBlocksLEFT = Physics2D.RaycastAll(transform.position + Vector3.left * 0.5f, Vector2.left, 0.01f);
+
+            for (int i = 0; i < checkingDeathBlocksLEFT.Length; i++)
+            {
+                if (checkingDeathBlocksLEFT[i].collider != null)
+                {
+                    Block deathBlock = checkingDeathBlocksLEFT[i].collider.gameObject.GetComponent<Block>();
+                    if (deathBlock != null && deathBlock.GetBlockType() == BlockType.Death)
+                    {
+                        this.DestroyPlayer();
+                        playerDies = true;
+                    }
+                }
+            }
+        }
+        // END checking death block
+        //****************************************************************************************************
+
+        bool hasHitDown = false;
+        transform.parent = null;
+
+        if (!playerDies && _state != State.Jumping)
         {
             _downRay.origin = transform.position + _vectorDownCollisionOffset;
             RaycastHit2D[] hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, _rayDownCollisionOffset * 2);
@@ -331,12 +418,6 @@ public class Player : MonoBehaviour {
                             transform.parent = goHitDownBlock.transform;
                         }
 
-                        // Check if it is a death block
-                        if (goHitDownBlock.GetBlockType() == BlockType.Death)
-                        {
-                            deathBlock = true;
-                        }
-
                         hasHitDown = true;
                     }
                 }
@@ -352,6 +433,60 @@ public class Player : MonoBehaviour {
 
                 _state = State.Grounded;
                 _targetXvelocity = -1f;
+                
+                // Check left and right to unparent the player if
+                // it is on a platform and it hits a block
+                if (transform.parent != null &&
+                                transform.parent.GetComponent<Block>() != null &&
+                                transform.parent.GetComponent<Block>().IsPlatform())
+                {
+
+                    _rightRay1.origin = transform.position + _vectorRight1CollisionOffset;
+                    RaycastHit2D hit_right = Physics2D.Raycast(_rightRay1.origin, _rightRay1.direction, 0.01f);
+
+                    if (hit_right.collider != null)
+                    {
+                        GameObject goHitRight = hit_right.collider.gameObject;
+                        Block goHitRightBlock = goHitRight.GetComponent<Block>();
+
+                        // Check if it is a Block
+                        if (goHitRightBlock != null)
+                        {
+                            transform.parent = null;
+                        }
+                    }
+
+                    _leftRay1.origin = transform.position + _vectorLeft1CollisionOffset;
+                    RaycastHit2D hit_left = Physics2D.Raycast(_leftRay1.origin, _leftRay1.direction, 0.01f);
+
+                    // Check if there is something on the player's Left
+                    if (hit_left.collider != null)
+                    {
+                        GameObject goHitLeft = hit_left.collider.gameObject;
+
+                        // Check if it is a Block
+                        if (goHitLeft.GetComponent<Block>() != null)
+                        {
+                            transform.parent = null;
+                        }
+                    }
+
+                    // Check if there is a block over the player. If the
+                    // player is on a platform and there's a block over it,
+                    // unparent it to prevent the player from clipping through
+                    // the walls
+                    RaycastHit2D[] checkingUpCollision = Physics2D.RaycastAll(transform.position + Vector3.up * 0.5f + 
+                        Vector3.left * 0.4f, Vector2.right, 0.8f);
+                    
+                    for (int i = 0; i < checkingUpCollision.Length; ++i)
+                    {
+                        if (checkingUpCollision[i].collider.gameObject.GetComponent<Block>())
+                        {
+                            transform.parent = null;
+                            break;
+                        }
+                    }
+                }
 
                 // Check the player's Right
                 if (_playerDirection == Direction.Right)
@@ -371,56 +506,58 @@ public class Player : MonoBehaviour {
                             // Adjust player's real direction
                             _playerDirection = Direction.None;
 
-                            // Check if it is a death block
-                            if (goHitRightBlock.GetBlockType() == BlockType.Death)
-                            {
-                                deathBlock = true;
-                            }
+                            // Check if there is a block over the block which player collided with
+                            _rightRay2.origin = transform.position + _vectorRight2CollisionOffset;
+                            RaycastHit2D hit_right2 = Physics2D.Raycast(_rightRay2.origin, _rightRay2.direction, 0.01f);
 
-                            // Only perform the checks if the player doesn't have to die
-                            if (!deathBlock)
+                            if (hit_right2.collider == null || (hit_right2.collider != null && hit_right2.collider.gameObject.GetComponent<Block>() == null))
                             {
-                                // Check if there is a block over the block which player collided with
-                                _rightRay2.origin = transform.position + _vectorRight2CollisionOffset;
-                                RaycastHit2D hit_right2 = Physics2D.Raycast(_rightRay2.origin, _rightRay2.direction, 0.01f);
+                                // Check if there is a block over the player
+                                _upRay.origin = transform.position + Vector3.up;
+                                RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
 
-                                if (hit_right2.collider == null || (hit_right2.collider != null && hit_right2.collider.gameObject.GetComponent<Block>() == null))
+                                if (hit_up.collider == null || (hit_up.collider != null && hit_up.collider.gameObject.GetComponent<Block>() == null))
                                 {
-                                    // Check if there is a block over the player
-                                    _upRay.origin = transform.position + Vector3.up;
-                                    RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
+                                    _jumpWaitTimer += Time.deltaTime;
 
-                                    if (hit_up.collider == null || (hit_up.collider != null && hit_up.collider.gameObject.GetComponent<Block>() == null))
+                                    if (_jumpWaitTimer > _jumpWaitTime)
                                     {
-                                        _jumpWaitTimer += Time.deltaTime;
+                                        _playerDirection = Direction.Up;
+                                        _jumpWaitTimer = 0f;
+                                        SetJumpingValues();
 
-                                        if (_jumpWaitTimer > _jumpWaitTime)
-                                        {
-                                            _playerDirection = Direction.Up;
-                                            _jumpWaitTimer = 0f;
-                                            SetJumpingValues();
-
-                                            _state = State.Jumping;
-                                        }
+                                        _state = State.Jumping;
                                     }
                                 }
                             }
+
                         }
 
-                        // Check if it is a lever
+                    }
+
+                    // Check lever collision
+                    bool leverCollision = false;
+                    RaycastHit2D[] leverHits = Physics2D.RaycastAll(transform.position + Vector3.left * 1.1f, Vector2.right, 2.2f);
+                    Lever lev = null;
+
+                    foreach (RaycastHit2D rayHit in leverHits)
+                    {
+                        if (rayHit.collider != null && rayHit.collider.gameObject.GetComponent<Lever>() != null)
+                        {
+                            leverCollision = true;
+                            lev = rayHit.collider.gameObject.GetComponent<Lever>();
+                        }
+                    }
+                    // Check if it is a lever
+                    if (leverCollision)
+                    {
                         if (_windButton == null)
                         {
                             _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
                         }
 
-                        if (goHitRight.GetComponent<Lever>() != null)
-                        {
-                            _windButton.image.sprite = _leverSprite;
-                        }
-                        else
-                        {
-                            _windButton.image.sprite = _windSprite;
-                        }
+                        //_windButton.image.sprite = _leverSprite;
+                        //_windButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
                     }
                     else
                     {
@@ -429,7 +566,10 @@ public class Player : MonoBehaviour {
                             _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
                         }
 
-                        _windButton.image.sprite = _windSprite;
+                        //_windButton.image.sprite = _windSprite;
+
+                        //float color = (_wind <= 0 && _hadWindUsesBefore ? 0.5f : 1f);
+                        //_windButton.GetComponent<Image>().color = new Color(color, color, color, (_wind > 0 || _hadWindUsesBefore ? 1f : 0f));
                     }
                 }
                 // Check the player's Left
@@ -449,56 +589,55 @@ public class Player : MonoBehaviour {
                             // Adjust player's real direction
                             _playerDirection = Direction.None;
 
-                            // Check if it is a death block
-                            if (goHitLeft.GetComponent<Block>().GetBlockType() == BlockType.Death)
-                            {
-                                deathBlock = true;
-                            }
+                            // Check if there is a block over the block which player collided with
+                            _leftRay2.origin = transform.position + _vectorLeft2CollisionOffset;
+                            RaycastHit2D hit_left2 = Physics2D.Raycast(_leftRay2.origin, _leftRay2.direction, 0.01f);
 
-                            // Only perform the checks if the player doesn't have to die
-                            if (!deathBlock)
+                            if (hit_left2.collider == null || (hit_left2.collider != null && hit_left2.collider.gameObject.GetComponent<Block>() == null))
                             {
-                                // Check if there is a block over the block which player collided with
-                                _leftRay2.origin = transform.position + _vectorLeft2CollisionOffset;
-                                RaycastHit2D hit_left2 = Physics2D.Raycast(_leftRay2.origin, _leftRay2.direction, 0.01f);
+                                // Check if there is a block over the player
+                                _upRay.origin = transform.position + Vector3.up;
+                                RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
 
-                                if (hit_left2.collider == null || (hit_left2.collider != null && hit_left2.collider.gameObject.GetComponent<Block>() == null))
+                                if (hit_up.collider == null || (hit_up.collider != null && hit_up.collider.gameObject.GetComponent<Block>() == null))
                                 {
-                                    // Check if there is a block over the player
-                                    _upRay.origin = transform.position + Vector3.up;
-                                    RaycastHit2D hit_up = Physics2D.Raycast(_upRay.origin, _upRay.direction, 0.01f);
+                                    _jumpWaitTimer += Time.deltaTime;
 
-                                    if (hit_up.collider == null || (hit_up.collider != null && hit_up.collider.gameObject.GetComponent<Block>() == null))
+                                    if (_jumpWaitTimer > _jumpWaitTime)
                                     {
-                                        _jumpWaitTimer += Time.deltaTime;
+                                        _playerDirection = Direction.Up;
+                                        SetJumpingValues();
+                                        _jumpWaitTimer = 0f;
 
-                                        if (_jumpWaitTimer > _jumpWaitTime)
-                                        {
-                                            _playerDirection = Direction.Up;
-                                            SetJumpingValues();
-                                            _jumpWaitTimer = 0f;
-
-                                            _state = State.Jumping;
-                                        }
+                                        _state = State.Jumping;
                                     }
                                 }
                             }
+                            
                         }
+                    }
 
-                        // Check if it is a lever
+                    // Check lever collision
+                    bool leverCollision = false;
+                    RaycastHit2D[] leverHits = Physics2D.RaycastAll(transform.position + Vector3.right * 0.5f, Vector2.left, _leverDetectionDistance);
+                    foreach(RaycastHit2D rayHit in leverHits)
+                    {
+                        if (rayHit.collider != null && rayHit.collider.gameObject.GetComponent<Lever>() != null)
+                        {
+                            leverCollision = true;
+                        }
+                    }
+                    // Check if it is a lever
+                    if (leverCollision)
+                    {
                         if (_windButton == null)
                         {
                             _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
                         }
 
-                        if (goHitLeft.GetComponent<Lever>() != null)
-                        {
-                            _windButton.image.sprite = _leverSprite;
-                        }
-                        else
-                        {
-                            _windButton.image.sprite = _windSprite;
-                        }
+                        //_windButton.image.sprite = _leverSprite;
+                        //_windButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+
                     }
                     else
                     {
@@ -507,7 +646,9 @@ public class Player : MonoBehaviour {
                             _windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetWindButton().GetComponent<UnityEngine.UI.Button>();
                         }
 
-                        _windButton.image.sprite = _windSprite;
+                        //_windButton.image.sprite = _windSprite;
+                        //float color = (_wind <= 0 && _hadWindUsesBefore ? 0.5f : 1f);
+                        //_windButton.GetComponent<Image>().color = new Color(color, color, color, (_wind > 0 || _hadWindUsesBefore ? 1f : 0f));
                     }
                 }
                 else
@@ -515,11 +656,6 @@ public class Player : MonoBehaviour {
                     _jumpWaitTimer = 0f;
                 }
 
-                // Check if the player has to die
-                if (deathBlock)
-                {
-                    this.DestroyPlayer();
-                }
             }
             else
             {
@@ -564,6 +700,28 @@ public class Player : MonoBehaviour {
 
             DustParticle dp = go.AddComponent<DustParticle>();
             dp.StartParticle(Vector3.up);
+        }
+    }
+
+    private void CreateRockParticles(Vector3 position, int count = 1)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            GameObject go = new GameObject();
+            go.transform.localScale = Vector3.one * 0.8f;
+            go.name = "Rock Particle";
+            
+            go.transform.position = position;
+
+            int rp = Random.Range(0, 3);
+            SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+            Sprite spr = Sprite.Create(_dustParticle[rp], new Rect(0, 0, _dustParticle[rp].width, _dustParticle[rp].height),
+                        new Vector2(0.5f, 0.5f), 128f);
+            rend.sprite = spr;
+            rend.sortingOrder = 135 + i;
+
+            DustParticle dp = go.AddComponent<DustParticle>();
+            dp.StartParticle(Random.insideUnitCircle, true);
         }
     }
 
@@ -620,7 +778,7 @@ public class Player : MonoBehaviour {
             for (int i = 0; i < 25; i++)
             {
                 GameObject go = new GameObject();
-                go.transform.localScale = Vector3.one * 0.3f;
+                go.transform.localScale = Vector3.one * 0.15f;
                 go.name = "Fire Particle";
 
                 Vector3 pos = transform.position;
@@ -673,11 +831,11 @@ public class Player : MonoBehaviour {
                 switch (_playerDirection)
                 {
                     case Direction.Right:
-                        _velocity.x = _speed;
+                        _velocity.x = _speed * _speedAtteniuation;
                         break;
 
                     case Direction.Left:
-                        _velocity.x = -_speed;
+                        _velocity.x = -_speed * _speedAtteniuation;
                         break;
 
                     default:
@@ -781,8 +939,8 @@ public class Player : MonoBehaviour {
                 p.y += Time.deltaTime * _velocity.y * _accSpeed;
                 p.x = Mathf.SmoothDamp(p.x, _targetXfalling, ref _targetXvelocity, 0.1f);
 
-                _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 1.1f, ref _scaleXvelocity, 0.1f);
-                _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 0.8f, ref _scaleYvelocity, 0.1f);
+                _targetScaleX = Mathf.SmoothDamp(_targetScaleX, 0.8f, ref _scaleXvelocity, 0.1f);
+                _targetScaleY = Mathf.SmoothDamp(_targetScaleY, 1.2f, ref _scaleYvelocity, 0.1f);
 
                 if (_beginFalling)
                 {
@@ -882,92 +1040,134 @@ public class Player : MonoBehaviour {
     
     public void SetActions(int ice, int fire, int wind, int earth)
     {
-        Text earthLabel = GameObject.Find("EarthUsesLabel").GetComponent<Text>();
-        Text windLabel = GameObject.Find("WindUsesLabel").GetComponent<Text>();
-        Text fireLabel = GameObject.Find("FireUsesLabel").GetComponent<Text>();
-        Text iceLabel = GameObject.Find("WaterUsesLabel").GetComponent<Text>();
+        Text earthLabel = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementLabel(PlayerActions.Earth);
+        Text windLabel = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementLabel(PlayerActions.Wind);
+        Text fireLabel = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementLabel(PlayerActions.Fire);
+        Text iceLabel = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementLabel(PlayerActions.Ice);
 
-        Image earthButton = GameObject.Find("Earth").GetComponent<Image>();
-        Image windButton = GameObject.Find("Wind").GetComponent<Image>();
-        Image fireButton = GameObject.Find("Fire").GetComponent<Image>();
-        Image iceButton = GameObject.Find("Water").GetComponent<Image>();
+        Image earthButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementButtonImage(PlayerActions.Earth);
+        Image windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementButtonImage(PlayerActions.Wind);
+        Image fireButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementButtonImage(PlayerActions.Fire);
+        Image iceButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementButtonImage(PlayerActions.Ice);
 
         _ice = ice;
         _fire = fire;
         _wind = wind;
         _earth = earth;
 
-        earthLabel.text = _earth.ToString();
-        fireLabel.text = _fire.ToString();
-        iceLabel.text = _ice.ToString();
-        windLabel.text = _wind.ToString();
+        if (earthLabel != null)
+            earthLabel.text = _earth.ToString();
+
+        if (fireLabel != null)
+            fireLabel.text = _fire.ToString();
+
+        if (iceLabel != null)
+            iceLabel.text = _ice.ToString();
+
+        if (windLabel != null)
+            windLabel.text = _wind.ToString();
 
         if (_earth == 0 && !GameController.IS_DEBUG_MODE)
         {
-            earthButton.color = new Color(1f, 1f, 1f, 0f);
+            if (earthButton != null)
+                earthButton.color = new Color(1f, 1f, 1f, 0f);
 
-            Color c = earthLabel.color;
-            c.a = 0f;
-            earthLabel.color = c;
+            if (earthLabel != null)
+            {
+                Color c = earthLabel.color;
+                c.a = 0f;
+                earthLabel.color = c;
+            }
         }
         else
         {
-            earthButton.color = Color.white;
+            if (earthButton != null)
+                earthButton.color = Color.white;
 
-            Color c = earthLabel.color;
-            c.a = 1f;
-            earthLabel.color = c;
+            if (earthLabel != null)
+            {
+                Color c = earthLabel.color;
+                c.a = 1f;
+                earthLabel.color = c;
+            }
         }
 
         if (_fire == 0 && !GameController.IS_DEBUG_MODE)
         {
-            fireButton.color = new Color(1f, 1f, 1f, 0f);
+            if (fireButton != null)
+                fireButton.color = new Color(1f, 1f, 1f, 0f);
 
-            Color c = fireLabel.color;
-            c.a = 0f;
-            fireLabel.color = c;
+            if (fireLabel != null)
+            {
+                Color c = fireLabel.color;
+                c.a = 0f;
+                fireLabel.color = c;
+            }
         }
         else
         {
-            fireButton.color = Color.white;
+            if (fireButton != null)
+                fireButton.color = Color.white;
 
-            Color c = fireLabel.color;
-            c.a = 1f;
-            fireLabel.color = c;
+            if (fireLabel != null)
+            {
+                Color c = fireLabel.color;
+                c.a = 1f;
+                fireLabel.color = c;
+            }
         }
 
         if (_ice == 0 && !GameController.IS_DEBUG_MODE)
         {
-            iceButton.color = new Color(1f, 1f, 1f, 0f);
+            if (iceButton != null)
+                iceButton.color = new Color(1f, 1f, 1f, 0f);
 
-            Color c = iceLabel.color;
-            c.a = 0f;
-            iceLabel.color = c;
+            if (iceLabel != null)
+            {
+                Color c = iceLabel.color;
+                c.a = 0f;
+                iceLabel.color = c;
+            }
         }
         else
         {
-            iceButton.color = Color.white;
+            if (iceButton != null)
+                iceButton.color = Color.white;
 
-            Color c = iceLabel.color;
-            c.a = 1f;
-            iceLabel.color = c;
+            if (iceLabel != null)
+            {
+                Color c = iceLabel.color;
+                c.a = 1f;
+                iceLabel.color = c;
+            }
         }
 
         if (_wind == 0 && !GameController.IS_DEBUG_MODE)
         {
-            windButton.color = new Color(1f, 1f, 1f, 0f);
+            if (windButton != null)
+                windButton.color = new Color(1f, 1f, 1f, 0f);
 
-            Color c = windLabel.color;
-            c.a = 0f;
-            windLabel.color = c;
+            if (windLabel != null)
+            {
+                Color c = windLabel.color;
+                c.a = 0f;
+                windLabel.color = c;
+            }
         }
         else
         {
-            windButton.color = Color.white;
+            if (windButton != null)
+            {
+                windButton.color = Color.white;
+                _hadWindUsesBefore = true;
+            }
 
-            Color c = windLabel.color;
-            c.a = 1f;
-            windLabel.color = c;
+            if (windLabel != null)
+            {
+                Color c = windLabel.color;
+                c.a = 1f;
+                windLabel.color = c;
+            }
         }
     }
 
@@ -977,108 +1177,148 @@ public class Player : MonoBehaviour {
         {
             case PlayerActions.Earth:
                 {
-                    Text earthLabel = GameObject.Find("EarthUsesLabel").GetComponent<Text>();
-                    Image earthButton = GameObject.Find("Earth").GetComponent<Image>();
+                    Text earthLabel = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementLabel(PlayerActions.Earth);
+                    Image earthButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementButtonImage(PlayerActions.Earth);
 
                     _earth = uses;
-                    earthLabel.text = _earth.ToString();
+
+                    if (earthLabel != null)
+                        earthLabel.text = _earth.ToString();
 
                     if (_earth == 0 && !GameController.IS_DEBUG_MODE)
                     {
-                        earthButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+                        if (earthButton != null)
+                            earthButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
 
-                        Color c = earthLabel.color;
-                        c.a = 0f;
-                        earthLabel.color = c;
+                        if (earthLabel != null)
+                        {
+                            Color c = earthLabel.color;
+                            c.a = 0f;
+                            earthLabel.color = c;
+                        }
                     }
                     else
                     {
-                        earthButton.color = Color.white;
+                        if (earthButton != null)
+                            earthButton.color = Color.white;
 
-                        Color c = earthLabel.color;
-                        c.a = 1f;
-                        earthLabel.color = c;
+                        if (earthLabel != null)
+                        {
+                            Color c = earthLabel.color;
+                            c.a = 1f;
+                            earthLabel.color = c;
+                        }
                     }
                 }
                 break;
 
             case PlayerActions.Fire:
                 {
-                    Text fireLabel = GameObject.Find("FireUsesLabel").GetComponent<Text>();
-                    Image fireButton = GameObject.Find("Fire").GetComponent<Image>();
+                    Text fireLabel = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementLabel(PlayerActions.Fire);
+                    Image fireButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementButtonImage(PlayerActions.Fire);
 
                     _fire = uses;
-                    fireLabel.text = _fire.ToString();
+
+                    if (fireLabel != null)
+                        fireLabel.text = _fire.ToString();
 
                     if (_fire == 0 && !GameController.IS_DEBUG_MODE)
                     {
-                        fireButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+                        if (fireButton != null)
+                            fireButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
 
-                        Color c = fireLabel.color;
-                        c.a = 0f;
-                        fireLabel.color = c;
+                        if (fireLabel != null)
+                        {
+                            Color c = fireLabel.color;
+                            c.a = 0f;
+                            fireLabel.color = c;
+                        }
                     }
                     else
                     {
-                        fireButton.color = Color.white;
+                        if (fireButton != null)
+                            fireButton.color = Color.white;
 
-                        Color c = fireLabel.color;
-                        c.a = 1f;
-                        fireLabel.color = c;
+                        if (fireLabel != null)
+                        {
+                            Color c = fireLabel.color;
+                            c.a = 1f;
+                            fireLabel.color = c;
+                        }
                     }
                 }
                 break;
 
             case PlayerActions.Ice:
                 {
-                    Text iceLabel = GameObject.Find("WaterUsesLabel").GetComponent<Text>();
-                    Image iceButton = GameObject.Find("Water").GetComponent<Image>();
+                    Text iceLabel = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementLabel(PlayerActions.Ice);
+                    Image iceButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementButtonImage(PlayerActions.Ice);
 
                     _ice = uses;
-                    iceLabel.text = _ice.ToString();
+
+                    if (iceLabel != null)
+                        iceLabel.text = _ice.ToString();
 
                     if (_ice == 0 && !GameController.IS_DEBUG_MODE)
-                    {
-                        iceButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+                    { 
+                        if (iceButton != null)
+                            iceButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
 
-                        Color c = iceLabel.color;
-                        c.a = 0f;
-                        iceLabel.color = c;
+                        if (iceLabel != null)
+                        {
+                            Color c = iceLabel.color;
+                            c.a = 0f;
+                            iceLabel.color = c;
+                        }
                     }
                     else
                     {
-                        iceButton.color = Color.white;
+                        if (iceButton != null)
+                            iceButton.color = Color.white;
 
-                        Color c = iceLabel.color;
-                        c.a = 1f;
-                        iceLabel.color = c;
+                        if (iceLabel != null)
+                        {
+                            Color c = iceLabel.color;
+                            c.a = 1f;
+                            iceLabel.color = c;
+                        }
                     }
                 }
                 break;
 
             case PlayerActions.Wind:
                 {
-                    Text windLabel = GameObject.Find("WindUsesLabel").GetComponent<Text>();
-                    Image windButton = GameObject.Find("Wind").GetComponent<Image>();
+                    Text windLabel = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementLabel(PlayerActions.Wind);
+                    Image windButton = _gameController.GetLevelController().GetActiveLevel().GetGuiCallbacks().GetElementButtonImage(PlayerActions.Wind);
 
                     _wind = uses;
-                    windLabel.text = _wind.ToString();
+
+                    if (windLabel != null)
+                        windLabel.text = _wind.ToString();
 
                     if (_wind == 0 && !GameController.IS_DEBUG_MODE)
                     {
-                        windButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+                        if (windButton != null)
+                            windButton.color = new Color(0.5f, 0.5f, 0.5f, 1f);
 
-                        Color c = windLabel.color;
-                        c.a = 0f;
-                        windLabel.color = c;
+                        if (windLabel != null)
+                        {
+                            Color c = windLabel.color;
+                            c.a = 0f;
+                            windLabel.color = c;
+                        }
                     }
                     else
                     {
-                        windButton.color = Color.white;
+                        if (windButton != null)
+                            windButton.color = Color.white;
 
-                        Color c = windLabel.color;
-                        c.a = 1f;
-                        windLabel.color = c;
+                        if (windLabel != null)
+                        {
+                            Color c = windLabel.color;
+                            c.a = 1f;
+                            windLabel.color = c;
+                        }
                     }
                 }
                 break;
@@ -1112,20 +1352,37 @@ public class Player : MonoBehaviour {
             _actionHappen = false;
             _actionDirectionSaved = _actionDirection;
 
-            if ((_state == State.Grounded && _velocity.magnitude == 0) || _state == State.Falling)
+            if ((_state == State.Grounded && _velocity.x == 0) || _state == State.Falling)
             {
                 _actionRay = new Ray2D();
                 
                 if (_actionDirectionSaved == Direction.Left)
                 {
-                    _actionRay.origin = new Vector3(Mathf.Round(transform.position.x - 1), Mathf.Round(transform.position.y), 0f); //transform.position + new Vector3(-0.31f, 0f, 0f);
+                    if (_action == PlayerActions.Wind)
+                    {
+                        _actionRay.origin = transform.position;
+                    }
+                    else
+                    {
+                        _actionRay.origin = new Vector3(Mathf.Round(transform.position.x - 1), Mathf.Round(transform.position.y), 0f);
+                    }
+
                     _actionRay.direction = Vector2.left;
                 }
                 else if (_actionDirectionSaved == Direction.Right)
                 {
-                    _actionRay.origin = new Vector3(Mathf.Round(transform.position.x + 1), Mathf.Round(transform.position.y), 0f);//transform.position + new Vector3(0.31f, 0f, 0f);
+                    if (_action == PlayerActions.Wind)
+                    {
+                        _actionRay.origin = transform.position;
+                    }
+                    else
+                    {
+                        _actionRay.origin = new Vector3(Mathf.Round(transform.position.x + 1), Mathf.Round(transform.position.y), 0f);
+                    }
+                    
                     _actionRay.direction = Vector2.right;
                 }
+                
 
                 if ((_actionDirectionSaved == Direction.Right || _actionDirectionSaved == Direction.Left))
                 {
@@ -1139,17 +1396,14 @@ public class Player : MonoBehaviour {
                                     _actionHappen = true;
                                 }
                             }
-
                             break;
                         case PlayerActions.Wind:
                             {
-                                // Play the wind animation
-                                CreateWindParticles();
-
                                 RaycastHit2D[] hit = Physics2D.RaycastAll(transform.position, _actionRay.direction, 1f);
 
                                 // Check if there is something on the player's Left or Right
                                 GameObject aux = null;
+                                GameObject auxLever = null;
 
                                 for (int i_hit = 0; i_hit < hit.Length; i_hit++)
                                 {
@@ -1158,11 +1412,22 @@ public class Player : MonoBehaviour {
 
                                     if (goHitBlock != null && goHitBlock.IsMovable())
                                     {
+                                        auxLever = null;
                                         break;
+                                    }
+
+                                    if (aux.GetComponent<Lever>() != null)
+                                    {
+                                        auxLever = aux;
                                     }
                                 }
 
                                 _actionObjectAux = aux;
+
+                                if (auxLever != null)
+                                {
+                                    _actionObjectAux = auxLever;
+                                }
 
                                 // Check if the wind in front of the player is a lever
                                 // If it's not, reduce the wind use count
@@ -1190,8 +1455,6 @@ public class Player : MonoBehaviour {
 
                         case PlayerActions.Fire:
 
-                            CreateFireParticles();
-
                             if (_fire > 0 || GameController.IS_DEBUG_MODE)
                             {
                                 _actionHappen = true;
@@ -1216,6 +1479,11 @@ public class Player : MonoBehaviour {
 
             if (_actionHappen)
             {
+                if (_action == PlayerActions.Ice)
+                {
+                    _gameController.GetAudioController().PlayChannel(2);
+                }
+
                 // Animation
                 _animState = PlayerAnimState.Action;
                 _changeAnimation = true;
@@ -1224,11 +1492,14 @@ public class Player : MonoBehaviour {
                 _animationGo = new GameObject("AnimationObject_" + type.ToString());
                 _animationGo.transform.position = _actionRay.origin;
 
-                SpriteRenderer rend = _animationGo.AddComponent<SpriteRenderer>();
-                rend.sortingOrder = 107;
+                if (_action != PlayerActions.Earth)
+                {
+                    SpriteRenderer rend = _animationGo.AddComponent<SpriteRenderer>();
+                    rend.sortingOrder = 107;
 
-                AnimationObject animObj = _animationGo.AddComponent<AnimationObject>();
-                animObj.SetParams(_activeLevel, "Actions/" + type.ToString() + "Action/" + type.ToString() + "Action_1_Anim");
+                    AnimationObject animObj = _animationGo.AddComponent<AnimationObject>();
+                    animObj.SetParams(_activeLevel, "Actions/" + type.ToString() + "Action/" + type.ToString() + "Action_1_Anim");
+                }
             }
         }
     }
@@ -1245,6 +1516,7 @@ public class Player : MonoBehaviour {
 
                  _activeLevel.AddEntity(goToPut, goToPut.name);
                  SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
+                
                 break;
 
             case PlayerActions.Wind:
@@ -1259,6 +1531,9 @@ public class Player : MonoBehaviour {
                         goHitBlock.Kick(_actionDirectionSaved);
                         SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
 
+                        // Play the wind animation
+                        CreateWindParticles();
+                        _gameController.GetAudioController().PlayChannel(8);
                     }
 
                     // Check if it is a Lever
@@ -1267,6 +1542,16 @@ public class Player : MonoBehaviour {
                     if (goHitLever != null)
                     {
                         goHitLever.ChangeLeverDirection();
+
+                        // Play the wind animation
+                        if (goHitLever.GetLeverDirection() == 0)
+                        {
+                            _gameController.GetAudioController().PlayChannel(9);
+                        }
+                        else
+                        {
+                            _gameController.GetAudioController().PlayChannel(10);
+                        }
                     }
                 }
                 
@@ -1285,8 +1570,9 @@ public class Player : MonoBehaviour {
                 }
 
                 _activeLevel.AddEntity(goToPut, goToPut.name);
-
+                CreateFireParticles();
                 SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
+                _gameController.GetAudioController().PlayChannel(6);
 
                 break;
 
@@ -1300,6 +1586,8 @@ public class Player : MonoBehaviour {
                 _activeLevel.AddEntity(goToPut, goToPut.name);
 
                 SetUsesOfElem(_action, GetUsesOfElem(_action) - 1);
+                CreateRockParticles(goToPut.transform.position, 10);
+                _gameController.GetAudioController().PlayChannel(7);
 
                 break;
 
@@ -1332,7 +1620,7 @@ public class Player : MonoBehaviour {
                 {
                     sprite_animator.SetActiveAnimation("ACTION");
                     _changeAnimation = false;
-                    _canMove = false;
+                    _canMove = true;
                 }
 
                 if (_action == PlayerActions.Ice)
@@ -1536,6 +1824,8 @@ public class Player : MonoBehaviour {
     {
         if (!_isDying && !_isOnDoor)
         {
+            _gameController.GetAudioController().PlayChannel(11);
+
             _animState = PlayerAnimState.Death;
             _changeAnimation = true;
             _isDying = true;

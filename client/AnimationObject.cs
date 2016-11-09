@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class AnimationObject : MonoBehaviour {
-
+public class AnimationObject : MonoBehaviour
+{
     private string _animation;
     private SpriteAnimator _spriteAnimator;
     private Level _level;
-	// Use this for initialization
-	void Start () {
+
+	void Start()
+    {
         _spriteAnimator = gameObject.AddComponent<SpriteAnimator>();
         _spriteAnimator.SetActiveLevel(_level);
 
@@ -25,8 +26,8 @@ public class AnimationObject : MonoBehaviour {
 
 	}
 	
-	// Update is called once per frame
-	void Update () {
+	void Update ()
+    {
         if (_spriteAnimator.IsTheLastFrame())
         {
             GameObject.Destroy(gameObject);

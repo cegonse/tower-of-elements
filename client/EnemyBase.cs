@@ -78,15 +78,15 @@ public class EnemyBase : MonoBehaviour
 
     public void CheckPlayerCollisions()
     {
-        _downRay.origin = transform.position + new Vector3(0.46f, -0.46f, 0f);
-        _upRay.origin = transform.position + new Vector3(-0.46f, 0.46f, 0f);
-        _leftRay.origin = transform.position + new Vector3(-0.46f, -0.46f, 0f);
-        _rightRay.origin = transform.position + new Vector3(0.46f, 0.46f, 0f);
+        _downRay.origin = transform.position + new Vector3(0f, -0.51f, 0f);
+        _upRay.origin = transform.position + new Vector3(0f, 0.51f, 0f);
+        _leftRay.origin = transform.position + new Vector3(-0.51f, 0f, 0f);
+        _rightRay.origin = transform.position + new Vector3(0.51f, 0f, 0f);
 
-        RaycastHit2D[] hit_right = Physics2D.RaycastAll(_rightRay.origin, _rightRay.direction, 0.9f);
-        RaycastHit2D[] hit_left = Physics2D.RaycastAll(_leftRay.origin, _leftRay.direction, 0.9f);
-        RaycastHit2D[] hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, 0.9f);
-        RaycastHit2D[] hit_up = Physics2D.RaycastAll(_upRay.origin, _upRay.direction, 0.9f);
+        RaycastHit2D[] hit_right = Physics2D.RaycastAll(_rightRay.origin, _rightRay.direction, 0.5f);
+        RaycastHit2D[] hit_left = Physics2D.RaycastAll(_leftRay.origin, _leftRay.direction, 0.5f);
+        RaycastHit2D[] hit_down = Physics2D.RaycastAll(_downRay.origin, _downRay.direction, 0.5f);
+        RaycastHit2D[] hit_up = Physics2D.RaycastAll(_upRay.origin, _upRay.direction, 0.5f);
 
         bool killThaPlayer = false;
 

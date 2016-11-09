@@ -14,6 +14,10 @@ public class SaveGameController : MonoBehaviour
 
     public static SaveGameController instance = null;
 
+    private const bool ENCRYPT_SAVE = false;
+    private const int LEVELS_BEFORE_UNLOCK = 7;
+    private const int TUTORIAL_BEFORE_UNLOCK = 3;
+
     private string _path;
     private string _pathThreeStars = "static_values";
     
@@ -25,20 +29,24 @@ public class SaveGameController : MonoBehaviour
 
     private List<LevelProgressData> _levels;
     private Dictionary<string, float> _threeStarTimes;
+    private Dictionary<string, float> _twoStarTimes;
 
-	private bool _hasWindPower = false;
+    private bool _hasWindPower = false;
     private bool _hasIcePower = false;
     private bool _hasFirePower = false;
     private bool _hasEarthPower = false;
+    private bool _hasAllPowers = false;
 
-    private string _targetLevel = "0_01";
+    private string _targetLevel = "0_02";
+    private UIState _targetMainMenu = UIState.Intro;
 
     public enum UnlockablePowers
     {
         Wind,
         Ice,
         Fire,
-        Earth
+        Earth,
+        All
     }
 
     void Start()
@@ -65,10 +73,39 @@ public class SaveGameController : MonoBehaviour
         LoadStaticValues();
     }
 
+    public void SetTargetMenu(UIState st)
+    {
+        _targetMainMenu = st;
+    }
+
+    public UIState GetTargetMenu()
+    {
+        return _targetMainMenu;
+    }
+
     public int GetStarCount(float time, string lvName)
     {
-        // fair enough
-        return Random.Range(1,3);
+        int stars = 3;
+        float threeTime = GetThreeStarsTime(lvName);
+        float twoTime = GetTwoStarsTime(lvName);
+
+        if (time <= threeTime)
+        {
+            stars = 3;
+        }
+        else
+        {
+            if (time > threeTime && time <= twoTime)
+            {
+                stars = 2;
+            }
+            else
+            {
+                stars = 1;
+            }
+        }
+
+        return stars;
     }
 
     public bool IsMusicOn()
@@ -127,6 +164,66 @@ public class SaveGameController : MonoBehaviour
             _levels.Add(lvp);
         }
 
+        // Check if a new power was unlocked
+        int tutorialLevelCount = 0,
+            windLevelCount = 0,
+            iceLevelCount = 0,
+            fireLevelCount = 0,
+            earthLevelCount = 0;
+
+        for (int i = 0; i < _levels.Count; ++i)
+        {
+            if (_levels[i].Id.Contains("0_"))
+            {
+                ++tutorialLevelCount;
+            }
+
+            if (_levels[i].Id.Contains("1_"))
+            {
+                ++windLevelCount;
+            }
+
+            if (_levels[i].Id.Contains("2_"))
+            {
+                ++iceLevelCount;
+            }
+
+            if (_levels[i].Id.Contains("3_"))
+            {
+                ++fireLevelCount;
+            }
+
+            if (_levels[i].Id.Contains("4_"))
+            {
+                ++earthLevelCount;
+            }
+        }
+
+        if (tutorialLevelCount >= TUTORIAL_BEFORE_UNLOCK)
+        {
+            UnlockPower(UnlockablePowers.Wind);
+        }
+
+        if (windLevelCount >= LEVELS_BEFORE_UNLOCK)
+        {
+            UnlockPower(UnlockablePowers.Ice);
+        }
+
+        if (iceLevelCount >= LEVELS_BEFORE_UNLOCK)
+        {
+            UnlockPower(UnlockablePowers.Fire);
+        }
+
+        if (fireLevelCount >= LEVELS_BEFORE_UNLOCK)
+        {
+            UnlockPower(UnlockablePowers.Earth);
+        }
+
+        if (earthLevelCount >= LEVELS_BEFORE_UNLOCK)
+        {
+            UnlockPower(UnlockablePowers.All);
+        }
+
         Save();
     }
 	
@@ -151,6 +248,10 @@ public class SaveGameController : MonoBehaviour
             case UnlockablePowers.Wind:
                 result = _hasWindPower;
                 break;
+
+            case UnlockablePowers.All:
+                result = _hasAllPowers;
+                break;
         }
 
         return result;
@@ -174,6 +275,10 @@ public class SaveGameController : MonoBehaviour
 
             case UnlockablePowers.Wind:
                 _hasWindPower = true;
+                break;
+
+            case UnlockablePowers.All:
+                _hasAllPowers = true;
                 break;
         }
 
@@ -203,6 +308,7 @@ public class SaveGameController : MonoBehaviour
         json.AddField("has_ice", _hasIcePower);
         json.AddField("has_fire", _hasFirePower);
         json.AddField("has_earth", _hasEarthPower);
+        json.AddField("has_all", _hasAllPowers);
 
         json.AddField("target_level", _targetLevel);
 
@@ -217,12 +323,17 @@ public class SaveGameController : MonoBehaviour
 
             jlist.Add(jfield);
         }
-        
-        File.WriteAllText(_path, Cypher(json.Print()));
-        
-        #if UNITY_WEBGL
-        Application.ExternalCall("FS.syncfs", false);
-        #endif
+
+        json.AddField("levels", jlist);
+
+        string saveFileData = json.Print(true);
+
+        if (ENCRYPT_SAVE)
+        {
+            saveFileData = Cypher(saveFileData);
+        }
+
+        File.WriteAllText(_path, saveFileData);
     }
 
     public void Load()
@@ -234,9 +345,14 @@ public class SaveGameController : MonoBehaviour
         {
             jsonSave = File.ReadAllText(_path);
 
+            if (ENCRYPT_SAVE)
+            {
+                jsonSave = Cypher(jsonSave);
+            }
+
             if (!string.IsNullOrEmpty(jsonSave))
             {
-                save = new JSONObject(Cypher(jsonSave));
+                save = new JSONObject(jsonSave);
                 
                 if (save != null)
                 {
@@ -248,6 +364,7 @@ public class SaveGameController : MonoBehaviour
                     _hasIcePower = save["has_ice"].b;
                     _hasFirePower = save["has_fire"].b;
                     _hasEarthPower = save["has_earth"].b;
+                    _hasAllPowers = save["has_all"].b;
 
                     _targetLevel = save["target_level"].str;
 
@@ -300,7 +417,10 @@ public class SaveGameController : MonoBehaviour
     {
         //Load the threeStarsTimes dictionary
         _threeStarTimes = new Dictionary<string, float>();
+        _twoStarTimes = new Dictionary<string, float>();
+
         string threeStarsTextString = (Resources.Load(_pathThreeStars) as TextAsset).text;
+
         if (!string.IsNullOrEmpty(threeStarsTextString))
         {
             JSONObject threeStarsJSON = new JSONObject(threeStarsTextString);
@@ -308,9 +428,11 @@ public class SaveGameController : MonoBehaviour
             if (threeStarsJSON["level_values"] != null)
             {
                 List<JSONObject> staticValues = threeStarsJSON["level_values"].list;
+
                 for (int i = 0; i < staticValues.Count; i++ )
                 {
                     _threeStarTimes.Add(staticValues[i]["name"].str, staticValues[i]["threeStarsTime"].n);
+                    _twoStarTimes.Add(staticValues[i]["name"].str, staticValues[i]["twoStarsTime"].n);
                 }
             }
         }
@@ -329,7 +451,20 @@ public class SaveGameController : MonoBehaviour
         else
         {
             Debug.LogError("The level " + lvl + " is not in the _threeStarsTimes dictionary.");
-            return -1f;
+            return 100f;
+        }
+    }
+
+    public float GetTwoStarsTime(string lvl)
+    {
+        if (_twoStarTimes.ContainsKey(lvl))
+        {
+            return _twoStarTimes[lvl];
+        }
+        else
+        {
+            Debug.LogError("The level " + lvl + " is not in the _twoStarTimes dictionary.");
+            return 100f;
         }
     }
 }

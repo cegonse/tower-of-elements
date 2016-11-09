@@ -16,8 +16,13 @@ public class FireBall : MonoBehaviour
     //Rays
     private Ray2D _rightRay;
     private Ray2D _leftRay;
-	
-	void Start()
+
+    private Texture2D[] _fireParticle;
+
+    private GameController _gameController;
+
+
+    void Start()
 	{
         //Right Ray
         _rightRay = new Ray2D();
@@ -25,17 +30,69 @@ public class FireBall : MonoBehaviour
         //Left Ray
         _leftRay = new Ray2D();
 
+        
+
     }
 	
+    public void SetGameController(GameController game)
+    {
+        _gameController = game;
+        _fireParticle = new Texture2D[2];
+        _fireParticle[0] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleFire/ParticleFire_1");
+        _fireParticle[1] = (Texture2D)_gameController.GetTextureController().GetTexture("Particles/ParticleFire/ParticleFire_2");
+    }
+    
 	void Update()
 	{
         if (!_activeLevel.GetLevelController().GetGameController().IsGamePaused())
         {
             CheckMovingCollisions();
             MovingFireBall();
+
+            if (_gameController != null)
+            {
+                if (_actionDirection == Direction.Left)
+                {
+                    CreateFireParticles(3, Vector3.left);
+                }
+                else
+                {
+                    CreateFireParticles(3, Vector3.right);
+                }
+            }
         }
 	}
-    
+
+    private void CreateFireParticles(int count, Vector3 dir)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            GameObject go = new GameObject();
+            go.name = "Spark Particle";
+
+            if (dir == Vector3.left)
+            {
+                Vector3 pos = transform.position;
+                go.transform.position = pos;
+            }
+            else if (dir == Vector3.right)
+            {
+                Vector3 pos = transform.position;
+                go.transform.position = pos;
+            }
+
+            int index = Random.Range(0, _fireParticle.Length);
+            SpriteRenderer rend = go.AddComponent<SpriteRenderer>();
+            Sprite spr = Sprite.Create(_fireParticle[index], new Rect(0, 0, _fireParticle[index].width, _fireParticle[index].height),
+                        new Vector2(0.5f, 0.5f), 512f);
+            rend.sprite = spr;
+            rend.sortingOrder = 109 - i;
+
+            SparkParticle sp = go.AddComponent<SparkParticle>();
+            sp.StartParticle(dir, null, true);
+        }
+    }
+
     private void CheckMovingCollisions()
     {
 		if (_actionDirection == Direction.Right)

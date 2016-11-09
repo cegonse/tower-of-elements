@@ -21,18 +21,18 @@ public class SpriteAnimator : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-
+#if UNITY_EDITOR
         if (_activeLevel == null)
         {
             Debug.LogError("SpriteAnimator needs an active level!!");
         }
+#endif
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        if (_animationIndex != -1 && !_activeLevel.GetLevelController().GetGameController().IsGamePaused())
+        if (_animationIndex != -1 && _activeLevel != null && !_activeLevel.GetLevelController().GetGameController().IsGamePaused())
         {
             if (_animations[_activeAnimation][_animationIndex].timeToNext > _animationTimer * _animationTimerScaler)
             {
@@ -53,7 +53,6 @@ public class SpriteAnimator : MonoBehaviour
                 _animationTimer = 0f;
             }
         }
-
     }
 
     public void AddAnimation(string animation_name, List<AnimationFrame> animation, int init_sprite = 0)

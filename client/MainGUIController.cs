@@ -22,7 +22,8 @@ public enum UIState : int
     AllLevelsMenu,
     FirstLevelsMenu,
     SelectionLevelMenu,
-    PlayState
+    PlayState,
+    TutorialState
 }
 
 public class MainGUIController : MonoBehaviour
@@ -50,6 +51,11 @@ public class MainGUIController : MonoBehaviour
 
     //*** UI GameObjects ***
     public UI_Interface _interfaces;
+
+    public AudioClip _music;
+    public AudioClip _clickSound;
+    public AudioClip _totemVibrateSound;
+    public AudioClip _totemMoveSound;
 
     //*** Transition variables ***
     //Varible to store when a transition is being done
@@ -177,8 +183,16 @@ public class MainGUIController : MonoBehaviour
     private int _starsOnLevel = 0;
     private float _timeOnLevel = 0f;
 
+    private int _windUses = 0;
+    private int _iceUses = 0;
+    private int _fireUses = 0;
+    private int _earthUses = 0;
+
     public float TWO_STARS_MULTIPLIER = 2f;
     public float ONE_STAR_MULTIPLIER = 3f;
+
+    private AudioSource _musicSource;
+    private AudioSource _sfxSource;
 
     // Use this for initialization
     void Start()
@@ -201,16 +215,31 @@ public class MainGUIController : MonoBehaviour
         // UI transition
 
         //Set the next UI state
-        _UINextState = UIState.MainMenu;
+        if (SaveGameController.instance.GetTargetMenu() == UIState.Intro)
+        {
+            _UINextState = UIState.MainMenu;
+        }
+        else if (SaveGameController.instance.GetTargetMenu() == UIState.SelectDungeonMenu)
+        {
+            _UINextState = UIState.SelectDungeonMenu;
+        }
+
         //Start the transition
         MakeUITransition(INIT_NEXT_TRANSITION);
+
+        _musicSource = transform.GetChild(0).GetComponent<AudioSource>();
+        _sfxSource = transform.GetChild(1).GetComponent<AudioSource>();
+
+        _musicSource.clip = _music;
+        _musicSource.loop = true;
+        _musicSource.Play();
+
+        Resources.UnloadUnusedAssets();
     }
 
     // Update is called once per frame
     void Update()
     {
-
-
         //*************************************
         // UI over time transitions
         // This methods are called when the GUI
@@ -273,13 +302,16 @@ public class MainGUIController : MonoBehaviour
 
     public void OnPlayButton()
     {
-        //*********************************
-        // UI transition
-
         //Set the next UI state
         _UINextState = UIState.SelectDungeonMenu;
+
+        //*********************************
+        // UI transition
         //Start the transition
         MakeUITransition();
+
+        _sfxSource.clip = _clickSound;
+        _sfxSource.Play();
     }
 
     public void OnOptionsButton()
@@ -291,6 +323,9 @@ public class MainGUIController : MonoBehaviour
         _UINextState = UIState.OptionsMenu;
         //Start the transition
         MakeUITransition();
+
+        _sfxSource.clip = _clickSound;
+        _sfxSource.Play();
     }
 
     public void BackToMainMenu()
@@ -302,6 +337,9 @@ public class MainGUIController : MonoBehaviour
         _UINextState = UIState.MainMenu;
         //Start the transition
         MakeUITransition();
+
+        _sfxSource.clip = _clickSound;
+        _sfxSource.Play();
     }
 
     public void OnSelectDungeonElementButton(GameObject button)
@@ -333,17 +371,19 @@ public class MainGUIController : MonoBehaviour
 
         //Start the transition
         MakeUITransition();
+
+        _sfxSource.clip = _clickSound;
+        _sfxSource.Play();
     }
 
     public void OnLevelButton(GameObject button)
     {
-
         _levelButton = button;
+
         if (_levelButton != null)
         {
-
+            // Get the star count
             List<SaveGameController.LevelProgressData> levelsData = SaveGameController.instance.GetLevelProgress();
-
             bool found = false;
 
             for (int i = 0; i < levelsData.Count && !found; i++)
@@ -351,7 +391,9 @@ public class MainGUIController : MonoBehaviour
                 if (_levelButton.name == levelsData[i].Id)
                 {
                     _timeOnLevel = levelsData[i].Score;
+
                     float threeStarsTime = SaveGameController.instance.GetThreeStarsTime(levelsData[i].Id);
+                    float twoStarsTime = SaveGameController.instance.GetTwoStarsTime(levelsData[i].Id);
 
                     if (_timeOnLevel <= threeStarsTime)
                     {
@@ -359,13 +401,13 @@ public class MainGUIController : MonoBehaviour
                     }
                     else
                     {
-                        if (_timeOnLevel <= threeStarsTime * TWO_STARS_MULTIPLIER)
+                        if (_timeOnLevel > threeStarsTime && _timeOnLevel <= twoStarsTime)
                         {
                             _starsOnLevel = 2;
                         }
                         else
                         {
-                            if (_timeOnLevel <= threeStarsTime * ONE_STAR_MULTIPLIER)
+                            if (_timeOnLevel > twoStarsTime)
                             {
                                 _starsOnLevel = 1;
                             }
@@ -375,29 +417,45 @@ public class MainGUIController : MonoBehaviour
                             }
                         }
                     }
+
                     found = true;
                 }
             }
 
             if (!found)
             {
-                Debug.Log("There is no level with the name: " + _levelButton.name + "!");
+#if UNITY_EDITOR
+                Debug.LogError("There is no level with the name: " + _levelButton.name + "!");
+                Debug.LogError("Stars on level: " + _starsOnLevel);
+#endif
                 _starsOnLevel = 0;
-                Debug.Log("Stars on level: " + _starsOnLevel);
                 _timeOnLevel = 0f;
             }
 
             SaveGameController.instance.SetTargetLevel(_levelButton.name);
+
+            // Get the use count
+            TextAsset txLevel = Resources.Load("Levels/" + _levelButton.name) as TextAsset;
+            JSONObject jsLevel = new JSONObject(txLevel.text);
+
+            _windUses = (int)jsLevel["player"]["wind"].n;
+            _iceUses = (int)jsLevel["player"]["ice"].n;
+            _fireUses = (int)jsLevel["player"]["fire"].n;
+            _earthUses = (int)jsLevel["player"]["earth"].n;
+
+            Resources.UnloadAsset(txLevel);
+
             //*********************************
             // UI transition
-
-            //Set the next UI state
+            // Set the next UI state
             _UINextState = UIState.SelectionLevelMenu;
-            //Start the transition
-            MakeUITransition();
 
+            // Start the transition
+            MakeUITransition();
         }
 
+        _sfxSource.clip = _clickSound;
+        _sfxSource.Play();
     }
 
     public void BackToSelectDungeonMenu()
@@ -409,27 +467,31 @@ public class MainGUIController : MonoBehaviour
         _UINextState = UIState.SelectDungeonMenu;
         //Start the transition
         MakeUITransition();
+
+        _sfxSource.clip = _clickSound;
+        _sfxSource.Play();
     }
 
     public void BackToLevelsSelectionMenu()
     {
         //*********************************
         // UI transition
-
-        //Set the next UI state
+        // Set the next UI state
         _UINextState = _UIPreviousState;
-        //Start the transition
+        // Start the transition
         MakeUITransition();
+
+        _sfxSource.clip = _clickSound;
+        _sfxSource.Play();
     }
 
     public void GoToPlayScene()
     {
         //*********************************
         // UI transition
-
-        //Set the next UI state
+        // Set the next UI state
         _UINextState = UIState.PlayState;
-        //Start the transition
+        // Start the transition
         MakeUITransition();
     }
 
@@ -508,6 +570,10 @@ public class MainGUIController : MonoBehaviour
 
             case UIState.SelectionLevelMenu:
                 SelectionLevelMenuTransition();
+                break;
+
+            case UIState.TutorialState:
+                TutorialStateTransition();
                 break;
         }
     }
@@ -723,7 +789,24 @@ public class MainGUIController : MonoBehaviour
 
                         //Main Menu
                         if (_UINextState != UIState.OptionsMenu)
+                        {
                             _interfaces.MainMenu[0].SetActive(false);
+
+                            // Check if it is the first play. If it is not,
+                            // proceed to the totem. If it is, fade to black
+                            // and go to the tutorial scene.
+                            List<SaveGameController.LevelProgressData> levelsData = SaveGameController.instance.GetLevelProgress();
+
+                            if (levelsData.Count < 3)
+                            {
+                                #if UNITY_EDITOR
+                                Debug.Log("Loading tutorial...");
+                                #endif
+
+                                SaveGameController.instance.SetTargetLevel("0_02");
+                                UnityEngine.SceneManagement.SceneManager.LoadScene("game");
+                            }
+                        }
 
                         // Call the MakeUITransition function whit INIT_NEXT_TRANSITION
                         // here to ensure the INIT transition of the UINextState is called
@@ -1987,6 +2070,12 @@ public class MainGUIController : MonoBehaviour
                     //Set the time on the hourglass
                     _interfaces.SelectionLevelMenu[1].GetComponent<Text>().text = GetTimeText(_timeOnLevel);
 
+                    //Set the use count for each element
+                    _interfaces.SelectionLevelMenu[11].GetComponent<Text>().text = _windUses.ToString();
+                    _interfaces.SelectionLevelMenu[12].GetComponent<Text>().text = _iceUses.ToString();
+                    _interfaces.SelectionLevelMenu[13].GetComponent<Text>().text = _fireUses.ToString();
+                    _interfaces.SelectionLevelMenu[14].GetComponent<Text>().text = _earthUses.ToString();
+
                     //Stars
                     switch (_starsOnLevel)
                     {
@@ -2265,6 +2354,86 @@ public class MainGUIController : MonoBehaviour
         }
     }
     // END SelectionLevelMenuTransition()
+
+    void TutorialStateTransition()
+    {
+        switch (_transitionType)
+        {
+            case TransitionType.Init: //Init transition
+
+                // The first time the transition begins
+                // Use this part to initialize all the
+                // things needed to make the transition.
+                if (!_onTransition)
+                {
+                    //////////////////////
+                    // Initialization code
+                    //////////////////////
+
+                    //Set onTransition to true!
+                    _onTransition = true;
+
+                }
+                else //During _onTransition calls
+                // This part is called during the transition
+                // Use it to move, fade, etc. the interface objects
+                // NOTE: Must detect the end of the transition and set _onTransition variable to false
+                {
+                    //////////////////////
+                    // Transition code
+                    //////////////////////
+
+                    //End of transition
+                    if (/* Transition finished condition */true)
+                    {
+                        _onTransition = false;
+
+                        /////////////////////////
+                        // Transition finish code
+                        /////////////////////////
+                    }
+                }
+
+                break;
+
+            case TransitionType.Finish: //Finish transition
+
+                // The first time the transition begins
+                // Use this part to initialize all the
+                // things needed to make the transition.
+                if (!_onTransition)
+                {
+                    //////////////////////
+                    // Initialization code
+                    //////////////////////
+
+                    //Set onTransition to true!
+                    _onTransition = true;
+                }
+                else //During _onTransition calls
+                // This part is called during the transition
+                // Use it to move, fade, etc. the interface objects
+                // NOTE: Must detect the end of the transition and set _onTransition variable to false
+                // Usually you must call here the MakeUITransition with INIT_NEXT_TRANSITION method
+                // to Init the next transition if needed
+                {
+                    //////////////////////
+                    // Transition code
+                    //////////////////////
+
+                    //End of transition
+                    if (/* Transition finished condition */true)
+                    {
+                        _onTransition = false;
+
+                        /////////////////////////
+                        // Transition finish code
+                        /////////////////////////
+                    }
+                }
+                break;
+        }
+    }
 
 
     //Auxiliar functions

@@ -5,6 +5,7 @@ public class ButtonVibration : MonoBehaviour {
 
     public bool _isVibrating = true;
     public bool _isSmoothing = false;
+
     private Vector3 _pivotPos;
     private Vector3 _pivotPosSmoothing;
 
@@ -35,7 +36,6 @@ public class ButtonVibration : MonoBehaviour {
             {
                 transform.position = Vector3.SmoothDamp(transform.position, _randomSmoothPos, ref _velocity, _speed / 3f, _speed, Time.deltaTime);
             }
-            //transform.localPosition = _pivotPosSmoothing + Vector3.right * Random.Range(-5f, 5f) + Vector3.up * Random.Range(-5f, 5f);
         }
 	}
 
@@ -46,6 +46,4 @@ public class ButtonVibration : MonoBehaviour {
         _pivotPosSmoothing = transform.position;
         _randomSmoothPos = _pivotPosSmoothing + Vector3.right * Random.Range(-10f, 10f) + Vector3.up * Random.Range(-10f, 10f);
     }
-
-    
 }

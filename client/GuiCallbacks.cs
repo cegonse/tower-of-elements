@@ -14,6 +14,7 @@ public class GuiCallbacks : MonoBehaviour
     private bool _isCameraMoving = false;
     private bool _isOnWinMenu = false;
     private bool _wantsToContinue = false;
+    private bool _isOnEye = false;
 
     private GameObject _settings;
     private GameObject _fire;
@@ -24,8 +25,23 @@ public class GuiCallbacks : MonoBehaviour
     private GameObject _right;
     private GameObject _left;
     private GameObject _eye;
+    private GameObject _reset;
+
+    private UnityEngine.UI.Text _iceLabel;
+    private UnityEngine.UI.Text _windLabel;
+    private UnityEngine.UI.Text _fireLabel;
+    private UnityEngine.UI.Text _earthLabel;
+
+    private UnityEngine.UI.Image _iceButtonImage;
+    private UnityEngine.UI.Image _windButtonImage;
+    private UnityEngine.UI.Image _fireButtonImage;
+    private UnityEngine.UI.Image _earthButtonImage;
 
     private float _lastJoyX = 0f;
+    private float _lastJoyStickX = 0f;
+
+    private bool _foundAll = false;
+    private bool _uiHidden = false;
 
     void Start()
     {
@@ -38,52 +54,173 @@ public class GuiCallbacks : MonoBehaviour
         _right = GameObject.Find("Right");
         _left = GameObject.Find("Left");
         _eye = GameObject.Find("Eye");
+        _reset = GameObject.Find("Reset");
+
+        if (_water != null)
+        {
+            _iceButtonImage = _water.GetComponent<UnityEngine.UI.Image>();
+            _iceLabel = GameObject.Find("WaterUsesLabel").GetComponent<Text>();
+        }
+
+        if (_wind != null)
+        {
+            _windButtonImage = _wind.GetComponent<UnityEngine.UI.Image>();
+            _windLabel = GameObject.Find("WindUsesLabel").GetComponent<Text>();
+        }
+
+        if (_fire != null)
+        {
+            _fireButtonImage = _fire.GetComponent<UnityEngine.UI.Image>();
+            _fireLabel = GameObject.Find("FireUsesLabel").GetComponent<Text>();
+        }
+
+        if (_earth != null)
+        {
+            _earthButtonImage = _earth.GetComponent<UnityEngine.UI.Image>();
+            _earthLabel = GameObject.Find("EarthUsesLabel").GetComponent<Text>();
+        }
+    }
+
+    public bool IsReady()
+    {
+        return _foundAll;
     }
 
     public void Update()
     {
-        if (_wind == null)
+        if (!_foundAll)
         {
+            _settings = GameObject.Find("Settings");
+            _fire = GameObject.Find("Fire");
+            _water = GameObject.Find("Water");
+            _earth = GameObject.Find("Earth");
             _wind = GameObject.Find("Wind");
+            _skills = GameObject.Find("Skills_Background");
+            _right = GameObject.Find("Right");
+            _left = GameObject.Find("Left");
+            _eye = GameObject.Find("Eye");
+            _reset = GameObject.Find("WinResetButton");
+
+            if (_water != null)
+            {
+                _iceButtonImage = _water.GetComponent<UnityEngine.UI.Image>();
+                _iceLabel = GameObject.Find("WaterUsesLabel").GetComponent<Text>();
+            }
+
+            if (_wind != null)
+            {
+                _windButtonImage = _wind.GetComponent<UnityEngine.UI.Image>();
+                _windLabel = GameObject.Find("WindUsesLabel").GetComponent<Text>();
+            }
+
+            if (_fire != null)
+            {
+                _fireButtonImage = _fire.GetComponent<UnityEngine.UI.Image>();
+                _fireLabel = GameObject.Find("FireUsesLabel").GetComponent<Text>();
+            }
+
+            if (_earth != null)
+            {
+                _earthButtonImage = _earth.GetComponent<UnityEngine.UI.Image>();
+                _earthLabel = GameObject.Find("EarthUsesLabel").GetComponent<Text>();
+            }
+
+            if (_settings != null &&
+                _fire     != null &&
+                _water    != null &&
+                _earth    != null &&
+                _wind     != null &&
+                _skills   != null &&
+                _right    != null &&
+                _left     != null &&
+                _eye      != null &&
+                _reset    != null)
+            {
+                _foundAll = true;
+            }
         }
 
-        if (Application.platform != RuntimePlatform.Android)
+        if (Application.platform != RuntimePlatform.Android ||
+            Application.platform != RuntimePlatform.WSAPlayerARM)
         {
-            if (!_isOnDeathMenu || !_isOnWinMenu)
+            if (GameController.IS_DEMO_MODE)
+            {
+                if (Input.GetKey(KeyCode.F10) && Input.GetKey(KeyCode.F11))
+                {
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("DemoScene");
+                }
+            }
+
+            if (!_isOnDeathMenu && !_isOnWinMenu)
             {
                 if (Input.GetKeyDown(KeyCode.RightArrow))
                 {
                     _gameController.GetGuiController().MovePlayerRight();
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.MoveRight));
+                    }
                 }
 
                 if (Input.GetKeyDown(KeyCode.LeftArrow))
                 {
                     _gameController.GetGuiController().MovePlayerLeft();
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.MoveLeft));
+                    }
                 }
 
                 if (Input.GetKeyUp(KeyCode.RightArrow) || Input.GetKeyUp(KeyCode.LeftArrow))
                 {
                     _gameController.GetGuiController().StopPlayer();
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.StopMove));
+                    }
                 }
 
-                if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.A))
+                if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.F))
                 {
                     _gameController.GetGuiController().DoAction(PlayerActions.Wind);
-                }
 
-                if (Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.S))
-                {
-                    _gameController.GetGuiController().DoAction(PlayerActions.Ice);
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.Wind));
+                    }
                 }
 
                 if (Input.GetKeyDown(KeyCode.JoystickButton2) || Input.GetKeyDown(KeyCode.D))
                 {
-                    _gameController.GetGuiController().DoAction(PlayerActions.Fire);
+                    _gameController.GetGuiController().DoAction(PlayerActions.Ice);
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.Ice));
+                    }
                 }
 
-                if (Input.GetKeyDown(KeyCode.JoystickButton3) || Input.GetKeyDown(KeyCode.F))
+                if (Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.S))
+                {
+                    _gameController.GetGuiController().DoAction(PlayerActions.Fire);
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.Fire));
+                    }
+                }
+
+                if (Input.GetKeyDown(KeyCode.JoystickButton3) || Input.GetKeyDown(KeyCode.A))
                 {
                     _gameController.GetGuiController().DoAction(PlayerActions.Earth);
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.Earth));
+                    }
                 }
 
                 if (Input.GetKeyDown(KeyCode.JoystickButton6) || Input.GetKeyDown(KeyCode.E))
@@ -91,30 +228,94 @@ public class GuiCallbacks : MonoBehaviour
                     if (_eye.activeSelf)
                     {
                         OnEye();
+
+                        if (GameController.IS_DEMO_MODE)
+                        {
+                            GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.Eye));
+                        }
                     }
                 }
 
                 if (Input.GetKeyDown(KeyCode.JoystickButton7) || Input.GetKeyDown(KeyCode.R))
                 {
-                    _gameController.GetGuiController().ResetLevel();
+                    if (!_pause)
+                    {
+                        _gameController.GetGuiController().ResetLevel();
+
+                        if (GameController.IS_DEMO_MODE)
+                        {
+                            GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.Reset));
+                        }
+                    }
                 }
 
+                // D-pad handling
                 float x = Input.GetAxis("Horizontal");
 
                 if (x == 1f && _lastJoyX == 0f)
                 {
                     _gameController.GetGuiController().MovePlayerRight();
+                    _gameController.GetGuiController().SetSpeedAtteniuation(1f);
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.MoveRight));
+                    }
                 }
                 else if (x == -1f && _lastJoyX == 0f)
                 {
                     _gameController.GetGuiController().MovePlayerLeft();
+                    _gameController.GetGuiController().SetSpeedAtteniuation(1f);
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.MoveLeft));
+                    }
                 }
                 else if (x == 0f && _lastJoyX != 0f)
                 {
                     _gameController.GetGuiController().StopPlayer();
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.StopMove));
+                    }
                 }
 
                 _lastJoyX = x;
+
+                // Joystick handling
+                float jx = Input.GetAxis("HorizontalStick");
+
+                if (jx > 0.11f && Mathf.Abs(_lastJoyStickX) < 0.1f)
+                {
+                    _gameController.GetGuiController().MovePlayerRight();
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.MoveRight));
+                    }
+                }
+                else if (jx < -0.1f && Mathf.Abs(_lastJoyStickX) < 0.1f)
+                {
+                    _gameController.GetGuiController().MovePlayerLeft();
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.MoveLeft));
+                    }
+                }
+                else if (Mathf.Abs(jx) < 0.1f && Mathf.Abs(_lastJoyStickX) > 0.1f)
+                {
+                    _gameController.GetGuiController().StopPlayer();
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.StopMove));
+                    }
+                }
+
+                _lastJoyStickX = jx;
             }
             
             if (_isOnDeathMenu)
@@ -128,19 +329,112 @@ public class GuiCallbacks : MonoBehaviour
 
             if (_isOnWinMenu)
             {
-                if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.A))
+                if (_gameController.GetGuiController().GetDialog("WinMenuUI").GetComponent<WinMenuController>().CanContinue())
                 {
-                    _wantsToContinue = true;
-                    HideWinMenu();
-                }
+                    if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.A))
+                    {
+                        _wantsToContinue = true;
+                        HideWinMenu();
+                    }
 
-                if (Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.S))
+                    if (Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.S))
+                    {
+                        _wantsToReset = true;
+                        HideWinMenu();
+                    }
+                }
+            }
+
+            // Mobile eye handling
+            if (GameController.IS_MOBILE_RUNTIME && _isOnEye)
+            {
+                if (Input.GetMouseButtonDown(0))
                 {
-                    _wantsToReset = true;
-                    HideWinMenu();
+                    OnEye();
+
+                    if (GameController.IS_DEMO_MODE)
+                    {
+                        GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.Eye));
+                    }
+                }
+            }
+
+            // Debug UI hidding handling
+            if (GameController.IS_DEBUG_MODE && !_isOnEye)
+            {
+                if (Input.GetKeyDown(KeyCode.F12))
+                {
+                    ToggleShowUI();
                 }
             }
         }
+    }
+
+    public void ToggleShowUI()
+    {
+        if (_foundAll)
+        {
+            if (_uiHidden)
+            {
+                _gameController.GetGuiController().ShowDialog("InGameUI");
+                _gameController.GetGuiController().ShowDialog("DebugUI");
+
+                _uiHidden = false;
+            }
+            else
+            {
+                _gameController.GetGuiController().HideDialog("InGameUI");
+                _gameController.GetGuiController().HideDialog("DebugUI");
+
+                _uiHidden = true;
+            }
+        }
+    }
+
+    public UnityEngine.UI.Text GetElementLabel(PlayerActions action)
+    {
+        UnityEngine.UI.Text res = null;
+
+        switch (action)
+        {
+            case PlayerActions.Ice:
+                res = _iceLabel;
+                break;
+            case PlayerActions.Wind:
+                res = _windLabel;
+                break;
+            case PlayerActions.Fire:
+                res = _fireLabel;
+                break;
+            case PlayerActions.Earth:
+                res = _earthLabel;
+                break;
+        }
+
+        return res;
+    }
+
+    public UnityEngine.UI.Image GetElementButtonImage(PlayerActions action)
+    {
+        UnityEngine.UI.Image res = null;
+
+        switch (action)
+        {
+            case PlayerActions.Ice:
+                res = _iceButtonImage;
+                break;
+            case PlayerActions.Wind:
+                res = _windButtonImage;
+                break;
+            case PlayerActions.Fire:
+                res = _fireButtonImage;
+                break;
+            case PlayerActions.Earth:
+                res = _earthButtonImage;
+                break;
+        }
+
+        return res;
     }
 
     public GameObject GetWindButton()
@@ -297,8 +591,23 @@ public class GuiCallbacks : MonoBehaviour
 
             case "WinResetButton":
                 {
-                    _wantsToReset = true;
-                    HideWinMenu();
+                    if (_isOnWinMenu)
+                    {
+                        _wantsToReset = true;
+                        HideWinMenu();
+                    }
+                    else
+                    {
+                        if (!_pause)
+                        {
+                            _gameController.GetGuiController().ResetLevel();
+
+                            if (GameController.IS_DEMO_MODE)
+                            {
+                                GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.Reset));
+                            }
+                        }
+                    }
                 }
                 break;
 
@@ -311,13 +620,18 @@ public class GuiCallbacks : MonoBehaviour
         }
     }
 
+    public bool IsOnEye()
+    {
+        return _pause;
+    }
+
     public void OnEye(bool forced = false)
     {
         if (_pause == false)
         {
-            //Time.timeScale = 0;
             _isCameraMoving = true;
             _pause = true;
+            _isOnEye = true;
 
             _settings.GetComponent<Button>().interactable = false;
             _fire.SetActive(false);
@@ -326,19 +640,26 @@ public class GuiCallbacks : MonoBehaviour
             _earth.SetActive(false);
             _skills.SetActive(false);
             _right.SetActive(false);
+            _reset.SetActive(false);
             _left.SetActive(false);
+            _eye.GetComponent<Image>().enabled = false;
 
             if (forced)
             {
                 _eye.SetActive(false);
+                _gameController.GetLevelController().GetActiveLevel().GetPlayer().transform.GetChild(0).GetComponent<TransformSinTweener>().enabled = false;
+            }
+            else
+            {
+                _gameController.GetGuiController().ShowDialog("MenuEyeMenuUI");
             }
         }
         else
         {
-            //Time.timeScale = 1;
             _isCameraMoving = false;
             _gameController.GetCamera().GetComponent<Camera>().orthographicSize = 3.5f;
             _pause = false;
+            _isOnEye = false;
 
             _settings.GetComponent<Button>().interactable = true;
             _fire.SetActive(true);
@@ -348,10 +669,18 @@ public class GuiCallbacks : MonoBehaviour
             _skills.SetActive(true);
             _right.SetActive(true);
             _left.SetActive(true);
+            _reset.SetActive(true);
+            _eye.GetComponent<Image>().enabled = true;
+
+            _gameController.GetLevelController().GetActiveLevel().GetPlayer().transform.GetChild(0).GetComponent<TransformSinTweener>().enabled = true;
 
             if (forced)
             {
                 _eye.SetActive(true);
+            }
+            else
+            {
+                _gameController.GetGuiController().HideDialog("MenuEyeMenuUI");
             }
         }
 
@@ -454,6 +783,48 @@ public class GuiCallbacks : MonoBehaviour
 
     public void OnPlayerHitDoor(float t, int s, string id)
     {
+        if (GameController.IS_DEMO_MODE)
+        {
+            GameRecorder.GetInstance().Upload();
+        }
+        else
+        {
+            // Search the level in the level progress save file
+            bool found = false;
+            List<SaveGameController.LevelProgressData> llpd = SaveGameController.instance.GetLevelProgress();
+            SaveGameController.LevelProgressData lpd;
+
+            for (int i = 0; i < llpd.Count; i++)
+            {
+                lpd = llpd[i];
+
+                // If the level has been played and the player took
+                // a longer time than now, replace the lowest time
+                if (lpd.Id == id)
+                {
+                    found = true;
+
+                    if (lpd.Score > t)
+                    {
+                        lpd.Score = t;
+                        SaveGameController.instance.SetLevelProgress(lpd);
+                    }
+                }
+            }
+
+            // If this is the first time the player goes through
+            // the level, add the time
+            if (!found)
+            {
+                lpd = new SaveGameController.LevelProgressData();
+
+                lpd.Id = id;
+                lpd.Score = t;
+
+                SaveGameController.instance.SetLevelProgress(lpd);
+            }
+        }
+
         GuiController gc = _gameController.GetGuiController();
         GameObject winMenu = gc.GetDialog("WinMenuUI");
 
@@ -465,43 +836,7 @@ public class GuiCallbacks : MonoBehaviour
                 WinMenuController wmc = winMenu.GetComponent<WinMenuController>();
 
                 winMenu.SetActive(true);
-                wmc.OnPlayerWin(gameObject, s, t);
-
-                // Search the level in the level progress save file
-                bool found = false;
-                List<SaveGameController.LevelProgressData> llpd = SaveGameController.instance.GetLevelProgress();
-                SaveGameController.LevelProgressData lpd;
-
-                for (int i = 0; i < llpd.Count; i++)
-                {
-                    lpd = llpd[i];
-
-                    // If the level has been played and the player took
-                    // a longer time than now, replace the lowest time
-                    if (lpd.Id == id)
-                    {
-                        found = true;
-
-                        if (lpd.Score > t)
-                        {
-                            lpd.Score = t;
-                            SaveGameController.instance.SetLevelProgress(lpd);
-                        }
-                    }
-                }
-
-                // If this is the first time the player goes through
-                // the level, add the time
-                if (!found)
-                {
-                    lpd = new SaveGameController.LevelProgressData();
-
-                    lpd.Id = id;
-                    lpd.Score = t;
-
-                    SaveGameController.instance.SetLevelProgress(lpd);
-                }
-
+                wmc.OnPlayerWin(gameObject, _gameController, s, t);
                 _isOnWinMenu = true;
             }
         }
@@ -536,6 +871,11 @@ public class GuiCallbacks : MonoBehaviour
     {
         GuiController gc = _gameController.GetGuiController();
         GameObject deathMenu = gc.GetDialog("DeathMenuUI");
+
+        if (GameController.IS_DEMO_MODE)
+        {
+            GameRecorder.GetInstance().OnGameEvent(new GameRecorder.GameEvent(Time.time, GameRecorder.GameCommand.Death));
+        }
 
         if (deathMenu != null && !_isOnDeathMenu)
         {
@@ -652,12 +992,44 @@ public class GuiCallbacks : MonoBehaviour
 
     private void OnContinueNextLevel()
     {
-        string lv = _gameController.GetLevelController().GetActiveLevel().GetTargetLevel();
-
-        if (SaveGameController.instance != null)
+        // Check if the game is set in demo mode and if 
+        // it is the last level of the demo
+        if (GameController.IS_DEMO_MODE)
         {
-            SaveGameController.instance.SetTargetLevel(lv);
+            if (_gameController.GetLevelController().GetActiveLevel().GetTargetLevel().Contains("demoend"))
+            {
+                if (GameController.IS_MOBILE_RUNTIME)
+                {
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("MobileDemoEndScene");
+                }
+                else
+                {
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("DemoEndScene");
+                }
+            }
         }
+
+        // Check if it is the last level of the tutorial or
+        // if it is the last level of a dungeon
+        if (_gameController.GetLevelController().GetActiveLevel().GetName().Contains("_10") ||
+            _gameController.GetLevelController().GetActiveLevel().GetName().Contains(LevelController.LAST_TUTORIAL_LEVEL))
+        {
+            // If it is the last level of the game, load the
+            // credits sequence
+            if (_gameController.GetLevelController().GetActiveLevel().GetName().Contains("5_"))
+            {
+                // Load the credits scene
+            }
+            else
+            {
+                SaveGameController.instance.SetTargetMenu(UIState.SelectDungeonMenu);
+                UnityEngine.SceneManagement.SceneManager.LoadScene("IntroMenu");
+            }
+        }
+
+        // Set next target level
+        string lv = _gameController.GetLevelController().GetActiveLevel().GetTargetLevel();
+        SaveGameController.instance.SetTargetLevel(lv);
 
         _gameController.GetLevelController().GetActiveLevel().ClearLevel();
         _gameController.GetLevelController().SetActiveLevel(lv);
@@ -665,6 +1037,7 @@ public class GuiCallbacks : MonoBehaviour
 
     private void OnBackToMenu()
     {
+        SaveGameController.instance.SetTargetMenu(UIState.Intro);
         UnityEngine.SceneManagement.SceneManager.LoadScene("IntroMenu");
     }
 	
